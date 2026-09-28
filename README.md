@@ -1,4 +1,4 @@
-# Interactividad Web
+# Interactividad y validación
 
 Página educativa e interactiva para una exposición de Diseño Web de primer año.
 

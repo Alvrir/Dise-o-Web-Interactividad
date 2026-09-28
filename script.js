@@ -42,7 +42,7 @@ const state = {
 };
 
 const screens = [
-    { id: "start", title: "INTERACTIVIDAD WEB", label: "Inicio", render: renderStart },
+    { id: "start", title: "INTERACTIVIDAD Y VALIDACIÓN", label: "Inicio", render: renderStart },
     { id: "browser", title: "¿QUÉ SABE LA PÁGINA SOBRE VOS?", label: "Actividad 1 / 8", render: renderBrowserInfo },
     { id: "events", title: "LA PÁGINA REACCIONA", label: "Actividad 2 / 8", render: renderEvents },
     { id: "form", title: "¿SOS ALUMNO?", label: "Actividad 3 y 4 / 8", render: renderForm },
@@ -189,7 +189,7 @@ function updateProgress(screen) {
 function renderStart() {
     app.innerHTML = `
         <section>
-            <h2 class="hero-title">INTERACTIVIDAD WEB</h2>
+            <h2 class="hero-title">INTERACTIVIDAD Y VALIDACIÓN</h2>
             <p class="lead">Una página que reacciona a vos.</p>
             <p class="lead">Descubrí cómo una página web puede detectar tus acciones, procesar información y responder.</p>
             <div class="hero-actions">
