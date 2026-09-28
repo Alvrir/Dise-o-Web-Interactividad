@@ -108,13 +108,13 @@ input:focus {
 .topbar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 24px;
+    justify-content: flex-start;
+    gap: 16px;
     margin-bottom: 18px;
 }
 
 .eyebrow {
-    margin: 0 0 8px;
+    margin: 0;
     color: var(--accent-dark);
     font-size: 0.8rem;
     font-weight: 800;
@@ -132,6 +132,7 @@ input:focus {
 }
 
 .dev-toggle {
+    margin-left: auto;
     white-space: nowrap;
 }
 
@@ -500,6 +501,10 @@ kbd {
 
     .progress-card {
         width: 100%;
+    }
+
+    .dev-toggle {
+        margin-left: 0;
     }
 
     .dev-panel-header {
