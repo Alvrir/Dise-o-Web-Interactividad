@@ -1,5 +1,4 @@
 const app = document.querySelector("#app");
-const screenTitle = document.querySelector("#screen-title");
 const progressText = document.querySelector("#progress-text");
 const progressFill = document.querySelector("#progress-fill");
 const devPanel = document.querySelector("#dev-panel");
@@ -170,7 +169,6 @@ function showScreen(screenId) {
     }
 
     state.currentScreen = screenId;
-    screenTitle.textContent = screen.title;
     updateProgress(screen);
     updateDeveloperScreenSelect(screenId);
     app.innerHTML = "";
