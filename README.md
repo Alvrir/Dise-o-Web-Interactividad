@@ -1,6 +1,8 @@
-# Interactividad Web
+# Interactividad y validación
 
-La idea principal es que la persona no solo lea conceptos, sino que los experimente: hace click, escribe, completa formularios, ve validaciones y juega un Password Game.
+Página educativa e interactiva para una exposición de Diseño Web de primer año.
+
+La idea principal es que la persona no solo lea conceptos, sino que los experimente: hace click, escribe, completa formularios, ve validaciones y juega dos versiones de un Password Game.
 
 ## Cómo abrir el proyecto
 
