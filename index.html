@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactividad Web</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">Exposición de Diseño Web</p>
+                <h1 id="screen-title">Interactividad Web</h1>
+            </div>
+            <div class="progress-card" aria-live="polite">
+                <span id="progress-text">Inicio</span>
+                <div class="progress-track" aria-hidden="true">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+            </div>
+            <button id="dev-toggle" class="dev-toggle" type="button">Herramientas de desarrollador</button>
+        </header>
+
+        <aside id="dev-panel" class="dev-panel hidden" aria-label="Herramientas de desarrollador">
+            <div class="dev-panel-header">
+                <strong>Herramientas de desarrollador</strong>
+                <button id="dev-close" class="secondary-button" type="button">Cerrar</button>
+            </div>
+            <div class="dev-grid">
+                <label class="field" for="dev-screen-select">
+                    <span>Saltar a pantalla</span>
+                    <select id="dev-screen-select"></select>
+                </label>
+                <button id="dev-go-screen" type="button">Ir</button>
+                <button id="dev-prev-screen" class="secondary-button" type="button">Anterior</button>
+                <button id="dev-next-screen" class="secondary-button" type="button">Siguiente</button>
+                <button id="dev-fill-student" class="secondary-button" type="button">Completar alumno</button>
+                <button id="dev-complete-password" class="secondary-button" type="button">Completar contraseña</button>
+                <button id="dev-open-readme" class="secondary-button" type="button">Ver README</button>
+            </div>
+            <p id="dev-message" class="dev-message" aria-live="polite">Panel para armar y testear el recorrido sin completar todo manualmente.</p>
+        </aside>
+
+        <main id="app" class="screen" tabindex="-1"></main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
