@@ -153,6 +153,11 @@ const finalPasswordRules = [
         id: "longPassword",
         description: "La contraseña debe tener más de 45 caracteres.",
         validate: password => password.length > 45
+    },
+    {
+        id: "cityName",
+        description: "Debe contener el nombre de nuestra ciudad.",
+        validate: password => normalizeText(password).includes("rojas")
     }
 ];
 
@@ -1280,7 +1285,7 @@ function buildValidFinalPassword() {
     }
 
     balancingDigits.push(String(remainingSum));
-    return `Ab!${passwordContext.currentYear}mayo${passwordContext.currentYearRoman}VManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividad`;
+    return `Ab!${passwordContext.currentYear}mayo${passwordContext.currentYearRoman}VManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividadRojas`;
 }
 
 function setDeveloperMessage(message) {
