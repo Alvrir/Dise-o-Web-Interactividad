@@ -255,8 +255,8 @@ async function loadBatteryInfo() {
         }
 
         const percentage = Math.round(battery.level * 100);
-        const chargingStatus = battery.charging ? "Cargando" : "Sin cargar";
-        currentStatus.textContent = `${percentage}% · ${chargingStatus}`;
+        const chargingStatus = battery.charging ? " · Cargando" : "";
+        currentStatus.textContent = `${percentage}%${chargingStatus}`;
     } catch (error) {
         const currentStatus = document.querySelector("#battery-status");
 
