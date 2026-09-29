@@ -337,7 +337,7 @@ Los dos juegos tienen comportamientos diferentes:
 - una condición revelada nunca vuelve a desaparecer, aunque después deje de cumplirse;
 - la última condición pendiente queda arriba; las condiciones cumplidas quedan debajo con la más recientemente cumplida primero y no desaparecen aunque después se rompa otra regla.
 
-Las reglas nuevas se revelan con un fade de `420 ms` y, al cambiar de grupo, se deslizan a su nueva posición durante `420 ms`. La animación usa solo `opacity` y `transform` para mantenerse liviana; se desactiva cuando el sistema pide reducir movimiento.
+Las reglas nuevas se revelan con un fade de `520 ms` y, al cambiar de grupo, se deslizan a su nueva posición durante `520 ms`. La animación usa solo `opacity` y `transform` para mantenerse liviana; se desactiva cuando el sistema pide reducir movimiento.
 
 En el nivel final, el contenedor del botón `CONTINUAR` se oculta por completo hasta que todas las reglas se cumplen. Esto evita que en celular deje un espacio vacío entre el campo de contraseña y las condiciones.
 
@@ -369,9 +369,9 @@ La tarjeta tiene una `×` para cerrarla, un botón `MOSTRAR RESULTADO` para abri
 
 El nivel final pide:
 
-1. mínimo 5 caracteres;
-2. una mayúscula;
-3. una minúscula;
+1. una minúscula;
+2. mínimo 8 caracteres;
+3. una mayúscula;
 4. un número;
 5. un símbolo;
 6. que los números aislados sumen 15: los dígitos pegados se ignoran; por ejemplo, `2a4` cuenta `2 + 4`, mientras que `222a3b66c` cuenta solamente `3`;

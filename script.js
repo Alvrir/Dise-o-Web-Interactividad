@@ -83,19 +83,19 @@ const shortPasswordRules = [
 
 const finalPasswordRules = [
     {
+        id: "lowercase",
+        description: "Al menos una minúscula.",
+        validate: password => /[a-záéíóúñ]/.test(password)
+    },
+    {
         id: "minLength",
-        description: "Mínimo 5 caracteres.",
-        validate: password => password.length >= 5
+        description: "Mínimo 8 caracteres.",
+        validate: password => password.length >= 8
     },
     {
         id: "uppercase",
         description: "Al menos una mayúscula.",
         validate: password => /[A-ZÁÉÍÓÚÑ]/.test(password)
-    },
-    {
-        id: "lowercase",
-        description: "Al menos una minúscula.",
-        validate: password => /[a-záéíóúñ]/.test(password)
     },
     {
         id: "number",
