@@ -340,11 +340,6 @@ function initGenieExperience(environmentPromise) {
     const action = document.querySelector("#genie-action");
     let currentStep = 0;
 
-    ["pensando.png", "celu.png"].forEach(fileName => {
-        const preload = new Image();
-        preload.src = `assets/genio/${fileName}`;
-    });
-
     const steps = [
         {
             thinking: "Voy a adivinar desde dónde me estás viendo...",

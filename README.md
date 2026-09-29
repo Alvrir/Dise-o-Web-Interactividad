@@ -456,6 +456,8 @@ assets/genio/pensando.png
 assets/genio/celu.png
 ```
 
+Las tres se precargan desde el `<head>` de `index.html`, así que sus descargas comienzan al abrir la página y no recién al llegar a la actividad del genio.
+
 Estados del personaje:
 
 - `idle.png`: pose inicial y explicación final;
