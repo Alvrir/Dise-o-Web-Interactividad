@@ -4,6 +4,34 @@ Página educativa e interactiva para una exposición de Diseño Web de primer a�
 
 La idea principal es que la persona no solo lea conceptos, sino que los experimente: hace click, escribe, completa formularios, ve validaciones y juega dos versiones de un Password Game.
 
+## Página publicada
+
+La versión pública está disponible en:
+
+```text
+https://alvrir.github.io/Dise-o-Web-Interactividad/
+```
+
+El repositorio de GitHub es:
+
+```text
+https://github.com/Alvrir/Dise-o-Web-Interactividad
+```
+
+## Regla de mantenimiento
+
+Antes de cada commit y cada publicación en GitHub se debe revisar y actualizar este `README.md` para que siempre coincida con el estado real del proyecto.
+
+La revisión debe incluir, según corresponda:
+
+- cambios visuales o de distribución;
+- textos y títulos;
+- pantallas y navegación;
+- validaciones y reglas de contraseña;
+- herramientas de desarrollador;
+- datos de prueba;
+- instrucciones de ejecución y publicación.
+
 ## Cómo abrir el proyecto
 
 La forma recomendada es usar un servidor local sencillo, porque algunos navegadores bloquean la lectura de archivos JSON cuando se abre el HTML directamente con `file://`.
@@ -48,7 +76,7 @@ Página Diseño Web/
 
 Contiene la estructura base de la página:
 
-- cabecera;
+- cabecera con el texto `Diseño Web`;
 - indicador de progreso;
 - botón de herramientas de desarrollador;
 - panel de herramientas de desarrollador;
@@ -136,7 +164,7 @@ const screens = [
 Cada pantalla tiene:
 
 - `id`: identificador interno;
-- `title`: título mostrado arriba;
+- `title`: nombre descriptivo usado en las herramientas de desarrollador;
 - `label`: texto del progreso;
 - `render`: función que dibuja esa pantalla.
 
@@ -331,7 +359,8 @@ Desde ese panel se puede:
 - ir a la pantalla anterior;
 - ir a la pantalla siguiente;
 - completar automáticamente el alumno de prueba;
-- completar automáticamente una contraseña válida.
+- completar automáticamente una contraseña válida;
+- abrir el `README.md` en otra pestaña.
 
 Esto es solo para desarrollo y exposición. Si se quiere ocultar más adelante, se puede borrar o comentar el panel en `index.html` y las funciones de herramientas en `script.js`.
 
@@ -381,7 +410,7 @@ renderFakeFinal()
 renderClosing()
 ```
 
-Si se quiere cambiar un título superior, revisar el arreglo:
+Los nombres descriptivos de las pantallas, que también aparecen en el selector de las herramientas de desarrollador, están en el arreglo:
 
 ```javascript
 const screens = [
@@ -400,9 +429,9 @@ style.css
 Partes importantes:
 
 - `.app-shell`: ancho general de la página;
-- `.topbar`: cabecera;
+- `.topbar`: cabecera que mantiene `Diseño Web` junto a la barra de progreso;
 - `.screen`: caja principal de cada pantalla;
-- `.progress-card`: progreso;
+- `.progress-card`: barra de progreso, separada `16px` de `Diseño Web` en escritorio;
 - `.form-grid`: formulario;
 - `.rule-item`: reglas del Password Game;
 - `.dev-panel`: herramientas de desarrollador;
