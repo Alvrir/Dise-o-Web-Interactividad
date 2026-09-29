@@ -295,6 +295,14 @@ input:focus {
     animation: genieThinking 800ms ease-in-out infinite alternate;
 }
 
+.genie-image.is-appearing {
+    animation: genieFadeIn 1.3s ease-out both;
+}
+
+.genie-image.is-thinking.is-appearing {
+    animation: genieFadeIn 1.3s ease-out both, genieThinking 800ms ease-in-out infinite alternate;
+}
+
 .genie-dialog {
     padding: 20px;
     border-left: 5px solid var(--accent);
@@ -319,9 +327,21 @@ input:focus {
     }
 }
 
+@keyframes genieFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .screen.is-entering > section,
     .genie-image.is-thinking,
+    .genie-image.is-appearing,
+    .genie-image.is-thinking.is-appearing,
     .rule-item.is-entering {
         animation: none;
     }

@@ -340,6 +340,18 @@ function initGenieExperience(environmentPromise) {
     const action = document.querySelector("#genie-action");
     let currentStep = 0;
 
+    const revealImage = () => {
+        image.classList.remove("is-appearing");
+        void image.offsetWidth;
+        image.classList.add("is-appearing");
+    };
+
+    if (image.complete) {
+        revealImage();
+    } else {
+        image.addEventListener("load", revealImage, { once: true });
+    }
+
     const steps = [
         {
             thinking: "Voy a adivinar desde dónde me estás viendo...",
@@ -385,9 +397,16 @@ function initGenieExperience(environmentPromise) {
     });
 
     function setGeniePose(pose, altText) {
+        image.classList.remove("is-appearing");
         image.src = `assets/genio/${pose}.png`;
         image.alt = altText;
         image.classList.toggle("is-thinking", pose === "pensando");
+
+        if (image.complete) {
+            revealImage();
+        } else {
+            image.addEventListener("load", revealImage, { once: true });
+        }
     }
 
     function finishGenieExperience() {
