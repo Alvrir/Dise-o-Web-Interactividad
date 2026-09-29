@@ -38,7 +38,8 @@ const state = {
     lastEvent: "todavía ninguno",
     shortPassword: "",
     finalPassword: "",
-    finalPasswordRevealedCount: 0
+    finalPasswordRevealedCount: 0,
+    finalPasswordCompletionOrder: []
 };
 
 const screens = [
@@ -572,6 +573,8 @@ function renderFinalPassword() {
         rules: finalPasswordRules,
         ruleMode: "progressive",
         revealedCountKey: "finalPasswordRevealedCount",
+        completedOrderKey: "finalPasswordCompletionOrder",
+        continueAtEnd: true,
         nextScreen: "closing"
     });
 }
@@ -585,7 +588,7 @@ function renderPasswordScreen(config) {
                     <span>Contraseña</span>
                     <input id="${config.inputId}" type="text" value="${state[config.stateKey]}" autocomplete="off">
                 </label>
-                <div class="actions">
+                <div id="password-actions" class="actions ${config.continueAtEnd ? "password-actions-end" : ""}">
                     <button id="password-continue" type="button" class="hidden" data-next="${config.nextScreen}">CONTINUAR →</button>
                 </div>
             </div>
@@ -595,23 +598,18 @@ function renderPasswordScreen(config) {
 
     const input = document.querySelector(`#${config.inputId}`);
     const continueButton = document.querySelector("#password-continue");
+    const passwordActions = document.querySelector("#password-actions");
     const renderRules = () => {
         state[config.stateKey] = input.value;
         const results = validatePassword(input.value, config.rules);
         const visibleResults = getVisiblePasswordResults(results, config);
+        const orderedResults = orderPasswordResults(visibleResults, config);
         const allValid = results.every(result => result.ok);
 
-        document.querySelector("#password-rules").innerHTML = visibleResults.map(result => `
-            <li class="rule-item ${result.ok ? "is-valid" : "is-invalid"}">
-                <span class="status ${result.ok ? "ok" : "bad"}">${result.ok ? "✓" : "×"}</span>
-                <div class="rule-content">
-                    <span>${result.description}</span>
-                    ${renderSponsorLogos(result.logos)}
-                </div>
-            </li>
-        `).join("");
+        renderPasswordRules(document.querySelector("#password-rules"), orderedResults);
 
         continueButton.classList.toggle("hidden", !allValid);
+        passwordActions.classList.toggle("hidden", !allValid);
     };
 
     input.addEventListener("input", renderRules);
@@ -650,15 +648,96 @@ function getVisiblePasswordResults(results, config) {
 
     state[config.revealedCountKey] = revealedCount;
 
-    return results
-        .slice(0, revealedCount)
-        .sort((first, second) => {
-            if (first.ok !== second.ok) {
-                return Number(first.ok) - Number(second.ok);
-            }
+    return results.slice(0, revealedCount);
+}
 
-            return first.ok ? first.order - second.order : second.order - first.order;
-        });
+function orderPasswordResults(results, config) {
+    if (!config.completedOrderKey) {
+        return results;
+    }
+
+    const completedOrder = state[config.completedOrderKey];
+
+    results.filter(result => result.ok).forEach(result => {
+        if (!completedOrder.includes(result.id)) {
+            completedOrder.push(result.id);
+        }
+    });
+
+    return [...results].sort((first, second) => {
+        if (first.ok !== second.ok) {
+            return Number(first.ok) - Number(second.ok);
+        }
+
+        if (!first.ok) {
+            return second.order - first.order;
+        }
+
+        return completedOrder.indexOf(first.id) - completedOrder.indexOf(second.id);
+    });
+}
+
+function renderPasswordRules(list, results) {
+    const previousPositions = new Map(
+        [...list.children].map(item => [item.dataset.ruleId, item.getBoundingClientRect()])
+    );
+    const existingItems = new Map(
+        [...list.children].map(item => [item.dataset.ruleId, item])
+    );
+    const visibleIds = new Set(results.map(result => result.id));
+
+    existingItems.forEach((item, id) => {
+        if (!visibleIds.has(id)) {
+            item.remove();
+        }
+    });
+
+    results.forEach(result => {
+        let item = existingItems.get(result.id);
+        const isNew = !item;
+
+        if (!item) {
+            item = document.createElement("li");
+            item.dataset.ruleId = result.id;
+        }
+
+        item.className = `rule-item ${result.ok ? "is-valid" : "is-invalid"}`;
+        item.innerHTML = `
+            <span class="status ${result.ok ? "ok" : "bad"}">${result.ok ? "✓" : "×"}</span>
+            <div class="rule-content">
+                <span>${result.description}</span>
+                ${renderSponsorLogos(result.logos)}
+            </div>
+        `;
+        list.append(item);
+
+        if (isNew) {
+            item.classList.add("is-entering");
+            item.addEventListener("animationend", () => item.classList.remove("is-entering"), { once: true });
+        }
+    });
+
+    results.forEach(result => {
+        const item = list.querySelector(`[data-rule-id="${result.id}"]`);
+        const previousPosition = previousPositions.get(result.id);
+
+        if (!item || !previousPosition) {
+            return;
+        }
+
+        const currentPosition = item.getBoundingClientRect();
+        const offset = previousPosition.top - currentPosition.top;
+
+        if (Math.abs(offset) < 1) {
+            return;
+        }
+
+        item.style.transition = "none";
+        item.style.transform = `translateY(${offset}px)`;
+        void item.offsetHeight;
+        item.style.transition = "";
+        item.style.transform = "";
+    });
 }
 
 function renderSponsorLogos(logos) {
