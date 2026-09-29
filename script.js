@@ -6,6 +6,7 @@ const devToggle = document.querySelector("#dev-toggle");
 const devClose = document.querySelector("#dev-close");
 const devScreenSelect = document.querySelector("#dev-screen-select");
 const devMessage = document.querySelector("#dev-message");
+const finalResultStoragePrefix = "interactividad-password-final-result:";
 
 const fallbackAlumnos = [
     {
@@ -39,7 +40,9 @@ const state = {
     shortPassword: "",
     finalPassword: "",
     finalPasswordRevealedCount: 0,
-    finalPasswordCompletionOrder: []
+    finalPasswordCompletionOrder: [],
+    finalPasswordStartedAt: null,
+    activePlayerDni: ""
 };
 
 const screens = [
@@ -491,6 +494,11 @@ function renderForm() {
 
         const results = validateStudentForm(state.formData);
         renderValidationResults(results);
+
+        if (results.every(result => result.ok) && state.activePlayerDni !== state.formData.dni) {
+            state.activePlayerDni = state.formData.dni;
+            resetFinalAttempt();
+        }
     });
 
     bindNextButtons();
@@ -566,6 +574,13 @@ function renderShortPassword() {
 }
 
 function renderFinalPassword() {
+    const storedResult = getStoredFinalResult();
+
+    if (storedResult) {
+        renderCompletedFinalPassword(storedResult);
+        return;
+    }
+
     renderPasswordScreen({
         intro: "Ahora sí. Cumplí todas las condiciones.",
         stateKey: "finalPassword",
@@ -615,11 +630,173 @@ function renderPasswordScreen(config) {
 
         continueButton.classList.toggle("hidden", !allValid);
         passwordActions.classList.toggle("hidden", !allValid);
+
+        if (config.stateKey === "finalPassword") {
+            if (input.value.length > 0 && !state.finalPasswordStartedAt) {
+                state.finalPasswordStartedAt = Date.now();
+            }
+
+            if (allValid) {
+                completeFinalPassword(input.value.length);
+            }
+        }
     };
 
     input.addEventListener("input", renderRules);
     renderRules();
     bindNextButtons();
+}
+
+function completeFinalPassword(characterCount) {
+    const result = {
+        nombre: state.formData.nombre || "Jugador/a",
+        dni: state.formData.dni || "sin-dni",
+        durationMs: Math.max(0, Date.now() - (state.finalPasswordStartedAt || Date.now())),
+        characterCount,
+        completedAt: new Date().toISOString()
+    };
+
+    saveFinalResult(result);
+    renderCompletedFinalPassword(result);
+    showFinalResultModal(result);
+}
+
+function renderCompletedFinalPassword(result) {
+    app.innerHTML = `
+        <section class="completed-game-screen">
+            <p class="lead">Esta partida ya fue registrada en este dispositivo.</p>
+            <div class="result-summary">
+                <strong>${escapeHtml(result.nombre)}</strong>
+                <span>${formatDuration(result.durationMs)} · ${result.characterCount} letras</span>
+            </div>
+            <div class="actions password-actions-end">
+                <button id="show-final-result" type="button">MOSTRAR RESULTADO</button>
+                <button data-next="closing" type="button">CONTINUAR →</button>
+            </div>
+        </section>
+    `;
+
+    document.querySelector("#show-final-result").addEventListener("click", () => showFinalResultModal(result));
+    bindNextButtons();
+}
+
+function showFinalResultModal(result) {
+    document.querySelector("#final-result-modal")?.remove();
+
+    const modal = document.createElement("section");
+    modal.id = "final-result-modal";
+    modal.className = "result-modal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-label", "Resultado de la partida");
+    modal.innerHTML = `
+        <div class="result-modal-card">
+            <button id="close-final-result" class="result-modal-close" type="button" aria-label="Cerrar resultado">×</button>
+            <span class="result-modal-label">RESULTADO</span>
+            <strong class="result-player-name">${escapeHtml(result.nombre)}</strong>
+            <div class="result-metrics">
+                <div><span>TIEMPO</span><strong>${formatDuration(result.durationMs)}</strong></div>
+                <div><span>LETRAS</span><strong>${result.characterCount}</strong></div>
+            </div>
+            <button id="save-final-result" type="button">GUARDAR IMAGEN</button>
+        </div>
+    `;
+
+    document.body.append(modal);
+    document.querySelector("#close-final-result").addEventListener("click", () => modal.remove());
+    document.querySelector("#save-final-result").addEventListener("click", () => downloadFinalResultImage(result));
+}
+
+function getFinalResultKey(dni = state.formData.dni) {
+    return `${finalResultStoragePrefix}${dni || "sin-dni"}`;
+}
+
+function getStoredFinalResult() {
+    try {
+        const storedResult = localStorage.getItem(getFinalResultKey());
+        return storedResult ? JSON.parse(storedResult) : null;
+    } catch (error) {
+        console.warn("No se pudo leer el resultado guardado.", error);
+        return null;
+    }
+}
+
+function saveFinalResult(result) {
+    try {
+        localStorage.setItem(getFinalResultKey(result.dni), JSON.stringify(result));
+    } catch (error) {
+        console.warn("No se pudo guardar el resultado en este dispositivo.", error);
+    }
+}
+
+function resetFinalAttempt() {
+    state.finalPassword = "";
+    state.finalPasswordRevealedCount = 0;
+    state.finalPasswordCompletionOrder = [];
+    state.finalPasswordStartedAt = null;
+}
+
+function resetCurrentPlayerGame() {
+    try {
+        localStorage.removeItem(getFinalResultKey());
+    } catch (error) {
+        console.warn("No se pudo borrar el resultado guardado.", error);
+    }
+
+    resetFinalAttempt();
+    document.querySelector("#final-result-modal")?.remove();
+    showScreen("finalPassword");
+    setDeveloperMessage("Partida reiniciada para el jugador actual.");
+}
+
+function formatDuration(durationMs) {
+    const totalSeconds = Math.round(durationMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    return `${minutes}:${seconds}`;
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function downloadFinalResultImage(result) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1200;
+    canvas.height = 630;
+    const context = canvas.getContext("2d");
+    const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, "#eaf7ef");
+    gradient.addColorStop(1, "#d9f3f1");
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "#075f66";
+    context.font = "700 34px Arial";
+    context.fillText("RESULTADO", 80, 100);
+    context.fillStyle = "#15202b";
+    context.font = "700 68px Arial";
+    context.fillText(String(result.nombre).slice(0, 28), 80, 190);
+    context.font = "700 30px Arial";
+    context.fillStyle = "#5b6b7a";
+    context.fillText("TIEMPO", 80, 300);
+    context.fillText("LETRAS", 650, 300);
+    context.font = "700 112px Arial";
+    context.fillStyle = "#15202b";
+    context.fillText(formatDuration(result.durationMs), 80, 430);
+    context.fillText(String(result.characterCount), 650, 430);
+    context.font = "700 25px Arial";
+    context.fillStyle = "#075f66";
+    context.fillText("Interactividad y validación", 80, 550);
+
+    const link = document.createElement("a");
+    link.download = `resultado-${String(result.nombre).replace(/[^a-z0-9]+/gi, "-").toLowerCase() || "jugador"}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
 }
 
 function validatePassword(password, rules) {
@@ -875,6 +1052,7 @@ function initDeveloperTools() {
 
     document.querySelector("#dev-fill-student").addEventListener("click", fillDeveloperStudent);
     document.querySelector("#dev-complete-password").addEventListener("click", completeDeveloperPassword);
+    document.querySelector("#dev-reset-game").addEventListener("click", resetCurrentPlayerGame);
     document.querySelector("#dev-open-readme").addEventListener("click", openReadme);
 }
 
@@ -904,6 +1082,8 @@ function fillDeveloperStudent() {
         dni: alumno.dni,
         edad: String(alumno.edad)
     };
+    state.activePlayerDni = alumno.dni;
+    resetFinalAttempt();
 
     document.querySelector("#nombre").value = state.formData.nombre;
     document.querySelector("#dni").value = state.formData.dni;

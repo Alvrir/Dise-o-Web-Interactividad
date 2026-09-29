@@ -224,9 +224,10 @@ Sirve para guardar datos mientras la página está abierta:
 - alumno encontrado;
 - último evento detectado;
 - contraseña del juego corto;
-- contraseña del juego final.
+- contraseña del juego final;
+- inicio y orden de cumplimiento del Password Game final.
 
-No se usa `localStorage`, base de datos real ni servidor.
+No se usa base de datos real ni servidor. El resultado del Password Game final sí se guarda con `localStorage` en el dispositivo de cada jugador.
 
 ## Cómo modificar alumnos
 
@@ -356,6 +357,14 @@ validatePassword(password, rules)
 
 El botón de continuar aparece recién cuando todas las reglas están cumplidas.
 
+## Resultado del Password Game final
+
+Al escribir la primera letra en el Password Game final comienza un temporizador local. Cuando todas las reglas quedan cumplidas al mismo tiempo aparece una tarjeta con el nombre y apellido del formulario, el tiempo total y la cantidad de letras.
+
+La tarjeta se guarda en el navegador del jugador usando su DNI como clave local. Por eso, desde ese dispositivo y con ese DNI no se puede volver a jugar hasta usar `Reiniciar partida` en las herramientas de desarrollador. No se guarda ni se muestra la contraseña final.
+
+La tarjeta tiene una `×` para cerrarla, un botón `MOSTRAR RESULTADO` para abrirla otra vez y `GUARDAR IMAGEN`, que descarga una imagen PNG con el resultado para compartirla o capturarla.
+
 El nivel final pide:
 
 1. mínimo 5 caracteres;
@@ -389,6 +398,7 @@ Desde ese panel se puede:
 - ir a la pantalla siguiente;
 - completar automáticamente el alumno de prueba;
 - completar automáticamente una contraseña válida;
+- reiniciar la partida del jugador actual, incluido su resultado local;
 - abrir el `README.md` en otra pestaña.
 
 Esto es solo para desarrollo y exposición. Si se quiere ocultar más adelante, se puede borrar o comentar el panel en `index.html` y las funciones de herramientas en `script.js`.
@@ -399,6 +409,7 @@ Funciones relacionadas:
 initDeveloperTools()
 fillDeveloperStudent()
 completeDeveloperPassword()
+resetCurrentPlayerGame()
 moveDeveloperScreen(direction)
 ```
 
@@ -541,6 +552,7 @@ Partes importantes:
 - `.rule-item`: reglas del Password Game y sus estados rojo/verde;
 - `.sponsor-logos`: fila de imágenes dentro de la regla de sponsors;
 - `.password-actions-end`: botón de continuar alineado a la derecha en el nivel final de escritorio;
+- `.result-modal`: tarjeta final con tiempo, letras y descarga de imagen;
 - `.dev-panel`: herramientas de desarrollador;
 - `.tip-box`: tip de F12;
 - `@media (max-width: 820px)`: comportamiento responsive en celular.

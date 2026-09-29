@@ -150,7 +150,7 @@ input:focus {
 
 .dev-grid {
     display: grid;
-    grid-template-columns: minmax(220px, 1fr) repeat(6, auto);
+    grid-template-columns: minmax(220px, 1fr) repeat(7, auto);
     gap: 10px;
     align-items: end;
 }
@@ -530,6 +530,120 @@ input:focus {
     color: var(--ink);
     font: inherit;
     white-space: nowrap;
+}
+
+.completed-game-screen {
+    display: grid;
+    align-content: center;
+    gap: 18px;
+    min-height: 100%;
+}
+
+.result-summary {
+    display: grid;
+    gap: 6px;
+    max-width: 540px;
+    padding: 20px;
+    border: 1px solid rgba(26, 127, 69, 0.35);
+    border-radius: 8px;
+    background: #eaf7ef;
+}
+
+.result-summary strong {
+    font-size: 1.5rem;
+}
+
+.result-modal {
+    position: fixed;
+    z-index: 20;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(21, 32, 43, 0.46);
+    animation: resultBackdropIn 180ms ease-out both;
+}
+
+.result-modal-card {
+    position: relative;
+    width: min(560px, 100%);
+    padding: clamp(28px, 6vw, 52px);
+    border: 1px solid rgba(26, 127, 69, 0.35);
+    border-radius: 8px;
+    color: var(--ink);
+    background: #eaf7ef;
+    box-shadow: 0 20px 48px rgba(21, 32, 43, 0.28);
+    animation: resultCardIn 220ms ease-out both;
+}
+
+.result-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    min-height: 32px;
+    width: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    color: var(--muted);
+    background: transparent;
+    font-size: 1.4rem;
+    font-weight: 400;
+}
+
+.result-modal-close:hover,
+.result-modal-close:focus-visible {
+    color: var(--ink);
+    background: rgba(21, 32, 43, 0.08);
+    transform: none;
+}
+
+.result-modal-label {
+    display: block;
+    margin-bottom: 12px;
+    color: var(--accent-dark);
+    font-size: 0.9rem;
+    font-weight: 900;
+}
+
+.result-player-name {
+    display: block;
+    overflow-wrap: anywhere;
+    font-size: clamp(2rem, 7vw, 3.6rem);
+    line-height: 1.05;
+}
+
+.result-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin: 30px 0;
+}
+
+.result-metrics div {
+    display: grid;
+    gap: 6px;
+}
+
+.result-metrics span {
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 900;
+}
+
+.result-metrics strong {
+    font-size: clamp(2.25rem, 9vw, 4rem);
+    line-height: 1;
+}
+
+@keyframes resultBackdropIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes resultCardIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .rule-list {
