@@ -394,9 +394,11 @@ navigator.getBattery()
 Durante la adivinanza, el mensaje del genio puede mostrar:
 
 - porcentaje aproximado;
-- si el dispositivo está cargando;
+- `Cargando` solamente cuando el dispositivo informa que está conectado;
 - que la información no está disponible cuando la API no existe;
 - que el navegador mantiene el dato en secreto cuando bloquea la consulta.
+
+Cuando el dispositivo no está cargando se muestra únicamente el porcentaje, sin agregar el texto `Sin cargar`.
 
 La función responsable es:
 
