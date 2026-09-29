@@ -707,11 +707,11 @@ input:focus {
 }
 
 .rule-item {
-    transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+    transition: border-color 420ms ease, background 420ms ease, transform 420ms ease;
 }
 
 .rule-item.is-entering {
-    animation: ruleReveal 220ms ease-out both;
+    animation: ruleReveal 420ms ease-out both;
 }
 
 @keyframes ruleReveal {
