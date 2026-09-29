@@ -60,6 +60,7 @@ const screens = [
 
 const passwordContext = {
     currentYear: String(new Date().getFullYear()),
+    currentYearRoman: toRomanNumeral(new Date().getFullYear()),
     browserName: getBrowserPasswordTerm()
 };
 
@@ -116,6 +117,16 @@ const finalPasswordRules = [
         id: "currentYear",
         description: "Debe contener el año actual.",
         validate: password => password.includes(passwordContext.currentYear)
+    },
+    {
+        id: "currentYearRoman",
+        description: "Debe contener el año actual en números romanos.",
+        validate: password => normalizeText(password).includes(normalizeText(passwordContext.currentYearRoman))
+    },
+    {
+        id: "multiplicationResult",
+        description: "Debe contener el resultado de 10 × 42.",
+        validate: password => password.includes("420")
     },
     {
         id: "browserName",
@@ -1264,7 +1275,7 @@ function buildValidFinalPassword() {
     }
 
     balancingDigits.push(String(remainingSum));
-    return `Ab!${passwordContext.currentYear}mayoVManaos${balancingDigits.join("x")}${passwordContext.browserName}`;
+    return `Ab!${passwordContext.currentYear}mayo${passwordContext.currentYearRoman}VManaos420${balancingDigits.join("x")}${passwordContext.browserName}`;
 }
 
 function setDeveloperMessage(message) {
@@ -1309,6 +1320,25 @@ function getBrowserPasswordTerm() {
 
     const browser = detectBrowser();
     return browserTerms[browser] || browser;
+}
+
+function toRomanNumeral(number) {
+    const numerals = [
+        [1000, "M"], [900, "CM"], [500, "D"], [400, "CD"],
+        [100, "C"], [90, "XC"], [50, "L"], [40, "XL"],
+        [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]
+    ];
+    let remaining = number;
+    let roman = "";
+
+    numerals.forEach(([value, symbol]) => {
+        while (remaining >= value) {
+            roman += symbol;
+            remaining -= value;
+        }
+    });
+
+    return roman;
 }
 
 async function getEnvironmentDetails() {

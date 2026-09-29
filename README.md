@@ -376,10 +376,12 @@ El nivel final pide:
 5. un símbolo;
 6. que los números aislados sumen 15: los dígitos pegados se ignoran; por ejemplo, `2a4` cuenta `2 + 4`, mientras que `222a3b66c` cuenta solamente `3`;
 7. el número del año actual;
-8. el nombre del navegador detectado;
-9. un mes del año;
-10. un número romano;
-11. uno de los textos `Binco`, `Manaos` o `Milkaut`; alcanza con una sola de esas palabras.
+8. el año actual escrito en números romanos;
+9. el resultado de `10 × 42`;
+10. el nombre del navegador detectado;
+11. un mes del año;
+12. un número romano;
+13. uno de los textos `Binco`, `Manaos` o `Milkaut`; alcanza con una sola de esas palabras.
 
 La última regla muestra los tres logos de `assets/logos/`. Cada regla usa `.is-valid` o `.is-invalid` para recibir un fondo verde o rojo suave.
 
