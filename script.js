@@ -204,7 +204,7 @@ function renderBrowserInfo() {
     const browser = detectBrowser();
 
     app.innerHTML = `
-        <section>
+        <section class="genie-screen">
             <div class="genie-stage">
                 <img id="genie-image" class="genie-image" src="assets/genio/idle.png" alt="Genio esperando para comenzar">
                 <div class="genie-dialog">
@@ -329,6 +329,7 @@ function initGenieExperience({ device, browser }) {
     function finishGenieExperience() {
         setGeniePose("idle", "Genio explicando cómo hizo las adivinanzas");
         message.textContent = "No fue magia: JavaScript leyó información que comparte tu navegador. Estos datos pueden ser incompletos o modificarse.";
+        document.querySelector(".genie-screen")?.classList.add("is-complete");
         document.querySelectorAll("[data-genie-extra]").forEach(element => element.classList.remove("hidden"));
         action.classList.add("hidden");
     }

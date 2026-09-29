@@ -101,6 +101,8 @@ Contiene todo el diseño visual:
 - tip de F12;
 - cierre con tarjetas preparadas para miniaturas.
 
+El layout principal utiliza una columna flex de altura completa (`100dvh`). El encabezado conserva su altura natural y `.screen` ocupa todo el espacio restante del navegador, sin imponer una altura mínima adicional en celulares.
+
 ### `script.js`
 
 Es el archivo principal de funcionamiento.
@@ -422,6 +424,8 @@ Después de mostrar cada respuesta, el botón `OTRA PISTA` permanece bloqueado d
 
 La clase `.genie-image` aplica una máscara degradada en CSS para que los bordes superior e inferior de las tres imágenes se desvanezcan suavemente hasta ser transparentes. Los archivos PNG originales no se modifican.
 
+Mientras el genio está adivinando, `.genie-stage` se expande para ocupar y centrar el contenido en todo el espacio disponible. Al mostrar el truco, la clase `.is-complete` vuelve compacta la escena para dejar lugar al User-Agent y al recuadro final.
+
 El genio revela por etapas:
 
 1. tipo de dispositivo;
@@ -499,9 +503,9 @@ style.css
 
 Partes importantes:
 
-- `.app-shell`: ancho general de la página;
+- `.app-shell`: contenedor de ancho y altura completos;
 - `.topbar`: cabecera con progreso y acceso a las herramientas de desarrollador;
-- `.screen`: caja principal de cada pantalla;
+- `.screen`: caja principal flexible que ocupa el espacio restante del viewport;
 - `.progress-card`: barra de progreso;
 - `.form-grid`: formulario;
 - `.rule-item`: reglas del Password Game;
