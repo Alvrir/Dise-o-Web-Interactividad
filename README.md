@@ -32,6 +32,8 @@ La revisión debe incluir, según corresponda:
 - datos de prueba;
 - instrucciones de ejecución y publicación.
 
+`index.html` agrega un parámetro `?v=` a `style.css` y `script.js` para evitar que GitHub Pages o el navegador mantengan archivos antiguos en caché. Cuando se publiquen cambios de CSS o JavaScript, incrementar ese valor en ambas referencias.
+
 ## Cómo abrir el proyecto
 
 La forma recomendada es usar un servidor local sencillo, porque algunos navegadores bloquean la lectura de archivos JSON cuando se abre el HTML directamente con `file://`.
