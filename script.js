@@ -213,35 +213,14 @@ function renderBrowserInfo() {
                     <button id="genie-action" type="button">EMPEZAR ADIVINACIÓN</button>
                 </div>
             </div>
-            <div class="info-grid">
-                <article class="info-card hidden" data-genie-clue="device">
-                    <strong>Tu dispositivo</strong>
-                    <code>${device}</code>
-                </article>
-                <article class="info-card hidden" data-genie-clue="browser">
-                    <strong>Tu navegador</strong>
-                    <code>${browser}</code>
-                </article>
-                <article class="info-card hidden" data-genie-clue="language">
-                    <strong>Idioma</strong>
-                    <code>${navigator.language || "No disponible"}</code>
-                </article>
-                <article class="info-card hidden" data-genie-clue="battery">
-                    <strong>Batería</strong>
-                    <code id="battery-status" aria-live="polite">Consultando...</code>
-                </article>
-            </div>
+            <span id="battery-status" class="hidden">Consultando...</span>
             <div class="info-card callout hidden" data-genie-extra>
                 <strong>User-Agent</strong>
                 <code class="user-agent">${navigator.userAgent}</code>
             </div>
             <div class="tip-box hidden" data-genie-extra>
-                <strong>Tip</strong>
-                <p>Apretá <kbd>F12</kbd> en tu navegador para abrir las herramientas de desarrollador. Desde ahí se puede inspeccionar cómo trabaja una página y, en algunos casos, modificar o simular información del navegador. Por eso estos datos sirven para experimentar, pero no son una identificación confiable.</p>
-            </div>
-            <div class="privacy-note hidden" data-genie-extra>
-                <strong>Dato de privacidad</strong>
-                <p>Navegadores como Brave incluyen defensas contra el <em>fingerprinting</em> de forma predeterminada. Pueden bloquear rastreadores y limitar o modificar algunos datos que una página intenta usar para reconocer tu dispositivo.</p>
+                <strong>El truco</strong>
+                <p>Apretá <kbd>F12</kbd> para inspeccionar estos datos. El User-Agent puede modificarse y navegadores como Brave limitan parte de esta información para proteger tu privacidad.</p>
             </div>
             <div class="actions hidden" data-genie-extra>
                 <button data-next="events">CONTINUAR →</button>
@@ -299,17 +278,14 @@ function initGenieExperience({ device, browser }) {
 
     const steps = [
         {
-            clue: "device",
             thinking: "Voy a adivinar desde dónde me estás viendo...",
             answer: `¡Estás usando ${formatDeviceGuess(device)}!`
         },
         {
-            clue: "browser",
             thinking: "Ahora voy a descubrir qué navegador elegiste...",
             answer: `Tu navegador parece ser ${browser}.`
         },
         {
-            clue: "battery",
             thinking: "Me falta una pista. Voy a intentar sentir la energía de tu batería...",
             answer: () => formatBatteryGuess()
         }
@@ -326,18 +302,22 @@ function initGenieExperience({ device, browser }) {
         setGeniePose("pensando", "Genio pensando la respuesta");
         message.textContent = step.thinking;
 
-        await wait(1600);
+        await wait(2000);
 
         if (state.currentScreen !== "browser" || !document.querySelector("#genie-image")) {
             return;
         }
 
-        document.querySelector(`[data-genie-clue="${step.clue}"]`).classList.remove("hidden");
         setGeniePose("celu", "Genio mostrando la respuesta");
         message.textContent = typeof step.answer === "function" ? step.answer() : step.answer;
         currentStep += 1;
-        action.disabled = false;
-        action.textContent = currentStep < steps.length ? "ADIVINAR OTRA COSA" : "MOSTRAR EL TRUCO";
+        action.textContent = currentStep < steps.length ? "OTRA PISTA" : "MOSTRAR EL TRUCO";
+
+        await wait(1000);
+
+        if (state.currentScreen === "browser" && document.querySelector("#genie-action")) {
+            action.disabled = false;
+        }
     });
 
     function setGeniePose(pose, altText) {
@@ -349,7 +329,6 @@ function initGenieExperience({ device, browser }) {
     function finishGenieExperience() {
         setGeniePose("idle", "Genio explicando cómo hizo las adivinanzas");
         message.textContent = "No fue magia: JavaScript leyó información que comparte tu navegador. Estos datos pueden ser incompletos o modificarse.";
-        document.querySelector('[data-genie-clue="language"]').classList.remove("hidden");
         document.querySelectorAll("[data-genie-extra]").forEach(element => element.classList.remove("hidden"));
         action.classList.add("hidden");
     }
