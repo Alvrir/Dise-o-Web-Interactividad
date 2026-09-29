@@ -423,6 +423,14 @@ El genio revela por etapas:
 3. nivel y estado de la batería, cuando están disponibles;
 4. idioma, User-Agent y tip de `F12` al mostrar el truco.
 
+Al final también aparece un recuadro naranja con un dato sobre privacidad. Explica que navegadores como Brave incluyen defensas contra el `fingerprinting`, por lo que pueden bloquear rastreadores y limitar o modificar algunos datos utilizados para intentar reconocer un dispositivo.
+
+El estilo de ese recuadro está en:
+
+```css
+.privacy-note
+```
+
 Las funciones relacionadas son:
 
 ```javascript

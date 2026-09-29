@@ -239,6 +239,10 @@ function renderBrowserInfo() {
                 <strong>Tip</strong>
                 <p>Apretá <kbd>F12</kbd> en tu navegador para abrir las herramientas de desarrollador. Desde ahí se puede inspeccionar cómo trabaja una página y, en algunos casos, modificar o simular información del navegador. Por eso estos datos sirven para experimentar, pero no son una identificación confiable.</p>
             </div>
+            <div class="privacy-note hidden" data-genie-extra>
+                <strong>Dato de privacidad</strong>
+                <p>Navegadores como Brave incluyen defensas contra el <em>fingerprinting</em> de forma predeterminada. Pueden bloquear rastreadores y limitar o modificar algunos datos que una página intenta usar para reconocer tu dispositivo.</p>
+            </div>
             <div class="actions hidden" data-genie-extra>
                 <button data-next="events">CONTINUAR →</button>
             </div>
