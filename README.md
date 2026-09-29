@@ -272,18 +272,12 @@ La función principal es:
 validateStudentForm(formData)
 ```
 
-Esa función:
+La pantalla está dividida en dos columnas en PC: el formulario queda a la izquierda y las verificaciones a la derecha. En celular vuelve a una sola columna. El botón `CARGAR` ejecuta la validación.
 
-1. revisa que el nombre no esté vacío;
-2. revisa que el DNI exista;
-3. revisa que el DNI tenga solo números;
-4. revisa una longitud razonable;
-5. revisa que la edad exista;
-6. revisa que la edad tenga solo números;
-7. revisa un rango de edad;
-8. busca el DNI en `alumnos.json`;
-9. compara nombre y edad con el registro encontrado;
-10. permite continuar si todo está correcto.
+La función agrupa la respuesta en solo dos verificaciones:
+
+1. controla que nombre, DNI y edad tengan un formato válido;
+2. informa `El alumno está en la base de datos` cuando DNI, nombre y edad coinciden, o `El alumno no está en la base de datos` cuando no coinciden.
 
 Para buscar un alumno se usa:
 
@@ -436,9 +430,11 @@ En PC, `.app-shell` deja `24px` de margen lateral e inferior para que el recuadr
 
 El genio revela por etapas:
 
-1. tipo de dispositivo;
-2. navegador;
+1. tipo de dispositivo, modelo cuando está disponible, sistema operativo y versión;
+2. navegador y versión;
 3. nivel y estado de la batería, cuando están disponibles.
+
+Para obtener más detalle, `getEnvironmentDetails()` combina el User-Agent tradicional con `navigator.userAgentData.getHighEntropyValues()`. Los navegadores basados en Chromium pueden compartir el modelo de algunos Android, la versión de la plataforma y la versión completa del navegador. En iPhone y iPad normalmente no se informa el modelo exacto, y el texto lo aclara en lugar de adivinar uno. Un User-Agent clásico de Windows tampoco permite distinguir con certeza Windows 10 de Windows 11; cuando no hay Client Hints se muestra `Windows 10 u 11`.
 
 Las respuestas aparecen solamente en el diálogo del personaje y no generan tarjetas debajo. Al pulsar `MOSTRAR EL TRUCO`, aparecen el User-Agent, el botón para continuar y un único recuadro breve que combina el tip de `F12` con el dato sobre las protecciones de privacidad de navegadores como Brave.
 
@@ -515,7 +511,8 @@ Partes importantes:
 - `.topbar`: cabecera con progreso y acceso a las herramientas de desarrollador;
 - `.screen`: caja principal flexible que ocupa el espacio restante del viewport;
 - `.progress-card`: barra de progreso;
-- `.form-grid`: formulario;
+- `.student-layout`: formulario y verificaciones en dos columnas;
+- `.form-grid`: campos del formulario;
 - `.rule-item`: reglas del Password Game;
 - `.dev-panel`: herramientas de desarrollador;
 - `.tip-box`: tip de F12;
