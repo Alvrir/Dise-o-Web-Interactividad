@@ -78,7 +78,7 @@ Página Diseño Web/
 
 Contiene la estructura base de la página:
 
-- cabecera con el texto `Diseño Web`;
+- cabecera con el indicador de progreso y las herramientas de desarrollador;
 - indicador de progreso;
 - botón de herramientas de desarrollador;
 - panel de herramientas de desarrollador;
@@ -199,6 +199,8 @@ La función que conecta los botones es:
 ```javascript
 bindNextButtons()
 ```
+
+Al cambiar de pantalla, `showScreen()` enfoca el contenido principal con `preventScroll`. Esto conserva la accesibilidad del foco sin desplazar automáticamente la página hacia abajo, especialmente en celulares.
 
 ## Estado central de la aplicación
 
@@ -498,9 +500,9 @@ style.css
 Partes importantes:
 
 - `.app-shell`: ancho general de la página;
-- `.topbar`: cabecera que mantiene `Diseño Web` junto a la barra de progreso;
+- `.topbar`: cabecera con progreso y acceso a las herramientas de desarrollador;
 - `.screen`: caja principal de cada pantalla;
-- `.progress-card`: barra de progreso, separada `16px` de `Diseño Web` en escritorio;
+- `.progress-card`: barra de progreso;
 - `.form-grid`: formulario;
 - `.rule-item`: reglas del Password Game;
 - `.dev-panel`: herramientas de desarrollador;

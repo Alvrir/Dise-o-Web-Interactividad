@@ -173,7 +173,7 @@ function showScreen(screenId) {
     updateDeveloperScreenSelect(screenId);
     app.innerHTML = "";
     screen.render();
-    app.focus();
+    app.focus({ preventScroll: true });
 }
 
 function updateProgress(screen) {
