@@ -586,7 +586,10 @@ function renderPasswordScreen(config) {
                 <p class="lead">${config.intro}</p>
                 <label class="field" for="${config.inputId}">
                     <span>Contraseña</span>
-                    <input id="${config.inputId}" type="text" value="${state[config.stateKey]}" autocomplete="off">
+                    <span class="password-input-row">
+                        <input id="${config.inputId}" type="text" value="${state[config.stateKey]}" autocomplete="off">
+                        <span id="password-character-count" class="password-character-count" aria-live="polite">0</span>
+                    </span>
                 </label>
                 <div id="password-actions" class="actions ${config.continueAtEnd ? "password-actions-end" : ""}">
                     <button id="password-continue" type="button" class="hidden" data-next="${config.nextScreen}">CONTINUAR →</button>
@@ -599,8 +602,10 @@ function renderPasswordScreen(config) {
     const input = document.querySelector(`#${config.inputId}`);
     const continueButton = document.querySelector("#password-continue");
     const passwordActions = document.querySelector("#password-actions");
+    const characterCount = document.querySelector("#password-character-count");
     const renderRules = () => {
         state[config.stateKey] = input.value;
+        characterCount.textContent = input.value.length;
         const results = validatePassword(input.value, config.rules);
         const visibleResults = getVisiblePasswordResults(results, config);
         const orderedResults = orderPasswordResults(visibleResults, config);

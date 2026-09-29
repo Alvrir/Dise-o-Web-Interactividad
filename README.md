@@ -340,6 +340,8 @@ Las reglas nuevas se revelan con un fade corto y, al cambiar de grupo, se desliz
 
 En el nivel final, el contenedor del botón `CONTINUAR` se oculta por completo hasta que todas las reglas se cumplen. Esto evita que en celular deje un espacio vacío entre el campo de contraseña y las condiciones.
 
+Los dos Password Game muestran, a la derecha del campo de contraseña, un contador numérico sin recuadro. El input usa el espacio restante para que el contador no se superponga.
+
 La función que decide qué reglas se muestran es:
 
 ```javascript
