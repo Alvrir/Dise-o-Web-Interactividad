@@ -114,12 +114,12 @@ const finalPasswordRules = [
     },
     {
         id: "currentYear",
-        description: `Debe contener el año actual (${passwordContext.currentYear}).`,
+        description: `Debe contener ${passwordContext.currentYear}.`,
         validate: password => password.includes(passwordContext.currentYear)
     },
     {
         id: "browserName",
-        description: `Debe contener el nombre de tu navegador (${passwordContext.browserName}).`,
+        description: `Debe contener ${passwordContext.browserName}.`,
         validate: password => normalizeText(password).includes(normalizeText(passwordContext.browserName))
     },
     {
@@ -134,7 +134,7 @@ const finalPasswordRules = [
     },
     {
         id: "sponsor",
-        description: "Debe contener uno de nuestros sponsors: Binco, Manaos o Milkaut.",
+        description: "Debe contener una de estas palabras.",
         logos: ["assets/logos/1.png", "assets/logos/2.png", "assets/logos/3.png"],
         validate: password => ["binco", "manaos", "milkaut"].some(sponsor => normalizeText(password).includes(sponsor))
     }
@@ -692,6 +692,7 @@ function completeFinalPassword(characterCount) {
     const result = {
         nombre: state.formData.nombre || "Jugador/a",
         dni: state.formData.dni || "sin-dni",
+        password: state.finalPassword,
         durationMs: Math.max(0, Date.now() - (state.finalPasswordStartedAt || Date.now())),
         characterCount,
         completedAt: new Date().toISOString()
@@ -730,6 +731,7 @@ function renderCompletedFinalPassword(result) {
             <p class="lead">Esta partida ya fue registrada en este dispositivo.</p>
             <div class="result-summary">
                 <strong>${escapeHtml(result.nombre)}</strong>
+                <span class="result-summary-password">${escapeHtml(getResultPassword(result))}</span>
                 <span>${formatDuration(result.durationMs)} · ${result.characterCount} letras</span>
             </div>
             <div class="actions password-actions-end">
@@ -757,6 +759,10 @@ function showFinalResultModal(result) {
             <button id="close-final-result" class="result-modal-close" type="button" aria-label="Cerrar resultado">×</button>
             <span class="result-modal-label">RESULTADO</span>
             <strong class="result-player-name">${escapeHtml(result.nombre)}</strong>
+            <div class="result-password">
+                <span>CONTRASEÑA</span>
+                <strong>${escapeHtml(getResultPassword(result))}</strong>
+            </div>
             <div class="result-metrics">
                 <div><span>TIEMPO</span><strong class="result-time">${formatDuration(result.durationMs)}</strong></div>
                 <div><span>LETRAS</span><strong>${result.characterCount}</strong></div>
@@ -790,6 +796,10 @@ function saveFinalResult(result) {
     } catch (error) {
         console.warn("No se pudo guardar el resultado en este dispositivo.", error);
     }
+}
+
+function getResultPassword(result) {
+    return result.password || "No disponible";
 }
 
 function resetFinalAttempt() {
@@ -838,7 +848,7 @@ function escapeHtml(value) {
 function downloadFinalResultImage(result) {
     const canvas = document.createElement("canvas");
     canvas.width = 1200;
-    canvas.height = 630;
+    canvas.height = 920;
     const context = canvas.getContext("2d");
     const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
     gradient.addColorStop(0, "#eaf7ef");
@@ -853,20 +863,45 @@ function downloadFinalResultImage(result) {
     context.fillText(String(result.nombre).slice(0, 28), 80, 190);
     context.font = "700 30px Arial";
     context.fillStyle = "#5b6b7a";
-    context.fillText("TIEMPO", 80, 300);
-    context.fillText("LETRAS", 650, 300);
+    context.fillText("CONTRASEÑA", 80, 280);
+    context.fillStyle = "#15202b";
+    context.font = "700 40px Arial";
+    const passwordEndY = drawCanvasPassword(context, getResultPassword(result), 80, 345, 1040, 52);
+    const metricLabelY = passwordEndY + 100;
+    context.font = "700 30px Arial";
+    context.fillStyle = "#5b6b7a";
+    context.fillText("TIEMPO", 80, metricLabelY);
+    context.fillText("LETRAS", 650, metricLabelY);
     context.font = "700 112px Arial";
     context.fillStyle = "#15202b";
-    context.fillText(formatDuration(result.durationMs), 80, 430);
-    context.fillText(String(result.characterCount), 650, 430);
+    context.fillText(formatDuration(result.durationMs), 80, metricLabelY + 130);
+    context.fillText(String(result.characterCount), 650, metricLabelY + 130);
     context.font = "700 25px Arial";
     context.fillStyle = "#075f66";
-    context.fillText("Interactividad y validación", 80, 550);
+    context.fillText("Interactividad y validación", 80, metricLabelY + 250);
 
     const link = document.createElement("a");
     link.download = `resultado-${String(result.nombre).replace(/[^a-z0-9]+/gi, "-").toLowerCase() || "jugador"}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
+}
+
+function drawCanvasPassword(context, password, x, y, maxWidth, lineHeight) {
+    let line = "";
+    let lineY = y;
+
+    for (const character of String(password)) {
+        if (line && context.measureText(`${line}${character}`).width > maxWidth) {
+            context.fillText(line, x, lineY);
+            line = character;
+            lineY += lineHeight;
+        } else {
+            line += character;
+        }
+    }
+
+    context.fillText(line || "No disponible", x, lineY);
+    return lineY;
 }
 
 function validatePassword(password, rules) {

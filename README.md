@@ -363,9 +363,9 @@ El botón de continuar aparece recién cuando todas las reglas están cumplidas.
 
 Al escribir la primera letra en el Password Game final comienza un temporizador local visible en la pantalla, con formato `minutos:segundos.milésimas`. Cuando todas las reglas quedan cumplidas al mismo tiempo aparece una tarjeta con el nombre y apellido del formulario, el tiempo total con la misma precisión y la cantidad de letras.
 
-La tarjeta se guarda en el navegador del jugador usando su DNI como clave local. Por eso, desde ese dispositivo y con ese DNI no se puede volver a jugar hasta usar `Reiniciar partida` en las herramientas de desarrollador. No se guarda ni se muestra la contraseña final.
+La tarjeta se guarda en el navegador del jugador usando su DNI como clave local. Por eso, desde ese dispositivo y con ese DNI no se puede volver a jugar hasta usar `Reiniciar partida` en las herramientas de desarrollador. El resultado incluye la contraseña final, el tiempo y la cantidad de letras.
 
-La tarjeta tiene una `×` para cerrarla, un botón `MOSTRAR RESULTADO` para abrirla otra vez y `GUARDAR IMAGEN`, que descarga una imagen PNG con el resultado para compartirla o capturarla.
+La tarjeta tiene una `×` para cerrarla, un botón `MOSTRAR RESULTADO` para abrirla otra vez y `GUARDAR IMAGEN`, que descarga una imagen PNG con la contraseña, el tiempo y la cantidad de letras para compartirla o capturarla.
 
 El nivel final pide:
 
@@ -375,7 +375,7 @@ El nivel final pide:
 4. un número;
 5. un símbolo;
 6. que los números aislados sumen 15: los dígitos pegados se ignoran; por ejemplo, `2a4` cuenta `2 + 4`, mientras que `222a3b66c` cuenta solamente `3`;
-7. el año actual;
+7. el número del año actual;
 8. el nombre del navegador detectado;
 9. un mes del año;
 10. un número romano;
