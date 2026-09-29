@@ -383,6 +383,8 @@ El nivel final pide:
 
 La última regla muestra los tres logos de `assets/logos/`. Cada regla usa `.is-valid` o `.is-invalid` para recibir un fondo verde o rojo suave.
 
+Las consignas del año, navegador y sponsors no revelan sus respuestas en pantalla. La validación detecta esos valores internamente según el navegador y el año actuales.
+
 ## Herramientas de desarrollador internas
 
 La página tiene un acceso oculto:
