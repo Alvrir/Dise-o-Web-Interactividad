@@ -430,7 +430,9 @@ La clase `.genie-image` aplica una máscara degradada en CSS para que los bordes
 
 Mientras el genio está adivinando, `.genie-stage` se expande para ocupar y centrar el contenido en todo el espacio disponible. Al mostrar el truco, la clase `.is-complete` vuelve compacta la escena para dejar lugar al User-Agent y al recuadro final.
 
-En pantallas de más de `820px`, el estado de adivinación se divide en dos columnas del mismo ancho: el genio puede crecer hasta `520px` y el diálogo ocupa la otra mitad con una altura amplia. Estas reglas usan `.genie-screen:not(.is-complete)`, por lo que no cambian el diseño final de `MOSTRAR EL TRUCO`.
+En pantallas de más de `820px`, el estado de adivinación se centra como un único conjunto de hasta `1040px`, dividido en dos columnas iguales. El genio puede crecer hasta `480px` y el diálogo ocupa la otra mitad. Durante este estado se oculta la línea inferior decorativa para evitar altura y scroll innecesarios. Estas reglas usan `.genie-screen:not(.is-complete)`, por lo que no cambian el diseño final de `MOSTRAR EL TRUCO`.
+
+En PC, `.app-shell` deja `24px` de margen lateral e inferior para que el recuadro general no toque el borde ni produzca un pequeño desbordamiento vertical en resoluciones como `1366 × 768`.
 
 El genio revela por etapas:
 
