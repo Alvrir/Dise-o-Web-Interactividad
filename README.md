@@ -103,6 +103,8 @@ Contiene todo el diseño visual:
 
 El layout principal utiliza una columna flex de altura completa (`100dvh`). El encabezado conserva su altura natural y `.screen` ocupa todo el espacio restante del navegador, sin imponer una altura mínima adicional en celulares.
 
+Cada cambio de pantalla reinicia la clase `.is-entering`, que aplica un fade de entrada de 320 ms al contenido. Si el navegador tiene activado `prefers-reduced-motion`, la animación se desactiva.
+
 ### `script.js`
 
 Es el archivo principal de funcionamiento.
@@ -425,6 +427,8 @@ Después de mostrar cada respuesta, el botón `OTRA PISTA` permanece bloqueado d
 La clase `.genie-image` aplica una máscara degradada en CSS para que los bordes superior e inferior de las tres imágenes se desvanezcan suavemente hasta ser transparentes. Los archivos PNG originales no se modifican.
 
 Mientras el genio está adivinando, `.genie-stage` se expande para ocupar y centrar el contenido en todo el espacio disponible. Al mostrar el truco, la clase `.is-complete` vuelve compacta la escena para dejar lugar al User-Agent y al recuadro final.
+
+En pantallas de más de `820px`, el estado de adivinación se divide en dos columnas del mismo ancho: el genio puede crecer hasta `520px` y el diálogo ocupa la otra mitad con una altura amplia. Estas reglas usan `.genie-screen:not(.is-complete)`, por lo que no cambian el diseño final de `MOSTRAR EL TRUCO`.
 
 El genio revela por etapas:
 
