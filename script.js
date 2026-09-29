@@ -114,12 +114,12 @@ const finalPasswordRules = [
     },
     {
         id: "currentYear",
-        description: `Debe contener ${passwordContext.currentYear}.`,
+        description: "Debe contener el año actual.",
         validate: password => password.includes(passwordContext.currentYear)
     },
     {
         id: "browserName",
-        description: `Debe contener ${passwordContext.browserName}.`,
+        description: "Debe contener el navegador que estás usando.",
         validate: password => normalizeText(password).includes(normalizeText(passwordContext.browserName))
     },
     {
@@ -134,7 +134,7 @@ const finalPasswordRules = [
     },
     {
         id: "sponsor",
-        description: "Debe contener una de estas palabras.",
+        description: "Debe contener uno de nuestros sponsors.",
         logos: ["assets/logos/1.png", "assets/logos/2.png", "assets/logos/3.png"],
         validate: password => ["binco", "manaos", "milkaut"].some(sponsor => normalizeText(password).includes(sponsor))
     }
