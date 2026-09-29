@@ -70,17 +70,14 @@ button:disabled {
     transform: none;
 }
 
-.secondary-button,
-.dev-toggle {
+.secondary-button {
     color: var(--accent-dark);
     border: 1px solid var(--line);
     background: #ffffff;
 }
 
 .secondary-button:hover,
-.secondary-button:focus-visible,
-.dev-toggle:hover,
-.dev-toggle:focus-visible {
+.secondary-button:focus-visible {
     color: #ffffff;
     background: var(--accent-dark);
 }
@@ -124,11 +121,14 @@ input:focus {
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.78);
     box-shadow: 0 10px 24px rgba(21, 32, 43, 0.08);
+    cursor: default;
+    touch-action: manipulation;
+    user-select: none;
 }
 
-.dev-toggle {
-    margin-left: auto;
-    white-space: nowrap;
+.progress-card:focus-visible {
+    outline: 3px solid rgba(28, 143, 120, 0.42);
+    outline-offset: 3px;
 }
 
 .dev-panel {
@@ -838,10 +838,6 @@ kbd {
 
     .progress-card {
         width: 100%;
-    }
-
-    .dev-toggle {
-        margin-left: 0;
     }
 
     .dev-panel-header {

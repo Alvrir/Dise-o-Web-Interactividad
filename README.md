@@ -383,13 +383,13 @@ La última regla muestra los tres logos de `assets/logos/`. Cada regla usa `.is-
 
 ## Herramientas de desarrollador internas
 
-La página tiene un botón:
+La página tiene un acceso oculto:
 
 ```text
-Herramientas de desarrollador
+mantener apretado el recuadro de progreso durante 5 segundos
 ```
 
-Sirve para testear y armar la página más rápido.
+Al completar los cinco segundos se abre el panel de herramientas de desarrollador, pensado para testear y armar la página más rápido. Soltar antes no abre nada.
 
 Desde ese panel se puede:
 
@@ -544,7 +544,7 @@ style.css
 Partes importantes:
 
 - `.app-shell`: contenedor de ancho y altura completos;
-- `.topbar`: cabecera con progreso y acceso a las herramientas de desarrollador;
+- `.topbar`: cabecera con progreso, que también es el acceso oculto a las herramientas de desarrollador al mantenerlo presionado cinco segundos;
 - `.screen`: caja principal flexible que ocupa el espacio restante del viewport;
 - `.progress-card`: barra de progreso;
 - `.student-layout`: formulario y verificaciones en dos columnas;
