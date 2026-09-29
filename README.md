@@ -464,6 +464,8 @@ Estados del personaje:
 - `pensando.png`: se muestra durante 2 segundos antes de cada respuesta;
 - `celu.png`: acompaña la respuesta revelada.
 
+Cada imagen del genio aparece con un fade in de `1,3 s` cuando termina de cargar. La pose de pensamiento mantiene además su movimiento vertical.
+
 Después de mostrar cada respuesta, el botón `OTRA PISTA` permanece bloqueado durante 1 segundo adicional para dar tiempo a leerla.
 
 La clase `.genie-image` aplica una máscara degradada en CSS para que los bordes superior e inferior de las tres imágenes se desvanezcan suavemente hasta ser transparentes. Los archivos PNG originales no se modifican.
