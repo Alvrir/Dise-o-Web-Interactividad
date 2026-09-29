@@ -525,6 +525,22 @@ input:focus {
     flex: 1 1 auto;
 }
 
+.live-timer {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 0 0 18px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 900;
+}
+
+.live-timer strong {
+    color: var(--ink);
+    font-size: 1.35rem;
+    font-variant-numeric: tabular-nums;
+}
+
 .password-character-count {
     flex: 0 0 auto;
     color: var(--ink);

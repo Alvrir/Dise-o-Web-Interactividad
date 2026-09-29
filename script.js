@@ -7,6 +7,7 @@ const devClose = document.querySelector("#dev-close");
 const devScreenSelect = document.querySelector("#dev-screen-select");
 const devMessage = document.querySelector("#dev-message");
 const finalResultStoragePrefix = "interactividad-password-final-result:";
+let finalTimerInterval = null;
 
 const fallbackAlumnos = [
     {
@@ -209,6 +210,7 @@ function showScreen(screenId) {
         return;
     }
 
+    stopFinalTimer();
     state.currentScreen = screenId;
     updateProgress(screen);
     updateDeveloperScreenSelect(screenId);
@@ -599,6 +601,12 @@ function renderPasswordScreen(config) {
         <section class="password-layout">
             <div>
                 <p class="lead">${config.intro}</p>
+                ${config.stateKey === "finalPassword" ? `
+                    <p class="live-timer" aria-live="off">
+                        <span>TIEMPO</span>
+                        <strong id="final-live-timer">${formatLiveDuration(0)}</strong>
+                    </p>
+                ` : ""}
                 <label class="field" for="${config.inputId}">
                     <span>Contraseña</span>
                     <span class="password-input-row">
@@ -618,6 +626,7 @@ function renderPasswordScreen(config) {
     const continueButton = document.querySelector("#password-continue");
     const passwordActions = document.querySelector("#password-actions");
     const characterCount = document.querySelector("#password-character-count");
+    const liveTimer = document.querySelector("#final-live-timer");
     const renderRules = () => {
         state[config.stateKey] = input.value;
         characterCount.textContent = input.value.length;
@@ -634,6 +643,7 @@ function renderPasswordScreen(config) {
         if (config.stateKey === "finalPassword") {
             if (input.value.length > 0 && !state.finalPasswordStartedAt) {
                 state.finalPasswordStartedAt = Date.now();
+                startFinalTimer(liveTimer);
             }
 
             if (allValid) {
@@ -644,10 +654,14 @@ function renderPasswordScreen(config) {
 
     input.addEventListener("input", renderRules);
     renderRules();
+    if (config.stateKey === "finalPassword" && state.finalPasswordStartedAt) {
+        startFinalTimer(liveTimer);
+    }
     bindNextButtons();
 }
 
 function completeFinalPassword(characterCount) {
+    stopFinalTimer();
     const result = {
         nombre: state.formData.nombre || "Jugador/a",
         dni: state.formData.dni || "sin-dni",
@@ -659,6 +673,28 @@ function completeFinalPassword(characterCount) {
     saveFinalResult(result);
     renderCompletedFinalPassword(result);
     showFinalResultModal(result);
+}
+
+function startFinalTimer(timerElement) {
+    stopFinalTimer();
+
+    const updateTimer = () => {
+        if (!timerElement || !state.finalPasswordStartedAt) {
+            return;
+        }
+
+        timerElement.textContent = formatLiveDuration(Date.now() - state.finalPasswordStartedAt);
+    };
+
+    updateTimer();
+    finalTimerInterval = window.setInterval(updateTimer, 250);
+}
+
+function stopFinalTimer() {
+    if (finalTimerInterval) {
+        window.clearInterval(finalTimerInterval);
+        finalTimerInterval = null;
+    }
 }
 
 function renderCompletedFinalPassword(result) {
@@ -753,6 +789,14 @@ function formatDuration(durationMs) {
     const totalSeconds = Math.round(durationMs / 1000);
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = String(totalSeconds % 60).padStart(2, "0");
+    return `${minutes}:${seconds}`;
+}
+
+function formatLiveDuration(durationMs) {
+    const totalSeconds = Math.floor(durationMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+
     return `${minutes}:${seconds}`;
 }
 

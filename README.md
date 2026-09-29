@@ -359,7 +359,7 @@ El botón de continuar aparece recién cuando todas las reglas están cumplidas.
 
 ## Resultado del Password Game final
 
-Al escribir la primera letra en el Password Game final comienza un temporizador local. Cuando todas las reglas quedan cumplidas al mismo tiempo aparece una tarjeta con el nombre y apellido del formulario, el tiempo total y la cantidad de letras.
+Al escribir la primera letra en el Password Game final comienza un temporizador local visible en la pantalla. Cuando todas las reglas quedan cumplidas al mismo tiempo aparece una tarjeta con el nombre y apellido del formulario, el tiempo total y la cantidad de letras.
 
 La tarjeta se guarda en el navegador del jugador usando su DNI como clave local. Por eso, desde ese dispositivo y con ese DNI no se puede volver a jugar hasta usar `Reiniciar partida` en las herramientas de desarrollador. No se guarda ni se muestra la contraseña final.
 
