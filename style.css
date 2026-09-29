@@ -301,15 +301,6 @@ input:focus {
     background: var(--surface-soft);
 }
 
-.genie-kicker {
-    display: block;
-    margin-bottom: 10px;
-    color: var(--accent-dark);
-    font-size: 0.82rem;
-    font-weight: 900;
-    text-transform: uppercase;
-}
-
 #genie-message {
     min-height: 3em;
     margin: 0 0 18px;
@@ -423,8 +414,14 @@ input:focus {
 
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 14px;
+}
+
+.student-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 1fr);
+    gap: clamp(28px, 5vw, 72px);
+    align-items: start;
 }
 
 .field label {
@@ -440,8 +437,11 @@ input:focus {
 }
 
 .result-panel {
-    margin-top: 22px;
     padding: 16px;
+}
+
+.student-layout .result-panel {
+    min-height: 100%;
 }
 
 .validation-list,
@@ -617,6 +617,7 @@ kbd {
     .screen-grid,
     .password-layout,
     .genie-stage,
+    .student-layout,
     .dev-grid {
         grid-template-columns: 1fr;
         display: grid;
