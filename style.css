@@ -514,6 +514,24 @@ input:focus {
     align-content: start;
 }
 
+.password-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.password-input-row input {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.password-character-count {
+    flex: 0 0 auto;
+    color: var(--ink);
+    font: inherit;
+    white-space: nowrap;
+}
+
 .rule-list {
     margin-top: 0;
 }
