@@ -219,6 +219,10 @@ function renderBrowserInfo() {
                     <strong>Idioma</strong>
                     <code>${navigator.language || "No disponible"}</code>
                 </article>
+                <article class="info-card">
+                    <strong>Batería</strong>
+                    <code id="battery-status" aria-live="polite">Consultando...</code>
+                </article>
             </div>
             <div class="info-card callout">
                 <strong>User-Agent</strong>
@@ -234,7 +238,40 @@ function renderBrowserInfo() {
         </section>
     `;
 
+    loadBatteryInfo();
     bindNextButtons();
+}
+
+async function loadBatteryInfo() {
+    const initialStatus = document.querySelector("#battery-status");
+
+    if (!initialStatus || typeof navigator.getBattery !== "function") {
+        if (initialStatus) {
+            initialStatus.textContent = "No disponible en este navegador";
+        }
+        return;
+    }
+
+    try {
+        const battery = await navigator.getBattery();
+        const currentStatus = document.querySelector("#battery-status");
+
+        if (!currentStatus) {
+            return;
+        }
+
+        const percentage = Math.round(battery.level * 100);
+        const chargingStatus = battery.charging ? "Cargando" : "Sin cargar";
+        currentStatus.textContent = `${percentage}% · ${chargingStatus}`;
+    } catch (error) {
+        const currentStatus = document.querySelector("#battery-status");
+
+        if (currentStatus) {
+            currentStatus.textContent = "Información no permitida";
+        }
+
+        console.warn("No se pudo consultar la Battery Status API.", error);
+    }
 }
 
 function renderEvents() {

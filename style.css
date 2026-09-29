@@ -238,6 +238,10 @@ input:focus {
     margin-top: 24px;
 }
 
+.info-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
 .info-card,
 .event-target,
 .rule-item,
