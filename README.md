@@ -382,6 +382,7 @@ El nivel final pide:
 11. un mes del año;
 12. un número romano;
 13. uno de los textos `Binco`, `Manaos` o `Milkaut`; alcanza con una sola de esas palabras.
+14. más de 45 caracteres.
 
 La última regla muestra los tres logos de `assets/logos/`. Cada regla usa `.is-valid` o `.is-invalid` para recibir un fondo verde o rojo suave.
 

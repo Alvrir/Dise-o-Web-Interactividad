@@ -148,6 +148,11 @@ const finalPasswordRules = [
         description: "Debe contener uno de nuestros sponsors.",
         logos: ["assets/logos/1.png", "assets/logos/2.png", "assets/logos/3.png"],
         validate: password => ["binco", "manaos", "milkaut"].some(sponsor => normalizeText(password).includes(sponsor))
+    },
+    {
+        id: "longPassword",
+        description: "La contraseña debe tener más de 45 caracteres.",
+        validate: password => password.length > 45
     }
 ];
 
@@ -1275,7 +1280,7 @@ function buildValidFinalPassword() {
     }
 
     balancingDigits.push(String(remainingSum));
-    return `Ab!${passwordContext.currentYear}mayo${passwordContext.currentYearRoman}VManaos420${balancingDigits.join("x")}${passwordContext.browserName}`;
+    return `Ab!${passwordContext.currentYear}mayo${passwordContext.currentYearRoman}VManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividad`;
 }
 
 function setDeveloperMessage(message) {
