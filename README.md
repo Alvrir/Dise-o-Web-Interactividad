@@ -387,7 +387,7 @@ El nivel final pide:
 14. más de 45 caracteres.
 15. el nombre de la ciudad: `Rojas`.
 
-La última regla muestra los tres logos de `assets/logos/`. Cada regla usa `.is-valid` o `.is-invalid` para recibir un fondo verde o rojo suave.
+La última regla muestra los tres logos de `assets/logos/` en recuadros de 72 px de alto. Cada imagen cubre su recuadro completo y cada regla usa `.is-valid` o `.is-invalid` para recibir un fondo verde o rojo suave.
 
 Las consignas del año, navegador y sponsors no revelan sus respuestas en pantalla. La validación detecta esos valores internamente según el navegador y el año actuales.
 
