@@ -37,7 +37,8 @@ const state = {
     alumnoEncontrado: null,
     lastEvent: "todavía ninguno",
     shortPassword: "",
-    finalPassword: ""
+    finalPassword: "",
+    finalPasswordRevealedCount: 0
 };
 
 const screens = [
@@ -50,6 +51,11 @@ const screens = [
     { id: "finalPassword", title: "PASSWORD GAME - NIVEL FINAL", label: "Actividad 7 / 8", render: renderFinalPassword },
     { id: "closing", title: "¿QUÉ ACABAMOS DE HACER?", label: "Actividad 8 / 8", render: renderClosing }
 ];
+
+const passwordContext = {
+    currentYear: String(new Date().getFullYear()),
+    browserName: getBrowserPasswordTerm()
+};
 
 const shortPasswordRules = [
     {
@@ -72,8 +78,8 @@ const shortPasswordRules = [
 const finalPasswordRules = [
     {
         id: "minLength",
-        description: "Mínimo 10 caracteres.",
-        validate: password => password.length >= 10
+        description: "Mínimo 5 caracteres.",
+        validate: password => password.length >= 5
     },
     {
         id: "uppercase",
@@ -94,6 +100,37 @@ const finalPasswordRules = [
         id: "symbol",
         description: "Al menos un símbolo.",
         validate: password => /[^A-Za-zÁÉÍÓÚáéíóúÑñ0-9]/.test(password)
+    },
+    {
+        id: "digitSum",
+        description: "Los números de la contraseña por separado deben sumar 15.",
+        validate: password => sumPasswordDigits(password) === 15
+    },
+    {
+        id: "currentYear",
+        description: `Debe contener el año actual (${passwordContext.currentYear}).`,
+        validate: password => password.includes(passwordContext.currentYear)
+    },
+    {
+        id: "browserName",
+        description: `Debe contener el nombre de tu navegador (${passwordContext.browserName}).`,
+        validate: password => normalizeText(password).includes(normalizeText(passwordContext.browserName))
+    },
+    {
+        id: "month",
+        description: "Debe contener un mes del año.",
+        validate: password => containsMonth(password)
+    },
+    {
+        id: "romanNumeral",
+        description: "Debe contener un número romano.",
+        validate: password => /[IVXLCDM]/.test(password)
+    },
+    {
+        id: "sponsor",
+        description: "Debe contener uno de nuestros sponsors: Manaos o Milkaut.",
+        logos: ["assets/logos/1.png", "assets/logos/3.png"],
+        validate: password => ["manaos", "milkaut"].some(sponsor => normalizeText(password).includes(sponsor))
     }
 ];
 
@@ -522,6 +559,7 @@ function renderShortPassword() {
         stateKey: "shortPassword",
         inputId: "short-password-input",
         rules: shortPasswordRules,
+        ruleMode: "always",
         nextScreen: "fakeFinal"
     });
 }
@@ -532,6 +570,8 @@ function renderFinalPassword() {
         stateKey: "finalPassword",
         inputId: "final-password-input",
         rules: finalPasswordRules,
+        ruleMode: "progressive",
+        revealedCountKey: "finalPasswordRevealedCount",
         nextScreen: "closing"
     });
 }
@@ -558,13 +598,16 @@ function renderPasswordScreen(config) {
     const renderRules = () => {
         state[config.stateKey] = input.value;
         const results = validatePassword(input.value, config.rules);
-        const visibleResults = getVisiblePasswordResults(results);
+        const visibleResults = getVisiblePasswordResults(results, config);
         const allValid = results.every(result => result.ok);
 
         document.querySelector("#password-rules").innerHTML = visibleResults.map(result => `
-            <li class="rule-item">
+            <li class="rule-item ${result.ok ? "is-valid" : "is-invalid"}">
                 <span class="status ${result.ok ? "ok" : "bad"}">${result.ok ? "✓" : "×"}</span>
-                <span>${result.description}</span>
+                <div class="rule-content">
+                    <span>${result.description}</span>
+                    ${renderSponsorLogos(result.logos)}
+                </div>
             </li>
         `).join("");
 
@@ -580,22 +623,60 @@ function validatePassword(password, rules) {
     return rules.map(rule => ({
         id: rule.id,
         description: rule.description,
+        logos: rule.logos || [],
         ok: rule.validate(password)
     }));
 }
 
-function getVisiblePasswordResults(results) {
-    const visibleResults = [];
-
-    for (const result of results) {
-        visibleResults.push(result);
-
-        if (!result.ok) {
-            break;
-        }
+function getVisiblePasswordResults(results, config) {
+    if (config.ruleMode === "always") {
+        return results;
     }
 
-    return visibleResults;
+    let revealedCount = state[config.revealedCountKey] || 0;
+
+    if (state[config.stateKey].length > 0 && revealedCount === 0) {
+        revealedCount = 1;
+    }
+
+    if (revealedCount === 0) {
+        return [];
+    }
+
+    while (revealedCount < results.length && results.slice(0, revealedCount).every(result => result.ok)) {
+        revealedCount += 1;
+    }
+
+    state[config.revealedCountKey] = revealedCount;
+
+    return results
+        .slice(0, revealedCount)
+        .sort((first, second) => Number(second.ok) - Number(first.ok));
+}
+
+function renderSponsorLogos(logos) {
+    if (!logos.length) {
+        return "";
+    }
+
+    return `
+        <span class="sponsor-logos" aria-label="Logos de sponsors">
+            ${logos.map((logo, index) => `<img src="${logo}" alt="Logo de sponsor ${index + 1}">`).join("")}
+        </span>
+    `;
+}
+
+function sumPasswordDigits(password) {
+    return (password.match(/\d/g) || []).reduce((total, digit) => total + Number(digit), 0);
+}
+
+function containsMonth(password) {
+    const months = [
+        "enero", "febrero", "marzo", "abril", "mayo", "junio",
+        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+    ];
+    const normalizedPassword = normalizeText(password);
+    return months.some(month => normalizedPassword.includes(month));
 }
 
 function renderFakeFinal() {
@@ -743,7 +824,7 @@ function fillDeveloperStudent() {
 function completeDeveloperPassword() {
     const passwordByScreen = {
         shortPassword: "Clave123",
-        finalPassword: "Clave1234!"
+        finalPassword: buildValidFinalPassword()
     };
     const inputByScreen = {
         shortPassword: "#short-password-input",
@@ -760,6 +841,20 @@ function completeDeveloperPassword() {
     input.value = password;
     input.dispatchEvent(new Event("input", { bubbles: true }));
     setDeveloperMessage("Contraseña de prueba cargada.");
+}
+
+function buildValidFinalPassword() {
+    const yearDigitSum = sumPasswordDigits(passwordContext.currentYear);
+    let remainingSum = Math.max(0, 15 - yearDigitSum);
+    let balancingDigits = "";
+
+    while (remainingSum > 9) {
+        balancingDigits += "9";
+        remainingSum -= 9;
+    }
+
+    balancingDigits += String(remainingSum);
+    return `Ab!${passwordContext.currentYear}mayoVManaos${balancingDigits}${passwordContext.browserName}`;
 }
 
 function setDeveloperMessage(message) {
@@ -784,12 +879,26 @@ function detectDevice() {
 function detectBrowser() {
     const agent = navigator.userAgent;
 
+    if (navigator.brave) return "Brave";
     if (agent.includes("Firefox")) return "Firefox";
     if (agent.includes("Edg")) return "Microsoft Edge";
+    if (agent.includes("OPR")) return "Opera";
+    if (agent.includes("SamsungBrowser")) return "Samsung Internet";
     if (agent.includes("Chrome")) return "Chrome";
     if (agent.includes("Safari")) return "Safari";
 
     return "Navegador no identificado";
+}
+
+function getBrowserPasswordTerm() {
+    const browserTerms = {
+        "Microsoft Edge": "Edge",
+        "Samsung Internet": "Samsung",
+        "Navegador no identificado": "navegador"
+    };
+
+    const browser = detectBrowser();
+    return browserTerms[browser] || browser;
 }
 
 async function getEnvironmentDetails() {
