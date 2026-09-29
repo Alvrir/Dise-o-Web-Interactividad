@@ -429,6 +429,8 @@ La pantalla `¿Qué sabe la página sobre vos?` intenta consultar la batería me
 navigator.getBattery()
 ```
 
+Si el porcentaje disponible es menor a 20%, el genio muestra una advertencia breve para avisar que el dispositivo podría apagarse.
+
 Durante la adivinanza, el mensaje del genio puede mostrar:
 
 - porcentaje aproximado;

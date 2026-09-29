@@ -436,6 +436,13 @@ function formatBatteryGuess() {
         return "Tu navegador mantiene la batería en secreto. ¡Esa pista no está disponible!";
     }
 
+    const percentageMatch = batteryStatus.match(/^(\d+)%/);
+    const percentage = percentageMatch ? Number(percentageMatch[1]) : null;
+
+    if (percentage !== null && percentage < 20) {
+        return `Tu batería indica ${percentage}%, cuidado que no se te apague en cualquier momento...`;
+    }
+
     return `Tu batería indica ${batteryStatus.toLowerCase()}.`;
 }
 
