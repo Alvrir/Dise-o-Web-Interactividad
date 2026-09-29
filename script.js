@@ -673,7 +673,7 @@ function orderPasswordResults(results, config) {
             return second.order - first.order;
         }
 
-        return completedOrder.indexOf(first.id) - completedOrder.indexOf(second.id);
+        return completedOrder.indexOf(second.id) - completedOrder.indexOf(first.id);
     });
 }
 

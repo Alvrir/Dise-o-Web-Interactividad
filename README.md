@@ -334,7 +334,7 @@ Los dos juegos tienen comportamientos diferentes:
 - en el primer `Password Game`, las tres condiciones están visibles desde el inicio y solo cambia su icono y color entre rojo y verde;
 - en `Password Game - Nivel final` no se muestra ninguna condición con el campo vacío. Al empezar a escribir aparece la primera y las siguientes se revelan progresivamente;
 - una condición revelada nunca vuelve a desaparecer, aunque después deje de cumplirse;
-- la última condición pendiente queda arriba; las condiciones cumplidas quedan debajo en el orden en que se cumplieron y no desaparecen aunque después se rompa otra regla.
+- la última condición pendiente queda arriba; las condiciones cumplidas quedan debajo con la más recientemente cumplida primero y no desaparecen aunque después se rompa otra regla.
 
 Las reglas nuevas se revelan con un fade corto y, al cambiar de grupo, se deslizan a su nueva posición. La animación usa solo `opacity` y `transform` para mantenerse liviana; se desactiva cuando el sistema pide reducir movimiento.
 
