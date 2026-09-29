@@ -7,7 +7,7 @@ const devClose = document.querySelector("#dev-close");
 const devScreenSelect = document.querySelector("#dev-screen-select");
 const devMessage = document.querySelector("#dev-message");
 const finalResultStoragePrefix = "interactividad-password-final-result:";
-let finalTimerInterval = null;
+let finalTimerFrame = null;
 let developerHoldTimeout = null;
 
 const fallbackAlumnos = [
@@ -711,16 +711,16 @@ function startFinalTimer(timerElement) {
         }
 
         timerElement.textContent = formatLiveDuration(Date.now() - state.finalPasswordStartedAt);
+        finalTimerFrame = window.requestAnimationFrame(updateTimer);
     };
 
     updateTimer();
-    finalTimerInterval = window.setInterval(updateTimer, 250);
 }
 
 function stopFinalTimer() {
-    if (finalTimerInterval) {
-        window.clearInterval(finalTimerInterval);
-        finalTimerInterval = null;
+    if (finalTimerFrame) {
+        window.cancelAnimationFrame(finalTimerFrame);
+        finalTimerFrame = null;
     }
 }
 
@@ -758,7 +758,7 @@ function showFinalResultModal(result) {
             <span class="result-modal-label">RESULTADO</span>
             <strong class="result-player-name">${escapeHtml(result.nombre)}</strong>
             <div class="result-metrics">
-                <div><span>TIEMPO</span><strong>${formatDuration(result.durationMs)}</strong></div>
+                <div><span>TIEMPO</span><strong class="result-time">${formatDuration(result.durationMs)}</strong></div>
                 <div><span>LETRAS</span><strong>${result.characterCount}</strong></div>
             </div>
             <button id="save-final-result" type="button">GUARDAR IMAGEN</button>
@@ -813,18 +813,17 @@ function resetCurrentPlayerGame() {
 }
 
 function formatDuration(durationMs) {
-    const totalSeconds = Math.round(durationMs / 1000);
+    const totalMilliseconds = Math.max(0, Math.floor(durationMs));
+    const totalSeconds = Math.floor(totalMilliseconds / 1000);
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = String(totalSeconds % 60).padStart(2, "0");
-    return `${minutes}:${seconds}`;
+    const milliseconds = String(totalMilliseconds % 1000).padStart(3, "0");
+
+    return `${minutes}:${seconds}.${milliseconds}`;
 }
 
 function formatLiveDuration(durationMs) {
-    const totalSeconds = Math.floor(durationMs / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = String(totalSeconds % 60).padStart(2, "0");
-
-    return `${minutes}:${seconds}`;
+    return formatDuration(durationMs);
 }
 
 function escapeHtml(value) {
