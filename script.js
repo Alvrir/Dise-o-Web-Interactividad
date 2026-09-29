@@ -203,15 +203,13 @@ function renderStart() {
 }
 
 function renderBrowserInfo() {
-    const device = detectDevice();
-    const browser = detectBrowser();
+    const environmentPromise = getEnvironmentDetails();
 
     app.innerHTML = `
         <section class="genie-screen">
             <div class="genie-stage">
                 <img id="genie-image" class="genie-image" src="assets/genio/idle.png" alt="Genio esperando para comenzar">
                 <div class="genie-dialog">
-                    <span class="genie-kicker">El genio del navegador</span>
                     <p id="genie-message">¡Hola! Puedo adivinar algunas cosas sobre el dispositivo desde el que me visitás.</p>
                     <button id="genie-action" type="button">EMPEZAR ADIVINACIÓN</button>
                 </div>
@@ -232,7 +230,7 @@ function renderBrowserInfo() {
     `;
 
     loadBatteryInfo();
-    initGenieExperience({ device, browser });
+    initGenieExperience(environmentPromise);
     bindNextButtons();
 }
 
@@ -268,7 +266,7 @@ async function loadBatteryInfo() {
     }
 }
 
-function initGenieExperience({ device, browser }) {
+function initGenieExperience(environmentPromise) {
     const image = document.querySelector("#genie-image");
     const message = document.querySelector("#genie-message");
     const action = document.querySelector("#genie-action");
@@ -282,11 +280,11 @@ function initGenieExperience({ device, browser }) {
     const steps = [
         {
             thinking: "Voy a adivinar desde dónde me estás viendo...",
-            answer: `¡Estás usando ${formatDeviceGuess(device)}!`
+            answer: async () => formatDeviceDetails(await environmentPromise)
         },
         {
             thinking: "Ahora voy a descubrir qué navegador elegiste...",
-            answer: `Tu navegador parece ser ${browser}.`
+            answer: async () => formatBrowserDetails(await environmentPromise)
         },
         {
             thinking: "Me falta una pista. Voy a intentar sentir la energía de tu batería...",
@@ -312,7 +310,7 @@ function initGenieExperience({ device, browser }) {
         }
 
         setGeniePose("celu", "Genio mostrando la respuesta");
-        message.textContent = typeof step.answer === "function" ? step.answer() : step.answer;
+        message.textContent = typeof step.answer === "function" ? await step.answer() : step.answer;
         currentStep += 1;
         action.textContent = currentStep < steps.length ? "OTRA PISTA" : "MOSTRAR EL TRUCO";
 
@@ -407,34 +405,37 @@ function renderEvents() {
 
 function renderForm() {
     app.innerHTML = `
-        <section>
-            <p class="lead">Completá tus datos para continuar. El formulario se valida en el navegador y consulta una base local en JSON.</p>
-            ${renderDataNotice()}
-            <form id="student-form" novalidate>
-                <div class="form-grid">
-                    <div class="field">
-                        <label for="nombre">Nombre y apellido</label>
-                        <input id="nombre" name="nombre" type="text" autocomplete="name" value="${state.formData.nombre}" placeholder="Juan Perez">
+        <section class="student-layout">
+            <div class="student-form-column">
+                <p class="lead">Completá tus datos para continuar. El formulario se valida en el navegador y consulta una base local en JSON.</p>
+                ${renderDataNotice()}
+                <form id="student-form" novalidate>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="nombre">Nombre y apellido</label>
+                            <input id="nombre" name="nombre" type="text" autocomplete="name" value="${state.formData.nombre}" placeholder="Juan Perez">
+                        </div>
+                        <div class="field">
+                            <label for="dni">DNI</label>
+                            <input id="dni" name="dni" type="text" inputmode="numeric" value="${state.formData.dni}" placeholder="12345678">
+                        </div>
+                        <div class="field">
+                            <label for="edad">Edad</label>
+                            <input id="edad" name="edad" type="text" inputmode="numeric" value="${state.formData.edad}" placeholder="18">
+                        </div>
                     </div>
-                    <div class="field">
-                        <label for="dni">DNI</label>
-                        <input id="dni" name="dni" type="text" inputmode="numeric" value="${state.formData.dni}" placeholder="12345678">
+                    <p class="hint">Alumno de prueba: Juan Perez, DNI 12345678, edad 18.</p>
+                    <div class="actions">
+                        <button type="submit">CARGAR</button>
+                        <button id="continue-after-form" type="button" class="hidden" data-next="shortPassword">CONTINUAR →</button>
                     </div>
-                    <div class="field">
-                        <label for="edad">Edad</label>
-                        <input id="edad" name="edad" type="text" inputmode="numeric" value="${state.formData.edad}" placeholder="18">
-                    </div>
-                </div>
-                <p class="hint">Alumno de prueba: Juan Perez, DNI 12345678, edad 18.</p>
-                <div class="actions">
-                    <button type="submit">ENVIAR</button>
-                    <button id="continue-after-form" type="button" class="hidden" data-next="shortPassword">CONTINUAR →</button>
-                </div>
-            </form>
+                </form>
+            </div>
             <section class="result-panel" aria-live="polite">
-                <h2>¿LOS DATOS SON CORRECTOS?</h2>
+                <h2>VERIFICACIÓN</h2>
                 <ul id="validation-results" class="validation-list">
-                    <li class="validation-item"><span class="status waiting">?</span><span>Esperando envío del formulario.</span></li>
+                    <li class="validation-item"><span class="status waiting">?</span><span>Esperando la carga de los datos.</span></li>
+                    <li class="validation-item"><span class="status waiting">?</span><span>Consulta a la base de datos pendiente.</span></li>
                 </ul>
             </section>
         </section>
@@ -469,34 +470,22 @@ function validateStudentForm(formData) {
     const results = [];
     const dniOnlyNumbers = /^\d+$/.test(formData.dni);
     const edadOnlyNumbers = /^\d+$/.test(formData.edad);
-
-    addResult(results, formData.nombre.length > 0, "Nombre y apellido ingresado.", "Debés ingresar nombre y apellido.");
-    addResult(results, formData.dni.length > 0, "DNI ingresado.", "Debés ingresar tu DNI.");
-    addResult(results, dniOnlyNumbers, "El DNI contiene solamente números.", "El DNI debe contener solamente números.");
-    addResult(results, formData.dni.length >= 7 && formData.dni.length <= 9, "Longitud de DNI razonable.", "El DNI debe tener entre 7 y 9 dígitos.");
-    addResult(results, formData.edad.length > 0, "Edad ingresada.", "Debés ingresar tu edad.");
-    addResult(results, edadOnlyNumbers, "La edad contiene solamente números.", "La edad debe contener solamente números.");
-
     const edad = Number(formData.edad);
-    addResult(results, edadOnlyNumbers && edad >= 12 && edad <= 99, "Edad dentro de un rango razonable.", "La edad debe estar entre 12 y 99.");
+    const validFormat = formData.nombre.length > 0
+        && dniOnlyNumbers
+        && formData.dni.length >= 7
+        && formData.dni.length <= 9
+        && edadOnlyNumbers
+        && edad >= 12
+        && edad <= 99;
+    const alumno = validFormat ? findAlumnoByDni(formData.dni) : null;
+    const studentMatches = Boolean(alumno)
+        && normalizeText(alumno.nombre) === normalizeText(formData.nombre)
+        && Number(alumno.edad) === edad;
 
-    const hasBasicErrors = results.some(result => !result.ok);
-    const alumno = hasBasicErrors ? null : findAlumnoByDni(formData.dni);
-    state.alumnoEncontrado = alumno;
-
-    if (!hasBasicErrors) {
-        addResult(results, Boolean(alumno), "DNI encontrado.", "DNI no encontrado.");
-
-        if (alumno) {
-            const nombreCoincide = normalizeText(alumno.nombre) === normalizeText(formData.nombre);
-            const edadCoincide = Number(alumno.edad) === edad;
-            addResult(results, nombreCoincide, "El nombre coincide con el registro.", "El nombre no coincide con el registro.");
-            addResult(results, edadCoincide, "La edad coincide con el registro.", "La edad no coincide con el registro.");
-        }
-    }
-
-    const allValid = results.every(result => result.ok);
-    addResult(results, allValid, "Datos verificados.", "Los datos no coinciden con el registro.");
+    state.alumnoEncontrado = studentMatches ? alumno : null;
+    addResult(results, validFormat, "Los datos tienen un formato válido.", "Revisá los datos ingresados.");
+    addResult(results, studentMatches, "El alumno está en la base de datos.", "El alumno no está en la base de datos.");
 
     return results;
 }
@@ -801,6 +790,125 @@ function detectBrowser() {
     if (agent.includes("Safari")) return "Safari";
 
     return "Navegador no identificado";
+}
+
+async function getEnvironmentDetails() {
+    const agent = navigator.userAgent;
+    const details = {
+        device: detectDevice(),
+        model: detectModel(agent),
+        os: detectOperatingSystem(agent),
+        browser: detectBrowser(),
+        browserVersion: detectBrowserVersion(agent)
+    };
+
+    if (!navigator.userAgentData?.getHighEntropyValues) {
+        return details;
+    }
+
+    try {
+        const hints = await navigator.userAgentData.getHighEntropyValues([
+            "model",
+            "platformVersion",
+            "fullVersionList"
+        ]);
+
+        if (hints.model) {
+            details.model = hints.model;
+        }
+
+        if (hints.platformVersion) {
+            details.os = formatClientHintOperatingSystem(navigator.userAgentData.platform, hints.platformVersion, details.os);
+        }
+
+        const browserHint = selectBrowserHint(hints.fullVersionList || []);
+        if (browserHint) {
+            details.browser = browserHint.name;
+            details.browserVersion = browserHint.version;
+        }
+    } catch (error) {
+        console.warn("El navegador no compartió los datos detallados del dispositivo.", error);
+    }
+
+    return details;
+}
+
+function detectModel(agent) {
+    const androidMatch = agent.match(/Android\s[\d.]+;\s*([^;)]+?)(?:\s+Build\/[^;)]+)?[;)]/i);
+    return androidMatch && androidMatch[1] !== "K" ? androidMatch[1].trim() : "";
+}
+
+function detectOperatingSystem(agent) {
+    const androidMatch = agent.match(/Android\s([\d.]+)/i);
+    if (androidMatch) return `Android ${androidMatch[1]}`;
+
+    const iosMatch = agent.match(/(?:iPhone|CPU) OS ([\d_]+)/i);
+    if (iosMatch) return `iOS ${iosMatch[1].replaceAll("_", ".")}`;
+
+    const windowsMatch = agent.match(/Windows NT ([\d.]+)/i);
+    if (windowsMatch) {
+        return windowsMatch[1] === "10.0" ? "Windows 10 u 11" : `Windows ${windowsMatch[1]}`;
+    }
+
+    const macMatch = agent.match(/Mac OS X ([\d_]+)/i);
+    if (macMatch) return `macOS ${macMatch[1].replaceAll("_", ".")}`;
+    if (/Linux/i.test(agent)) return "Linux";
+
+    return "sistema no identificado";
+}
+
+function detectBrowserVersion(agent) {
+    const patterns = [
+        /Edg\/([\d.]+)/,
+        /Firefox\/([\d.]+)/,
+        /Chrome\/([\d.]+)/,
+        /Version\/([\d.]+).*Safari/
+    ];
+    const match = patterns.map(pattern => agent.match(pattern)).find(Boolean);
+    return match ? match[1] : "";
+}
+
+function formatClientHintOperatingSystem(platform, platformVersion, fallback) {
+    if (platform === "Windows") {
+        const majorVersion = Number(platformVersion.split(".")[0]);
+        if (majorVersion >= 13) return "Windows 11";
+        if (majorVersion > 0) return "Windows 10";
+        return fallback;
+    }
+
+    if (platform === "Android") return `Android ${platformVersion}`;
+    if (platform === "macOS") return `macOS ${platformVersion}`;
+    if (platform === "Chrome OS") return `ChromeOS ${platformVersion}`;
+    return fallback;
+}
+
+function selectBrowserHint(versionList) {
+    const knownBrowsers = [
+        ["Microsoft Edge", /Microsoft Edge/i],
+        ["Opera", /Opera/i],
+        ["Google Chrome", /Google Chrome/i],
+        ["Chromium", /^Chromium$/i]
+    ];
+
+    for (const [name, pattern] of knownBrowsers) {
+        const match = versionList.find(item => pattern.test(item.brand));
+        if (match) return { name, version: match.version };
+    }
+
+    return null;
+}
+
+function formatDeviceDetails(details) {
+    const model = details.model ? ` Modelo: ${details.model}.` : "";
+    const modelNotice = !details.model && ["iPhone", "iPad"].includes(details.device)
+        ? " El navegador no comparte el modelo exacto."
+        : "";
+    return `¡Estás usando ${formatDeviceGuess(details.device)}!${model} Sistema: ${details.os}.${modelNotice}`;
+}
+
+function formatBrowserDetails(details) {
+    const version = details.browserVersion ? ` ${details.browserVersion}` : "";
+    return `Tu navegador parece ser ${details.browser}${version}.`;
 }
 
 function normalizeText(text) {
