@@ -1,13 +1,14 @@
 const app = document.querySelector("#app");
+const progressCard = document.querySelector("#progress-card");
 const progressText = document.querySelector("#progress-text");
 const progressFill = document.querySelector("#progress-fill");
 const devPanel = document.querySelector("#dev-panel");
-const devToggle = document.querySelector("#dev-toggle");
 const devClose = document.querySelector("#dev-close");
 const devScreenSelect = document.querySelector("#dev-screen-select");
 const devMessage = document.querySelector("#dev-message");
 const finalResultStoragePrefix = "interactividad-password-final-result:";
 let finalTimerInterval = null;
+let developerHoldTimeout = null;
 
 const fallbackAlumnos = [
     {
@@ -1073,9 +1074,7 @@ function initDeveloperTools() {
         <option value="${screen.id}">${screen.label} - ${screen.title}</option>
     `).join("");
 
-    devToggle.addEventListener("click", () => {
-        devPanel.classList.toggle("hidden");
-    });
+    initDeveloperHoldTrigger();
 
     devClose.addEventListener("click", () => {
         devPanel.classList.add("hidden");
@@ -1098,6 +1097,41 @@ function initDeveloperTools() {
     document.querySelector("#dev-complete-password").addEventListener("click", completeDeveloperPassword);
     document.querySelector("#dev-reset-game").addEventListener("click", resetCurrentPlayerGame);
     document.querySelector("#dev-open-readme").addEventListener("click", openReadme);
+}
+
+function initDeveloperHoldTrigger() {
+    const startHold = event => {
+        if (event.pointerType === "mouse" && event.button !== 0) {
+            return;
+        }
+
+        clearDeveloperHold();
+        developerHoldTimeout = window.setTimeout(() => {
+            devPanel.classList.remove("hidden");
+            setDeveloperMessage("Herramientas abiertas.");
+            developerHoldTimeout = null;
+        }, 5000);
+    };
+
+    progressCard.addEventListener("pointerdown", startHold);
+    progressCard.addEventListener("pointerup", clearDeveloperHold);
+    progressCard.addEventListener("pointercancel", clearDeveloperHold);
+    progressCard.addEventListener("pointerleave", clearDeveloperHold);
+    progressCard.addEventListener("lostpointercapture", clearDeveloperHold);
+    progressCard.addEventListener("keydown", event => {
+        if ((event.key === "Enter" || event.key === " ") && !event.repeat) {
+            event.preventDefault();
+            startHold(event);
+        }
+    });
+    progressCard.addEventListener("keyup", clearDeveloperHold);
+}
+
+function clearDeveloperHold() {
+    if (developerHoldTimeout) {
+        window.clearTimeout(developerHoldTimeout);
+        developerHoldTimeout = null;
+    }
 }
 
 function updateDeveloperScreenSelect(screenId) {

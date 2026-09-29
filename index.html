@@ -4,18 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactividad y validación</title>
-    <link rel="stylesheet" href="style.css?v=20260929-16">
+    <link rel="stylesheet" href="style.css?v=20260929-17">
 </head>
 <body>
     <div class="app-shell">
         <header class="topbar">
-            <div class="progress-card" aria-live="polite">
+            <div id="progress-card" class="progress-card" aria-live="polite" role="button" tabindex="0" aria-label="Progreso de las actividades">
                 <span id="progress-text">Inicio</span>
                 <div class="progress-track" aria-hidden="true">
                     <div id="progress-fill" class="progress-fill"></div>
                 </div>
             </div>
-            <button id="dev-toggle" class="dev-toggle" type="button">Herramientas de desarrollador</button>
         </header>
 
         <aside id="dev-panel" class="dev-panel hidden" aria-label="Herramientas de desarrollador">
@@ -42,6 +41,6 @@
         <main id="app" class="screen" tabindex="-1"></main>
     </div>
 
-    <script src="script.js?v=20260929-16"></script>
+    <script src="script.js?v=20260929-17"></script>
 </body>
 </html>
