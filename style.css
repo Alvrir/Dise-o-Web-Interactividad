@@ -226,6 +226,8 @@ input:focus {
     aspect-ratio: 1;
     object-fit: contain;
     filter: drop-shadow(0 16px 18px rgba(21, 32, 43, 0.18));
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000000 12%, #000000 88%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, #000000 12%, #000000 88%, transparent 100%);
 }
 
 .genie-image.is-thinking {
