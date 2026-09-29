@@ -776,11 +776,11 @@ input:focus {
 
 .sponsor-logos img {
     width: 100%;
-    height: 54px;
-    padding: 4px;
+    height: 72px;
+    padding: 0;
     border: 1px solid var(--line);
     border-radius: 6px;
-    object-fit: contain;
+    object-fit: cover;
     background: #ffffff;
 }
 
