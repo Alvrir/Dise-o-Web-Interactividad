@@ -334,7 +334,7 @@ Los dos juegos tienen comportamientos diferentes:
 - en el primer `Password Game`, las tres condiciones están visibles desde el inicio y solo cambia su icono y color entre rojo y verde;
 - en `Password Game - Nivel final` no se muestra ninguna condición con el campo vacío. Al empezar a escribir aparece la primera y las siguientes se revelan progresivamente;
 - una condición revelada nunca vuelve a desaparecer, aunque después deje de cumplirse;
-- las condiciones cumplidas se ordenan arriba y las pendientes quedan debajo.
+- la última condición pendiente queda arriba; las condiciones cumplidas quedan debajo y no desaparecen aunque después se rompa otra regla.
 
 La función que decide qué reglas se muestran es:
 
@@ -362,9 +362,9 @@ El nivel final pide:
 8. el nombre del navegador detectado;
 9. un mes del año;
 10. un número romano;
-11. uno de los textos `Manaos` o `Milkaut`.
+11. uno de los textos `Binco`, `Manaos` o `Milkaut`; alcanza con una sola de esas palabras.
 
-La última regla muestra los logos `assets/logos/1.png` y `assets/logos/3.png`. Cada regla usa `.is-valid` o `.is-invalid` para recibir un fondo verde o rojo suave.
+La última regla muestra los tres logos de `assets/logos/`. Cada regla usa `.is-valid` o `.is-invalid` para recibir un fondo verde o rojo suave.
 
 ## Herramientas de desarrollador internas
 
@@ -662,4 +662,3 @@ Mostrar de forma práctica:
 - reglas dinámicas mediante un Password Game.
 
 Este proyecto todavía es una base inicial. La prioridad es que funcione completo y sea fácil de modificar.
-

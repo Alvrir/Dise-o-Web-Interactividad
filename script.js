@@ -128,9 +128,9 @@ const finalPasswordRules = [
     },
     {
         id: "sponsor",
-        description: "Debe contener uno de nuestros sponsors: Manaos o Milkaut.",
-        logos: ["assets/logos/1.png", "assets/logos/3.png"],
-        validate: password => ["manaos", "milkaut"].some(sponsor => normalizeText(password).includes(sponsor))
+        description: "Debe contener uno de nuestros sponsors: Binco, Manaos o Milkaut.",
+        logos: ["assets/logos/1.png", "assets/logos/2.png", "assets/logos/3.png"],
+        validate: password => ["binco", "manaos", "milkaut"].some(sponsor => normalizeText(password).includes(sponsor))
     }
 ];
 
@@ -620,10 +620,11 @@ function renderPasswordScreen(config) {
 }
 
 function validatePassword(password, rules) {
-    return rules.map(rule => ({
+    return rules.map((rule, order) => ({
         id: rule.id,
         description: rule.description,
         logos: rule.logos || [],
+        order,
         ok: rule.validate(password)
     }));
 }
@@ -651,7 +652,13 @@ function getVisiblePasswordResults(results, config) {
 
     return results
         .slice(0, revealedCount)
-        .sort((first, second) => Number(second.ok) - Number(first.ok));
+        .sort((first, second) => {
+            if (first.ok !== second.ok) {
+                return Number(first.ok) - Number(second.ok);
+            }
+
+            return first.ok ? first.order - second.order : second.order - first.order;
+        });
 }
 
 function renderSponsorLogos(logos) {
@@ -1027,4 +1034,3 @@ function normalizeText(text) {
         .trim()
         .toLowerCase();
 }
-
