@@ -385,12 +385,12 @@ La pantalla `¿Qué sabe la página sobre vos?` intenta consultar la batería me
 navigator.getBattery()
 ```
 
-La tarjeta de batería puede mostrar:
+Durante la adivinanza, el mensaje del genio puede mostrar:
 
 - porcentaje aproximado;
 - si el dispositivo está cargando;
-- `No disponible en este navegador` cuando la API no existe;
-- `Información no permitida` cuando el navegador bloquea la consulta.
+- que la información no está disponible cuando la API no existe;
+- que el navegador mantiene el dato en secreto cuando bloquea la consulta.
 
 La función responsable es:
 
@@ -413,8 +413,10 @@ assets/genio/celu.png
 Estados del personaje:
 
 - `idle.png`: pose inicial y explicación final;
-- `pensando.png`: se muestra durante 1,6 segundos antes de cada respuesta;
+- `pensando.png`: se muestra durante 2 segundos antes de cada respuesta;
 - `celu.png`: acompaña la respuesta revelada.
+
+Después de mostrar cada respuesta, el botón `OTRA PISTA` permanece bloqueado durante 1 segundo adicional para dar tiempo a leerla.
 
 La clase `.genie-image` aplica una máscara degradada en CSS para que los bordes superior e inferior de las tres imágenes se desvanezcan suavemente hasta ser transparentes. Los archivos PNG originales no se modifican.
 
@@ -422,15 +424,14 @@ El genio revela por etapas:
 
 1. tipo de dispositivo;
 2. navegador;
-3. nivel y estado de la batería, cuando están disponibles;
-4. idioma, User-Agent y tip de `F12` al mostrar el truco.
+3. nivel y estado de la batería, cuando están disponibles.
 
-Al final también aparece un recuadro naranja con un dato sobre privacidad. Explica que navegadores como Brave incluyen defensas contra el `fingerprinting`, por lo que pueden bloquear rastreadores y limitar o modificar algunos datos utilizados para intentar reconocer un dispositivo.
+Las respuestas aparecen solamente en el diálogo del personaje y no generan tarjetas debajo. Al pulsar `MOSTRAR EL TRUCO`, aparecen el User-Agent, el botón para continuar y un único recuadro breve que combina el tip de `F12` con el dato sobre las protecciones de privacidad de navegadores como Brave.
 
-El estilo de ese recuadro está en:
+El estilo del recuadro final está en:
 
 ```css
-.privacy-note
+.tip-box
 ```
 
 Las funciones relacionadas son:
