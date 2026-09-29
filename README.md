@@ -329,14 +329,17 @@ Ejemplo:
 
 ## Cómo aparecen las reglas de contraseña
 
-Las condiciones aparecen de a una.
+Los dos juegos tienen comportamientos diferentes:
 
-Primero se muestra la primera regla. Cuando se cumple, aparece la siguiente. Cuando esa también se cumple, aparece otra, y así hasta terminar.
+- en el primer `Password Game`, las tres condiciones están visibles desde el inicio y solo cambia su icono y color entre rojo y verde;
+- en `Password Game - Nivel final` no se muestra ninguna condición con el campo vacío. Al empezar a escribir aparece la primera y las siguientes se revelan progresivamente;
+- una condición revelada nunca vuelve a desaparecer, aunque después deje de cumplirse;
+- las condiciones cumplidas se ordenan arriba y las pendientes quedan debajo.
 
 La función que decide qué reglas se muestran es:
 
 ```javascript
-getVisiblePasswordResults(results)
+getVisiblePasswordResults(results, config)
 ```
 
 La función que valida todas las reglas es:
@@ -346,6 +349,22 @@ validatePassword(password, rules)
 ```
 
 El botón de continuar aparece recién cuando todas las reglas están cumplidas.
+
+El nivel final pide:
+
+1. mínimo 5 caracteres;
+2. una mayúscula;
+3. una minúscula;
+4. un número;
+5. un símbolo;
+6. que la suma de todos los dígitos sea 15;
+7. el año actual;
+8. el nombre del navegador detectado;
+9. un mes del año;
+10. un número romano;
+11. uno de los textos `Manaos` o `Milkaut`.
+
+La última regla muestra los logos `assets/logos/1.png` y `assets/logos/3.png`. Cada regla usa `.is-valid` o `.is-invalid` para recibir un fondo verde o rojo suave.
 
 ## Herramientas de desarrollador internas
 
@@ -513,7 +532,8 @@ Partes importantes:
 - `.progress-card`: barra de progreso;
 - `.student-layout`: formulario y verificaciones en dos columnas;
 - `.form-grid`: campos del formulario;
-- `.rule-item`: reglas del Password Game;
+- `.rule-item`: reglas del Password Game y sus estados rojo/verde;
+- `.sponsor-logos`: fila de imágenes dentro de la regla de sponsors;
 - `.dev-panel`: herramientas de desarrollador;
 - `.tip-box`: tip de F12;
 - `@media (max-width: 820px)`: comportamiento responsive en celular.
@@ -610,7 +630,7 @@ Clave123
 Contraseña válida para el juego final:
 
 ```text
-Clave1234!
+Se genera automáticamente desde las herramientas de desarrollador porque incluye el año y el navegador actuales.
 ```
 
 ## Tecnologías usadas
