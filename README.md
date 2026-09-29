@@ -334,7 +334,11 @@ Los dos juegos tienen comportamientos diferentes:
 - en el primer `Password Game`, las tres condiciones están visibles desde el inicio y solo cambia su icono y color entre rojo y verde;
 - en `Password Game - Nivel final` no se muestra ninguna condición con el campo vacío. Al empezar a escribir aparece la primera y las siguientes se revelan progresivamente;
 - una condición revelada nunca vuelve a desaparecer, aunque después deje de cumplirse;
-- la última condición pendiente queda arriba; las condiciones cumplidas quedan debajo y no desaparecen aunque después se rompa otra regla.
+- la última condición pendiente queda arriba; las condiciones cumplidas quedan debajo en el orden en que se cumplieron y no desaparecen aunque después se rompa otra regla.
+
+Las reglas nuevas se revelan con un fade corto y, al cambiar de grupo, se deslizan a su nueva posición. La animación usa solo `opacity` y `transform` para mantenerse liviana; se desactiva cuando el sistema pide reducir movimiento.
+
+En el nivel final, el contenedor del botón `CONTINUAR` se oculta por completo hasta que todas las reglas se cumplen. Esto evita que en celular deje un espacio vacío entre el campo de contraseña y las condiciones.
 
 La función que decide qué reglas se muestran es:
 
@@ -534,6 +538,7 @@ Partes importantes:
 - `.form-grid`: campos del formulario;
 - `.rule-item`: reglas del Password Game y sus estados rojo/verde;
 - `.sponsor-logos`: fila de imágenes dentro de la regla de sponsors;
+- `.password-actions-end`: botón de continuar alineado a la derecha en el nivel final de escritorio;
 - `.dev-panel`: herramientas de desarrollador;
 - `.tip-box`: tip de F12;
 - `@media (max-width: 820px)`: comportamiento responsive en celular.

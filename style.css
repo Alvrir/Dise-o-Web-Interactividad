@@ -321,8 +321,13 @@ input:focus {
 
 @media (prefers-reduced-motion: reduce) {
     .screen.is-entering > section,
-    .genie-image.is-thinking {
+    .genie-image.is-thinking,
+    .rule-item.is-entering {
         animation: none;
+    }
+
+    .rule-item {
+        transition: none;
     }
 }
 
@@ -506,6 +511,7 @@ input:focus {
     grid-template-columns: minmax(0, 0.8fr) minmax(280px, 1fr);
     gap: 22px;
     align-items: start;
+    align-content: start;
 }
 
 .rule-list {
@@ -514,6 +520,22 @@ input:focus {
 
 .rule-item {
     transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.rule-item.is-entering {
+    animation: ruleReveal 220ms ease-out both;
+}
+
+@keyframes ruleReveal {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .rule-item.is-valid {
@@ -547,6 +569,12 @@ input:focus {
     border-radius: 6px;
     object-fit: contain;
     background: #ffffff;
+}
+
+@media (min-width: 821px) {
+    .password-actions-end {
+        justify-content: flex-end;
+    }
 }
 
 .fake-final {
@@ -676,6 +704,11 @@ kbd {
     .screen {
         min-height: 0;
         padding: 16px;
+    }
+
+    .password-layout {
+        gap: 16px;
+        align-content: start;
     }
 
     .genie-stage {
