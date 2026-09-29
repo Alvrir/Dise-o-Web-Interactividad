@@ -523,6 +523,7 @@ input:focus {
 .password-input-row input {
     min-width: 0;
     flex: 1 1 auto;
+    scroll-margin-top: 16px;
 }
 
 .live-timer {
