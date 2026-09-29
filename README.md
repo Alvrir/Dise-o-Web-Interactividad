@@ -109,6 +109,7 @@ Contiene:
 - lista de pantallas;
 - navegación entre pantallas;
 - detección básica del navegador;
+- consulta opcional del nivel y estado de carga de la batería;
 - eventos interactivos;
 - formulario;
 - validaciones;
@@ -372,6 +373,29 @@ fillDeveloperStudent()
 completeDeveloperPassword()
 moveDeveloperScreen(direction)
 ```
+
+## Battery Status API
+
+La pantalla `¿Qué sabe la página sobre vos?` intenta consultar la batería mediante:
+
+```javascript
+navigator.getBattery()
+```
+
+La tarjeta de batería puede mostrar:
+
+- porcentaje aproximado;
+- si el dispositivo está cargando;
+- `No disponible en este navegador` cuando la API no existe;
+- `Información no permitida` cuando el navegador bloquea la consulta.
+
+La función responsable es:
+
+```javascript
+loadBatteryInfo()
+```
+
+Esta API tiene compatibilidad limitada y requiere un contexto seguro en los navegadores modernos. La versión publicada en GitHub Pages usa HTTPS, pero algunos navegadores, especialmente varios navegadores de dispositivos Apple, pueden no compartir esta información.
 
 ## Tip de F12
 
