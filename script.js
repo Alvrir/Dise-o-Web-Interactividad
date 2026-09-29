@@ -262,6 +262,7 @@ function renderStart() {
             <p class="lead">Descubrí cómo una página web puede detectar tus acciones, procesar información y responder.</p>
             <div class="hero-actions">
                 <button data-next="browser">COMENZAR</button>
+                <button data-next="finalPassword" class="secondary-button">IR AL PASSWORD GAME FINAL</button>
             </div>
         </section>
     `;

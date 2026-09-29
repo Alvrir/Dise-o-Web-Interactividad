@@ -161,6 +161,8 @@ El recorrido actual es:
 7. Password Game final
 8. Cierre
 
+En Inicio hay un acceso directo secundario a `Password Game final`, útil para entrar a ese desafío sin recorrer las actividades anteriores.
+
 Las pantallas están definidas en `script.js`, en el arreglo:
 
 ```javascript
