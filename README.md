@@ -339,7 +339,7 @@ Los dos juegos tienen comportamientos diferentes:
 - una condición revelada nunca vuelve a desaparecer, aunque después deje de cumplirse;
 - la última condición pendiente queda arriba; las condiciones cumplidas quedan debajo con la más recientemente cumplida primero y no desaparecen aunque después se rompa otra regla.
 
-Las reglas nuevas se revelan con un fade de `520 ms` y, al cambiar de grupo, se deslizan a su nueva posición durante `520 ms`. La animación usa solo `opacity` y `transform` para mantenerse liviana; se desactiva cuando el sistema pide reducir movimiento.
+Las reglas nuevas se revelan con un fade de `700 ms` y, al cambiar de grupo, se deslizan a su nueva posición durante `700 ms`. La animación usa solo `opacity` y `transform` para mantenerse liviana; se desactiva cuando el sistema pide reducir movimiento.
 
 En el nivel final, el contenedor del botón `CONTINUAR` se oculta por completo hasta que todas las reglas se cumplen. Esto evita que en celular deje un espacio vacío entre el campo de contraseña y las condiciones.
 
