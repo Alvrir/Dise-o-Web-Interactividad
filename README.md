@@ -414,6 +414,8 @@ Estados del personaje:
 - `pensando.png`: se muestra durante 1,6 segundos antes de cada respuesta;
 - `celu.png`: acompaña la respuesta revelada.
 
+La clase `.genie-image` aplica una máscara degradada en CSS para que los bordes superior e inferior de las tres imágenes se desvanezcan suavemente hasta ser transparentes. Los archivos PNG originales no se modifican.
+
 El genio revela por etapas:
 
 1. tipo de dispositivo;
