@@ -654,11 +654,37 @@ function renderPasswordScreen(config) {
     };
 
     input.addEventListener("input", renderRules);
+    if (config.stateKey === "finalPassword") {
+        input.addEventListener("focus", () => scrollFinalPasswordIntoView(input));
+    }
     renderRules();
     if (config.stateKey === "finalPassword" && state.finalPasswordStartedAt) {
         startFinalTimer(liveTimer);
     }
     bindNextButtons();
+}
+
+function scrollFinalPasswordIntoView(input) {
+    if (!window.matchMedia("(max-width: 820px)").matches) {
+        return;
+    }
+
+    // Espera a que el teclado virtual reduzca el viewport antes de calcular el desplazamiento.
+    window.setTimeout(() => {
+        if (document.activeElement !== input) {
+            return;
+        }
+
+        const inputTop = input.getBoundingClientRect().top;
+        const targetTop = 16;
+
+        if (inputTop > targetTop) {
+            window.scrollBy({
+                top: inputTop - targetTop,
+                behavior: "smooth"
+            });
+        }
+    }, 300);
 }
 
 function completeFinalPassword(characterCount) {
