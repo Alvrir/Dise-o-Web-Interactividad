@@ -106,7 +106,7 @@ input:focus {
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
-    padding: 16px;
+    padding: 16px 24px 24px;
 }
 
 .topbar {
@@ -249,21 +249,28 @@ input:focus {
     flex: 0 0 auto;
 }
 
+.genie-screen:not(.is-complete) .genie-stage {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
 @media (min-width: 821px) {
     .genie-screen:not(.is-complete) .genie-stage {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: clamp(36px, 6vw, 96px);
-        padding: 0 clamp(20px, 4vw, 72px) 28px;
+        width: min(1040px, 100%);
+        align-self: center;
+        grid-template-columns: repeat(2, minmax(0, 480px));
+        justify-content: center;
+        gap: clamp(32px, 4vw, 64px);
     }
 
     .genie-screen:not(.is-complete) .genie-image {
-        width: min(100%, 520px);
+        width: min(100%, 480px);
         justify-self: end;
     }
 
     .genie-screen:not(.is-complete) .genie-dialog {
         width: 100%;
-        min-height: min(58vh, 500px);
+        min-height: min(54vh, 440px);
         display: flex;
         flex-direction: column;
         justify-content: center;
