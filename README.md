@@ -110,6 +110,7 @@ Contiene:
 - navegación entre pantallas;
 - detección básica del navegador;
 - consulta opcional del nivel y estado de carga de la batería;
+- secuencia interactiva del genio para revelar los datos;
 - eventos interactivos;
 - formulario;
 - validaciones;
@@ -396,6 +397,37 @@ loadBatteryInfo()
 ```
 
 Esta API tiene compatibilidad limitada y requiere un contexto seguro en los navegadores modernos. La versión publicada en GitHub Pages usa HTTPS, pero algunos navegadores, especialmente varios navegadores de dispositivos Apple, pueden no compartir esta información.
+
+## Genio del navegador
+
+La pantalla `¿Qué sabe la página sobre vos?` utiliza tres imágenes PNG transparentes:
+
+```text
+assets/genio/idle.png
+assets/genio/pensando.png
+assets/genio/celu.png
+```
+
+Estados del personaje:
+
+- `idle.png`: pose inicial y explicación final;
+- `pensando.png`: se muestra durante 1,6 segundos antes de cada respuesta;
+- `celu.png`: acompaña la respuesta revelada.
+
+El genio revela por etapas:
+
+1. tipo de dispositivo;
+2. navegador;
+3. nivel y estado de la batería, cuando están disponibles;
+4. idioma, User-Agent y tip de `F12` al mostrar el truco.
+
+Las funciones relacionadas son:
+
+```javascript
+initGenieExperience()
+formatDeviceGuess()
+formatBatteryGuess()
+```
 
 ## Tip de F12
 

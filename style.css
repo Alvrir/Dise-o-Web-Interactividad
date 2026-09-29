@@ -212,6 +212,65 @@ input:focus {
     line-height: 1.55;
 }
 
+.genie-stage {
+    display: grid;
+    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+    gap: 28px;
+    align-items: center;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--line);
+}
+
+.genie-image {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: contain;
+    filter: drop-shadow(0 16px 18px rgba(21, 32, 43, 0.18));
+}
+
+.genie-image.is-thinking {
+    animation: genieThinking 800ms ease-in-out infinite alternate;
+}
+
+.genie-dialog {
+    padding: 20px;
+    border-left: 5px solid var(--accent);
+    background: var(--surface-soft);
+}
+
+.genie-kicker {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--accent-dark);
+    font-size: 0.82rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+#genie-message {
+    min-height: 3em;
+    margin: 0 0 18px;
+    font-size: clamp(1.2rem, 2.4vw, 1.75rem);
+    line-height: 1.35;
+    font-weight: 700;
+}
+
+@keyframes genieThinking {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-8px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .genie-image.is-thinking {
+        animation: none;
+    }
+}
+
 .hero-title {
     max-width: 840px;
     margin: 0 0 16px;
@@ -498,6 +557,7 @@ kbd {
     .topbar,
     .screen-grid,
     .password-layout,
+    .genie-stage,
     .dev-grid {
         grid-template-columns: 1fr;
         display: grid;
@@ -519,6 +579,15 @@ kbd {
     .screen {
         min-height: calc(100vh - 180px);
         padding: 18px;
+    }
+
+    .genie-stage {
+        gap: 12px;
+    }
+
+    .genie-image {
+        width: min(260px, 78vw);
+        margin: 0 auto;
     }
 
     .info-grid,
