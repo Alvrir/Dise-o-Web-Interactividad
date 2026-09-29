@@ -8,6 +8,7 @@ const devScreenSelect = document.querySelector("#dev-screen-select");
 const devMessage = document.querySelector("#dev-message");
 const finalResultStoragePrefix = "interactividad-password-final-result:";
 let finalTimerFrame = null;
+let finalRestartCooldownInterval = null;
 let developerHoldTimeout = null;
 
 const fallbackAlumnos = [
@@ -233,6 +234,7 @@ function showScreen(screenId) {
     }
 
     stopFinalTimer();
+    stopFinalRestartCooldown();
     state.currentScreen = screenId;
     updateProgress(screen);
     updateDeveloperScreenSelect(screenId);
@@ -757,12 +759,17 @@ function renderCompletedFinalPassword(result) {
             </div>
             <div class="actions password-actions-end">
                 <button id="show-final-result" type="button">MOSTRAR RESULTADO</button>
-                <button data-next="closing" type="button">CONTINUAR →</button>
+                <div class="result-next-actions">
+                    <button data-next="closing" type="button">CONTINUAR →</button>
+                    <button id="restart-final-game" class="secondary-button" type="button" disabled>REINICIAR PARTIDA (20s)</button>
+                </div>
             </div>
         </section>
     `;
 
     document.querySelector("#show-final-result").addEventListener("click", () => showFinalResultModal(result));
+    document.querySelector("#restart-final-game").addEventListener("click", resetCurrentPlayerGame);
+    startFinalRestartCooldown(result);
     bindNextButtons();
 }
 
@@ -831,6 +838,7 @@ function resetFinalAttempt() {
 }
 
 function resetCurrentPlayerGame() {
+    stopFinalRestartCooldown();
     try {
         localStorage.removeItem(getFinalResultKey());
     } catch (error) {
@@ -840,7 +848,42 @@ function resetCurrentPlayerGame() {
     resetFinalAttempt();
     document.querySelector("#final-result-modal")?.remove();
     showScreen("finalPassword");
-    setDeveloperMessage("Partida reiniciada para el jugador actual.");
+}
+
+function startFinalRestartCooldown(result) {
+    const restartButton = document.querySelector("#restart-final-game");
+
+    if (!restartButton) {
+        return;
+    }
+
+    const updateRestartButton = () => {
+        const completedAt = new Date(result.completedAt).getTime();
+        const remainingMs = Number.isFinite(completedAt)
+            ? Math.max(0, 20000 - (Date.now() - completedAt))
+            : 0;
+
+        if (remainingMs === 0) {
+            restartButton.disabled = false;
+            restartButton.textContent = "REINICIAR PARTIDA";
+            stopFinalRestartCooldown();
+            return;
+        }
+
+        restartButton.disabled = true;
+        restartButton.textContent = `REINICIAR PARTIDA (${Math.ceil(remainingMs / 1000)}s)`;
+    };
+
+    stopFinalRestartCooldown();
+    updateRestartButton();
+    finalRestartCooldownInterval = window.setInterval(updateRestartButton, 250);
+}
+
+function stopFinalRestartCooldown() {
+    if (finalRestartCooldownInterval) {
+        window.clearInterval(finalRestartCooldownInterval);
+        finalRestartCooldownInterval = null;
+    }
 }
 
 function formatDuration(durationMs) {
@@ -1178,7 +1221,6 @@ function initDeveloperTools() {
 
     document.querySelector("#dev-fill-student").addEventListener("click", fillDeveloperStudent);
     document.querySelector("#dev-complete-password").addEventListener("click", completeDeveloperPassword);
-    document.querySelector("#dev-reset-game").addEventListener("click", resetCurrentPlayerGame);
     document.querySelector("#dev-open-readme").addEventListener("click", openReadme);
 }
 

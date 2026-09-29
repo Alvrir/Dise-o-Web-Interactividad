@@ -150,7 +150,7 @@ input:focus {
 
 .dev-grid {
     display: grid;
-    grid-template-columns: minmax(220px, 1fr) repeat(7, auto);
+    grid-template-columns: minmax(220px, 1fr) repeat(6, auto);
     gap: 10px;
     align-items: end;
 }
@@ -573,6 +573,11 @@ input:focus {
 .result-summary-password {
     overflow-wrap: anywhere;
     font-family: Consolas, Monaco, monospace;
+}
+
+.result-next-actions {
+    display: grid;
+    gap: 12px;
 }
 
 .result-modal {

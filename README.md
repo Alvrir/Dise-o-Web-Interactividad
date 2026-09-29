@@ -363,9 +363,9 @@ El botón de continuar aparece recién cuando todas las reglas están cumplidas.
 
 Al escribir la primera letra en el Password Game final comienza un temporizador local visible en la pantalla, con formato `minutos:segundos.milésimas`. Cuando todas las reglas quedan cumplidas al mismo tiempo aparece una tarjeta con el nombre y apellido del formulario, el tiempo total con la misma precisión y la cantidad de letras.
 
-La tarjeta se guarda en el navegador del jugador usando su DNI como clave local. Por eso, desde ese dispositivo y con ese DNI no se puede volver a jugar hasta usar `Reiniciar partida` en las herramientas de desarrollador. El resultado incluye la contraseña final, el tiempo y la cantidad de letras.
+La tarjeta se guarda en el navegador del jugador usando su DNI como clave local. El resultado incluye la contraseña final, el tiempo y la cantidad de letras.
 
-La tarjeta tiene una `×` para cerrarla, un botón `MOSTRAR RESULTADO` para abrirla otra vez y `GUARDAR IMAGEN`, que descarga una imagen PNG con la contraseña, el tiempo y la cantidad de letras para compartirla o capturarla.
+La tarjeta tiene una `×` para cerrarla, un botón `MOSTRAR RESULTADO` para abrirla otra vez y `GUARDAR IMAGEN`, que descarga una imagen PNG con la contraseña, el tiempo y la cantidad de letras para compartirla o capturarla. En la pantalla posterior al resultado aparece `REINICIAR PARTIDA` debajo de `CONTINUAR`; se habilita 20 segundos después de terminar para permitir otra partida.
 
 El nivel final pide:
 
@@ -406,7 +406,6 @@ Desde ese panel se puede:
 - ir a la pantalla siguiente;
 - completar automáticamente el alumno de prueba;
 - completar automáticamente una contraseña válida;
-- reiniciar la partida del jugador actual, incluido su resultado local;
 - abrir el `README.md` en otra pestaña.
 
 Esto es solo para desarrollo y exposición. Si se quiere ocultar más adelante, se puede borrar o comentar el panel en `index.html` y las funciones de herramientas en `script.js`.
@@ -417,7 +416,6 @@ Funciones relacionadas:
 initDeveloperTools()
 fillDeveloperStudent()
 completeDeveloperPassword()
-resetCurrentPlayerGame()
 moveDeveloperScreen(direction)
 ```
 
