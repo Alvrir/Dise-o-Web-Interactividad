@@ -570,6 +570,11 @@ input:focus {
     font-size: 1.5rem;
 }
 
+.result-summary-password {
+    overflow-wrap: anywhere;
+    font-family: Consolas, Monaco, monospace;
+}
+
 .result-modal {
     position: fixed;
     z-index: 20;
@@ -628,6 +633,27 @@ input:focus {
     overflow-wrap: anywhere;
     font-size: clamp(2rem, 7vw, 3.6rem);
     line-height: 1.05;
+}
+
+.result-password {
+    display: grid;
+    gap: 7px;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(26, 127, 69, 0.28);
+}
+
+.result-password span {
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 900;
+}
+
+.result-password strong {
+    overflow-wrap: anywhere;
+    font-family: Consolas, Monaco, monospace;
+    font-size: clamp(1rem, 4vw, 1.35rem);
+    line-height: 1.35;
 }
 
 .result-metrics {
