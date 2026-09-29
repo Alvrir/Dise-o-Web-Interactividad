@@ -205,40 +205,48 @@ function renderBrowserInfo() {
 
     app.innerHTML = `
         <section>
-            <p class="lead">JavaScript puede leer información del entorno del navegador. No es una identificación segura: estos datos pueden variar o falsificarse.</p>
+            <div class="genie-stage">
+                <img id="genie-image" class="genie-image" src="assets/genio/idle.png" alt="Genio esperando para comenzar">
+                <div class="genie-dialog">
+                    <span class="genie-kicker">El genio del navegador</span>
+                    <p id="genie-message">¡Hola! Puedo adivinar algunas cosas sobre el dispositivo desde el que me visitás.</p>
+                    <button id="genie-action" type="button">EMPEZAR ADIVINACIÓN</button>
+                </div>
+            </div>
             <div class="info-grid">
-                <article class="info-card">
+                <article class="info-card hidden" data-genie-clue="device">
                     <strong>Tu dispositivo</strong>
                     <code>${device}</code>
                 </article>
-                <article class="info-card">
+                <article class="info-card hidden" data-genie-clue="browser">
                     <strong>Tu navegador</strong>
                     <code>${browser}</code>
                 </article>
-                <article class="info-card">
+                <article class="info-card hidden" data-genie-clue="language">
                     <strong>Idioma</strong>
                     <code>${navigator.language || "No disponible"}</code>
                 </article>
-                <article class="info-card">
+                <article class="info-card hidden" data-genie-clue="battery">
                     <strong>Batería</strong>
                     <code id="battery-status" aria-live="polite">Consultando...</code>
                 </article>
             </div>
-            <div class="info-card callout">
+            <div class="info-card callout hidden" data-genie-extra>
                 <strong>User-Agent</strong>
                 <code class="user-agent">${navigator.userAgent}</code>
             </div>
-            <div class="tip-box">
+            <div class="tip-box hidden" data-genie-extra>
                 <strong>Tip</strong>
                 <p>Apretá <kbd>F12</kbd> en tu navegador para abrir las herramientas de desarrollador. Desde ahí se puede inspeccionar cómo trabaja una página y, en algunos casos, modificar o simular información del navegador. Por eso estos datos sirven para experimentar, pero no son una identificación confiable.</p>
             </div>
-            <div class="actions">
+            <div class="actions hidden" data-genie-extra>
                 <button data-next="events">CONTINUAR →</button>
             </div>
         </section>
     `;
 
     loadBatteryInfo();
+    initGenieExperience({ device, browser });
     bindNextButtons();
 }
 
@@ -272,6 +280,100 @@ async function loadBatteryInfo() {
 
         console.warn("No se pudo consultar la Battery Status API.", error);
     }
+}
+
+function initGenieExperience({ device, browser }) {
+    const image = document.querySelector("#genie-image");
+    const message = document.querySelector("#genie-message");
+    const action = document.querySelector("#genie-action");
+    let currentStep = 0;
+
+    ["pensando.png", "celu.png"].forEach(fileName => {
+        const preload = new Image();
+        preload.src = `assets/genio/${fileName}`;
+    });
+
+    const steps = [
+        {
+            clue: "device",
+            thinking: "Voy a adivinar desde dónde me estás viendo...",
+            answer: `¡Estás usando ${formatDeviceGuess(device)}!`
+        },
+        {
+            clue: "browser",
+            thinking: "Ahora voy a descubrir qué navegador elegiste...",
+            answer: `Tu navegador parece ser ${browser}.`
+        },
+        {
+            clue: "battery",
+            thinking: "Me falta una pista. Voy a intentar sentir la energía de tu batería...",
+            answer: () => formatBatteryGuess()
+        }
+    ];
+
+    action.addEventListener("click", async () => {
+        if (currentStep >= steps.length) {
+            finishGenieExperience();
+            return;
+        }
+
+        const step = steps[currentStep];
+        action.disabled = true;
+        setGeniePose("pensando", "Genio pensando la respuesta");
+        message.textContent = step.thinking;
+
+        await wait(1600);
+
+        if (state.currentScreen !== "browser" || !document.querySelector("#genie-image")) {
+            return;
+        }
+
+        document.querySelector(`[data-genie-clue="${step.clue}"]`).classList.remove("hidden");
+        setGeniePose("celu", "Genio mostrando la respuesta");
+        message.textContent = typeof step.answer === "function" ? step.answer() : step.answer;
+        currentStep += 1;
+        action.disabled = false;
+        action.textContent = currentStep < steps.length ? "ADIVINAR OTRA COSA" : "MOSTRAR EL TRUCO";
+    });
+
+    function setGeniePose(pose, altText) {
+        image.src = `assets/genio/${pose}.png`;
+        image.alt = altText;
+        image.classList.toggle("is-thinking", pose === "pensando");
+    }
+
+    function finishGenieExperience() {
+        setGeniePose("idle", "Genio explicando cómo hizo las adivinanzas");
+        message.textContent = "No fue magia: JavaScript leyó información que comparte tu navegador. Estos datos pueden ser incompletos o modificarse.";
+        document.querySelector('[data-genie-clue="language"]').classList.remove("hidden");
+        document.querySelectorAll("[data-genie-extra]").forEach(element => element.classList.remove("hidden"));
+        action.classList.add("hidden");
+    }
+}
+
+function formatDeviceGuess(device) {
+    const descriptions = {
+        Android: "un dispositivo Android",
+        iPhone: "un iPhone",
+        iPad: "un iPad",
+        Computadora: "una computadora"
+    };
+
+    return descriptions[device] || "un dispositivo que no pude reconocer del todo";
+}
+
+function formatBatteryGuess() {
+    const batteryStatus = document.querySelector("#battery-status")?.textContent || "No disponible";
+
+    if (batteryStatus.includes("No disponible") || batteryStatus.includes("no permitida")) {
+        return "Tu navegador mantiene la batería en secreto. ¡Esa pista no está disponible!";
+    }
+
+    return `Tu batería indica ${batteryStatus.toLowerCase()}.`;
+}
+
+function wait(milliseconds) {
+    return new Promise(resolve => window.setTimeout(resolve, milliseconds));
 }
 
 function renderEvents() {
@@ -694,11 +796,13 @@ function openReadme() {
 }
 
 function detectDevice() {
-    if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        return "Celular o tablet";
-    }
+    const agent = navigator.userAgent;
 
-    return "PC";
+    if (/Android/i.test(agent)) return "Android";
+    if (/iPhone|iPod/i.test(agent)) return "iPhone";
+    if (/iPad/i.test(agent)) return "iPad";
+
+    return "Computadora";
 }
 
 function detectBrowser() {
