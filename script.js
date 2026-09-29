@@ -109,7 +109,7 @@ const finalPasswordRules = [
     },
     {
         id: "digitSum",
-        description: "Los números de la contraseña por separado deben sumar 15.",
+        description: "Los números aislados deben sumar 15.",
         validate: password => sumPasswordDigits(password) === 15
     },
     {
@@ -1005,7 +1005,9 @@ function renderSponsorLogos(logos) {
 }
 
 function sumPasswordDigits(password) {
-    return (password.match(/\d/g) || []).reduce((total, digit) => total + Number(digit), 0);
+    return (password.match(/\d+/g) || [])
+        .filter(digits => digits.length === 1)
+        .reduce((total, digit) => total + Number(digit), 0);
 }
 
 function containsMonth(password) {
@@ -1218,17 +1220,16 @@ function completeDeveloperPassword() {
 }
 
 function buildValidFinalPassword() {
-    const yearDigitSum = sumPasswordDigits(passwordContext.currentYear);
-    let remainingSum = Math.max(0, 15 - yearDigitSum);
-    let balancingDigits = "";
+    let remainingSum = 15;
+    const balancingDigits = [];
 
     while (remainingSum > 9) {
-        balancingDigits += "9";
+        balancingDigits.push("9");
         remainingSum -= 9;
     }
 
-    balancingDigits += String(remainingSum);
-    return `Ab!${passwordContext.currentYear}mayoVManaos${balancingDigits}${passwordContext.browserName}`;
+    balancingDigits.push(String(remainingSum));
+    return `Ab!${passwordContext.currentYear}mayoVManaos${balancingDigits.join("x")}${passwordContext.browserName}`;
 }
 
 function setDeveloperMessage(message) {

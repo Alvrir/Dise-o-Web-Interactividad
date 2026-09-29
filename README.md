@@ -374,7 +374,7 @@ El nivel final pide:
 3. una minúscula;
 4. un número;
 5. un símbolo;
-6. que la suma de todos los dígitos sea 15;
+6. que los números aislados sumen 15: los dígitos pegados se ignoran; por ejemplo, `2a4` cuenta `2 + 4`, mientras que `222a3b66c` cuenta solamente `3`;
 7. el año actual;
 8. el nombre del navegador detectado;
 9. un mes del año;
