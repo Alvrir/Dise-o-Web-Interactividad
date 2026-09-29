@@ -199,6 +199,20 @@ input:focus {
     width: 100%;
 }
 
+.screen.is-entering > section {
+    animation: screenFadeIn 320ms ease-out both;
+}
+
+@keyframes screenFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
 .screen-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(260px, 0.78fr);
@@ -233,6 +247,32 @@ input:focus {
 
 .genie-screen.is-complete .genie-stage {
     flex: 0 0 auto;
+}
+
+@media (min-width: 821px) {
+    .genie-screen:not(.is-complete) .genie-stage {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: clamp(36px, 6vw, 96px);
+        padding: 0 clamp(20px, 4vw, 72px) 28px;
+    }
+
+    .genie-screen:not(.is-complete) .genie-image {
+        width: min(100%, 520px);
+        justify-self: end;
+    }
+
+    .genie-screen:not(.is-complete) .genie-dialog {
+        width: 100%;
+        min-height: min(58vh, 500px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: clamp(28px, 4vw, 56px);
+    }
+
+    .genie-screen:not(.is-complete) #genie-message {
+        font-size: clamp(1.6rem, 2.6vw, 2.5rem);
+    }
 }
 
 .genie-image {
@@ -282,6 +322,7 @@ input:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .screen.is-entering > section,
     .genie-image.is-thinking {
         animation: none;
     }

@@ -173,6 +173,9 @@ function showScreen(screenId) {
     updateDeveloperScreenSelect(screenId);
     app.innerHTML = "";
     screen.render();
+    app.classList.remove("is-entering");
+    void app.offsetWidth;
+    app.classList.add("is-entering");
     app.focus({ preventScroll: true });
 }
 
