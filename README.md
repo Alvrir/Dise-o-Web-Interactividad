@@ -555,9 +555,11 @@ Los textos visibles usan Cinzel y sus títulos principales usan Cinzel Decorativ
 
 En móvil, el título inicial separa “Interactividad” de “Y validación” en líneas completas y usa un tamaño fijo más compacto. Esto evita que el navegador corte letras individuales en pantallas angostas. El fondo personalizado usa una altura visual estable (`100svh`) para conservar su encuadre al desplazarse, sin los saltos provocados por la barra dinámica del navegador móvil.
 
-En la actividad de eventos para móvil, el recuadro `EVENTO DETECTADO` se mueve debajo de la explicación y queda fijo mientras se recorren las tarjetas. Es más compacto, pero conserva el contador, el último evento y su descripción.
+En la actividad de eventos para móvil, el recuadro `EVENTO DETECTADO` se mueve debajo de la explicación y queda fijo mientras se recorren las tarjetas. Es más compacto, pero conserva el contador, el último evento y su descripción. En la verificación de alumno y el primer Password Game, las imágenes del genio usan una sola columna centrada en móvil. El falso final recupera un genio visible en la esquina superior derecha y deja el texto y botón centrados debajo.
 
 En la actividad de eventos, tocar o hacer click en `ZONA SENSIBLE` informa `pointerdown`, también cuando se usa mouse. El foco del control se conserva para navegación con teclado, pero ya no reemplaza el evento mostrado. La pantalla que recupera una partida final guardada centra la tarjeta de resultado y organiza sus tres acciones en una grilla estable: una acción grande a la izquierda y las dos acciones de avance a la derecha; en móvil pasan a una sola columna.
+
+El Password Game final incluye una condición adicional que elige aleatoriamente uno de seis colores característicos: rojo, azul, amarillo, verde, blanco o negro. La regla muestra solo una muestra de color; la contraseña debe incluir el nombre de ese color.
 
 Al final de la actividad 8 hay dos controles del mismo tamaño: `VOLVER AL INICIO` regresa a la pantalla de bienvenida y `PANTALLA ANTERIOR` vuelve directamente al Password Game final. En escritorio se muestran lado a lado, alineados al final del recorrido; en móvil se apilan.
 

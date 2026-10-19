@@ -69,7 +69,8 @@ const screens = [
 const passwordContext = {
     currentYear: String(new Date().getFullYear()),
     currentYearRoman: toRomanNumeral(new Date().getFullYear()),
-    browserName: getBrowserPasswordTerm()
+    browserName: getBrowserPasswordTerm(),
+    targetColor: getRandomPasswordColor()
 };
 
 const shortPasswordRules = [
@@ -151,6 +152,12 @@ const finalPasswordRules = [
         description: "Debe contener uno de nuestros sponsors.",
         logos: ["assets/logos/1.png", "assets/logos/2.png", "assets/logos/3.png"],
         validate: password => ["binco", "manaos", "milkaut"].some(sponsor => normalizeText(password).includes(sponsor))
+    },
+    {
+        id: "targetColor",
+        description: "Debe contener el siguiente color:",
+        color: passwordContext.targetColor,
+        validate: password => normalizeText(password).includes(passwordContext.targetColor.name)
     },
     {
         id: "longPassword",
@@ -1123,6 +1130,7 @@ function validatePassword(password, rules) {
         id: rule.id,
         description: rule.description,
         logos: rule.logos || [],
+        color: rule.color || null,
         order,
         ok: rule.validate(password)
     }));
@@ -1208,6 +1216,7 @@ function renderPasswordRules(list, results) {
             <div class="rule-content">
                 <span>${result.description}</span>
                 ${renderSponsorLogos(result.logos)}
+                ${renderPasswordColor(result.color)}
             </div>
         `;
         list.append(item);
@@ -1251,6 +1260,27 @@ function renderSponsorLogos(logos) {
             ${logos.map((logo, index) => `<img src="${logo}" alt="Logo de sponsor ${index + 1}">`).join("")}
         </span>
     `;
+}
+
+function renderPasswordColor(color) {
+    if (!color) {
+        return "";
+    }
+
+    return `<span class="password-color-swatch" style="--password-target-color: ${color.hex}" aria-label="Color requerido"></span>`;
+}
+
+function getRandomPasswordColor() {
+    const colors = [
+        { name: "rojo", hex: "#dc3d3d" },
+        { name: "azul", hex: "#1c78d4" },
+        { name: "amarillo", hex: "#f5c542" },
+        { name: "verde", hex: "#32a462" },
+        { name: "blanco", hex: "#ffffff" },
+        { name: "negro", hex: "#111111" }
+    ];
+
+    return colors[Math.floor(Math.random() * colors.length)];
 }
 
 function containsMonth(password) {

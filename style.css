@@ -1892,6 +1892,18 @@ kbd {
     background: #ffffff;
 }
 
+.password-color-swatch {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    margin-left: 10px;
+    vertical-align: -5px;
+    border: 2px solid rgba(244, 247, 251, 0.8);
+    border-radius: 4px;
+    background: var(--password-target-color);
+    box-shadow: 0 0 0 1px rgba(3, 14, 24, 0.75), inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+
 .fake-final {
     min-height: 100%;
 }
@@ -2742,6 +2754,9 @@ select:focus-visible {
 
     .student-layout .result-panel .genie-companion {
         display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        justify-self: stretch;
+        place-items: center;
     }
 
     .student-layout .result-panel .genie-companion img {
@@ -2844,12 +2859,60 @@ select:focus-visible {
         position: static;
         inset: auto;
         grid-row: 3;
+        width: 100%;
+        justify-self: stretch;
+        place-items: center;
         margin-top: -8px;
     }
 
     .password-layout--shortPassword > .genie-companion img {
         width: 260px;
         max-height: 275px;
+        margin-inline: auto;
+    }
+
+    .fake-final {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        min-height: 430px;
+        align-items: start;
+    }
+
+    .fake-final-content {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        padding-top: 136px;
+        text-align: center;
+    }
+
+    .fake-final > .genie-companion {
+        position: absolute;
+        top: 12px;
+        right: 0;
+        z-index: 1;
+        display: grid;
+        width: 118px;
+        place-items: center;
+        pointer-events: none;
+    }
+
+    .fake-final > .genie-companion img {
+        display: block;
+        width: 112px;
+        max-height: 146px;
+        margin: 0 auto;
+    }
+
+    .fake-final-message {
+        min-height: 0;
+        font-size: 1.65rem;
+        line-height: 1.1;
+    }
+
+    .fake-final .actions {
+        justify-content: center;
     }
 
     .completed-game-screen > .actions {
