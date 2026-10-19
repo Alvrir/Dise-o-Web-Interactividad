@@ -232,7 +232,7 @@ El panel inferior muestra:
 
 El contador se guarda solo durante la sesión abierta. Completar los cuatro no bloquea el botón para continuar: la exploración es libre. En escritorio hay cuatro tarjetas por fila cuando entra el ancho disponible, se reducen a dos columnas en anchos intermedios y a una sola columna en celular.
 
-En equipos con mouse, la segunda tarjeta detecta el evento real `mouseover`. Al tocar en un dispositivo móvil se registra `pointerdown`, sin afirmar falsamente que ocurrió un evento de mouse. El foco con teclado también permite descubrir esa tarjeta.
+En equipos con mouse, la segunda tarjeta detecta el evento real `mouseover` al acercar el cursor y `pointerdown` al hacer click. Al tocar en un dispositivo móvil también se registra `pointerdown`. El foco con teclado sigue disponible para acceder al control, sin reemplazar el último evento mostrado.
 
 La actividad muestra una versión compacta de Akinator junto al laboratorio: queda como columna secundaria en pantallas muy anchas y pasa a una fila horizontal debajo de los experimentos cuando falta espacio.
 
@@ -548,6 +548,8 @@ Los mensajes son breves y contextuales. En móviles, el personaje se reduce a un
 En la verificación de alumno, el personaje tiene una presencia algo mayor junto al resultado. En el primer Password Game queda centrado, ocupa la altura central de la actividad y se difumina por debajo de los dos paneles ampliados del campo y las reglas. En celular vuelve al flujo normal para no interferir con el contenido. En la actividad 6, el genio sonriente aparece más grande con una entrada suave y un movimiento vertical discreto. La actividad 8 conserva un cierre estático y claro.
 
 Los textos visibles usan Cinzel y sus títulos principales usan Cinzel Decorative. Se eliminaron las menciones visibles a “laboratorio web”; la actividad de eventos se titula “Interactividad” y el cierre utiliza “Recorrido completado” y “Completaste todos los desafíos”.
+
+En la actividad de eventos, tocar o hacer click en `ZONA SENSIBLE` informa `pointerdown`, también cuando se usa mouse. El foco del control se conserva para navegación con teclado, pero ya no reemplaza el evento mostrado. La pantalla que recupera una partida final guardada centra la tarjeta de resultado y organiza sus tres acciones en una grilla estable: una acción grande a la izquierda y las dos acciones de avance a la derecha; en móvil pasan a una sola columna.
 
 ## Aclaración del Password Game final
 

@@ -2579,6 +2579,50 @@ select:focus-visible {
     animation: fakeFinalGenieIn 1.3s ease-out both, fakeFinalGenieFloat 3.2s ease-in-out 1.3s infinite;
 }
 
+/* Stored final results remain a compact, centered group instead of stretched columns. */
+.completed-game-screen {
+    width: min(760px, 100%);
+    margin: 0 auto;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    align-content: center;
+    gap: 20px;
+}
+
+.completed-game-screen > .lead {
+    width: 100%;
+    margin: 0;
+    text-align: center;
+}
+
+.completed-game-screen .result-summary {
+    width: min(100%, 620px);
+    max-width: none;
+    justify-self: center;
+    padding: 24px 26px;
+}
+
+.completed-game-screen > .actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    width: min(100%, 620px);
+    margin: 12px 0 0;
+    gap: 14px;
+    justify-content: initial;
+}
+
+.completed-game-screen .result-next-actions {
+    display: contents;
+}
+
+.completed-game-screen #show-final-result {
+    grid-row: span 2;
+}
+
+.completed-game-screen .actions button {
+    width: 100%;
+}
+
 @keyframes fakeFinalGenieIn {
     from { opacity: 0; transform: translateY(18px); }
     to { opacity: 1; transform: translateY(0); }
@@ -2661,6 +2705,14 @@ select:focus-visible {
     .password-layout--shortPassword > .genie-companion img {
         width: 210px;
         max-height: 220px;
+    }
+
+    .completed-game-screen > .actions {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .completed-game-screen #show-final-result {
+        grid-row: auto;
     }
 
     .closing-celebration {

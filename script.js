@@ -529,15 +529,14 @@ function renderEvents() {
     const eventDescriptions = {
         click: "El navegador detectó un click sobre el control interactivo.",
         mouseover: "El cursor entró en la zona sensible y disparó mouseover.",
-        pointerdown: "La pantalla táctil detectó un toque mediante pointerdown.",
+        pointerdown: "El navegador detectó la pulsación sobre la zona sensible mediante pointerdown.",
         input: "El valor del campo cambió mientras escribías.",
-        keydown: key => `El navegador detectó que presionaste la tecla ${key}.`,
-        focus: "El control recibió foco desde el teclado."
+        keydown: key => `El navegador detectó que presionaste la tecla ${key}.`
     };
 
     const updateLastEvent = (eventName, detail = "") => {
         state.lastEvent = eventName;
-        const discoveryName = eventName === "pointerdown" || eventName === "focus" ? "mouseover" : eventName;
+        const discoveryName = eventName === "pointerdown" ? "mouseover" : eventName;
 
         if (!state.discoveredEvents.includes(discoveryName)) {
             state.discoveredEvents.push(discoveryName);
@@ -553,12 +552,7 @@ function renderEvents() {
 
     document.querySelector("#click-demo").addEventListener("click", () => updateLastEvent("click"));
     document.querySelector("#hover-demo").addEventListener("mouseover", () => updateLastEvent("mouseover"));
-    document.querySelector("#hover-demo").addEventListener("pointerdown", event => {
-        if (event.pointerType !== "mouse") {
-            updateLastEvent("pointerdown");
-        }
-    });
-    document.querySelector("#hover-demo").addEventListener("focus", () => updateLastEvent("focus"));
+    document.querySelector("#hover-demo").addEventListener("pointerdown", () => updateLastEvent("pointerdown"));
     document.querySelector("#input-demo").addEventListener("input", () => updateLastEvent("input"));
     document.querySelector("#key-demo").addEventListener("keydown", event => updateLastEvent("keydown", event.key));
 
