@@ -2592,6 +2592,14 @@ select:focus-visible {
     font-size: 1.04rem;
 }
 
+.password-input-row input {
+    font-family: Verdana, "Segoe UI", Arial, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    font-variant-caps: normal;
+}
+
 .closing-celebration {
     grid-template-columns: minmax(0, 1fr) 320px;
 }

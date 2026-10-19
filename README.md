@@ -377,6 +377,8 @@ En escritorio, el Password Game final usa dos columnas anchas sin reservar espac
 
 Los dos Password Game muestran, a la derecha del campo de contraseña, un contador numérico sin recuadro. El input usa el espacio restante para que el contador no se superponga.
 
+El texto escrito en los campos de contraseña usa Verdana o Segoe UI en vez de la fuente decorativa general. Así se distinguen con claridad mayúsculas y minúsculas mientras se completa el desafío.
+
 La función que decide qué reglas se muestran es:
 
 ```javascript
