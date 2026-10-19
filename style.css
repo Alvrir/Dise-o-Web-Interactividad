@@ -2500,6 +2500,9 @@ select:focus-visible {
 .password-layout--shortPassword {
     width: min(1320px, 100%);
     grid-template-columns: minmax(440px, 1fr) minmax(440px, 1fr);
+    position: relative;
+    isolation: isolate;
+    min-height: 460px;
     align-items: start;
 }
 
@@ -2512,7 +2515,7 @@ select:focus-visible {
 .password-layout--shortPassword > .password-primary {
     grid-column: 1;
     grid-row: 1;
-    padding: clamp(30px, 3vw, 46px);
+    padding: clamp(34px, 3.4vw, 54px);
 }
 
 .password-layout--shortPassword > .password-primary .lead {
@@ -2536,6 +2539,7 @@ select:focus-visible {
     grid-column: 2;
     grid-row: 1;
     align-self: stretch;
+    padding: clamp(18px, 2vw, 30px);
 }
 
 .password-layout--shortPassword .rule-item {
@@ -2546,20 +2550,18 @@ select:focus-visible {
 
 .password-layout--shortPassword > .genie-companion {
     display: grid;
-    grid-column: 1 / -1;
-    grid-row: 2;
-    justify-self: center;
-    align-self: start;
-    margin-top: -12px;
+    position: absolute;
+    inset: 8px 0 0;
+    place-items: center;
     pointer-events: none;
     z-index: 1;
 }
 
 .password-layout--shortPassword > .genie-companion img {
-    width: min(100%, 320px);
-    max-height: 330px;
-    opacity: 0.3;
-    filter: blur(1.8px) drop-shadow(0 18px 24px rgba(0, 0, 0, 0.3));
+    width: min(44vw, 500px);
+    max-height: 440px;
+    opacity: 0.34;
+    filter: blur(2px) drop-shadow(0 22px 30px rgba(0, 0, 0, 0.32));
 }
 
 .closing-celebration {
@@ -2594,6 +2596,7 @@ select:focus-visible {
 
     .password-layout--shortPassword {
         grid-template-columns: minmax(0, 1fr);
+        min-height: 0;
     }
 
     .password-layout--shortPassword > .password-primary,
@@ -2618,6 +2621,8 @@ select:focus-visible {
 
     .password-layout--shortPassword > .genie-companion {
         display: grid;
+        position: static;
+        inset: auto;
         grid-row: 3;
         margin-top: -8px;
     }

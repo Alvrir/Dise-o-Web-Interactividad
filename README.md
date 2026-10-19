@@ -545,7 +545,7 @@ Fuera de la actividad original de adivinación, `renderGenieCompanion()` genera 
 
 Los mensajes son breves y contextuales. En móviles, el personaje se reduce a una fila para no ocultar controles ni alargar la pantalla de manera innecesaria. Las animaciones respetan `prefers-reduced-motion`.
 
-En la verificación de alumno, el personaje tiene una presencia algo mayor junto al resultado. En el primer Password Game queda centrado y difuminado por debajo del campo y las reglas, como parte del fondo de la actividad. Al completar la experiencia, el genio de la pantalla final aparece más grande con una entrada suave y un movimiento vertical discreto.
+En la verificación de alumno, el personaje tiene una presencia algo mayor junto al resultado. En el primer Password Game queda centrado, ocupa la altura central de la actividad y se difumina por debajo de los dos paneles ampliados del campo y las reglas. En celular vuelve al flujo normal para no interferir con el contenido. Al completar la experiencia, el genio de la pantalla final aparece más grande con una entrada suave y un movimiento vertical discreto.
 
 ## Aclaración del Password Game final
 
