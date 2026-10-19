@@ -714,6 +714,7 @@ function renderFinalPassword() {
 
     renderPasswordScreen({
         intro: "Ahora sí. Cumplí todas las condiciones.",
+        helper: "Empezá a escribir: el tiempo inicia con tu primera letra y se irán revelando las condiciones.",
         stateKey: "finalPassword",
         inputId: "final-password-input",
         rules: finalPasswordRules,
@@ -729,9 +730,10 @@ function renderFinalPassword() {
 
 function renderPasswordScreen(config) {
     app.innerHTML = `
-        <section class="password-layout">
+        <section class="password-layout password-layout--${config.stateKey}">
             <div class="password-primary">
                 <p class="lead">${config.intro}</p>
+                ${config.helper ? `<p class="password-helper">${config.helper}</p>` : ""}
                 ${config.stateKey === "finalPassword" ? `
                     <p class="live-timer" aria-live="off">
                         <span>TIEMPO</span>

@@ -545,6 +545,18 @@ Fuera de la actividad original de adivinación, `renderGenieCompanion()` genera 
 
 Los mensajes son breves y contextuales. En móviles, el personaje se reduce a una fila para no ocultar controles ni alargar la pantalla de manera innecesaria. Las animaciones respetan `prefers-reduced-motion`.
 
+En la verificación de alumno, el personaje tiene una presencia algo mayor junto al resultado. En el primer Password Game queda centrado y difuminado por debajo del campo y las reglas, como parte del fondo de la actividad. Al completar la experiencia, el genio de la pantalla final aparece más grande con una entrada suave y un movimiento vertical discreto.
+
+## Aclaración del Password Game final
+
+Antes del campo del nivel final se muestra este aviso breve:
+
+```text
+Empezá a escribir: el tiempo inicia con tu primera letra y se irán revelando las condiciones.
+```
+
+El texto no cambia las validaciones ni el orden progresivo de las reglas; solamente explica el inicio del temporizador y de las condiciones para que el desafío resulte más intuitivo.
+
 ## Fondo personalizado
 
 La configuración está centralizada al inicio de `script.js`:

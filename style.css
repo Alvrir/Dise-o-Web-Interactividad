@@ -2484,3 +2484,161 @@ select:focus-visible {
     border-color: var(--highlight);
     box-shadow: 0 0 0 4px rgba(28, 166, 242, 0.18);
 }
+
+/* Context-specific mascot placement. */
+.student-layout .result-panel .genie-companion {
+    display: grid;
+    justify-items: center;
+    margin-top: 18px;
+}
+
+.student-layout .result-panel .genie-companion img {
+    width: 142px;
+    max-height: 170px;
+}
+
+.password-layout--shortPassword {
+    width: min(1320px, 100%);
+    grid-template-columns: minmax(440px, 1fr) minmax(440px, 1fr);
+    align-items: start;
+}
+
+.password-layout--shortPassword > .password-primary,
+.password-layout--shortPassword > .rule-list {
+    position: relative;
+    z-index: 2;
+}
+
+.password-layout--shortPassword > .password-primary {
+    grid-column: 1;
+    grid-row: 1;
+    padding: clamp(30px, 3vw, 46px);
+}
+
+.password-layout--shortPassword > .password-primary .lead {
+    font-size: clamp(1.45rem, 2.2vw, 2rem);
+}
+
+.password-helper {
+    max-width: 58ch;
+    margin: -4px 0 22px;
+    color: rgba(221, 244, 255, 0.84);
+    font-size: 0.91rem;
+    line-height: 1.6;
+}
+
+.password-layout--shortPassword .password-input-row input {
+    min-height: 76px;
+    font-size: 1.28rem;
+}
+
+.password-layout--shortPassword > .rule-list {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: stretch;
+}
+
+.password-layout--shortPassword .rule-item {
+    min-height: 76px;
+    padding: 18px 20px;
+    font-size: 1.08rem;
+}
+
+.password-layout--shortPassword > .genie-companion {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: center;
+    align-self: start;
+    margin-top: -12px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.password-layout--shortPassword > .genie-companion img {
+    width: min(100%, 320px);
+    max-height: 330px;
+    opacity: 0.3;
+    filter: blur(1.8px) drop-shadow(0 18px 24px rgba(0, 0, 0, 0.3));
+}
+
+.closing-celebration {
+    grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.closing-celebration > .genie-companion img {
+    width: min(100%, 290px);
+    max-height: 350px;
+    animation: celebrationGenieIn 1.3s ease-out both, celebrationGenieFloat 3.2s ease-in-out 1.3s infinite;
+}
+
+@keyframes celebrationGenieIn {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes celebrationGenieFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@media (max-width: 820px) {
+    .student-layout .result-panel .genie-companion {
+        display: grid;
+    }
+
+    .student-layout .result-panel .genie-companion img {
+        width: 112px;
+        max-height: 132px;
+    }
+
+    .password-layout--shortPassword {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .password-layout--shortPassword > .password-primary,
+    .password-layout--shortPassword > .rule-list,
+    .password-layout--shortPassword > .genie-companion {
+        grid-column: 1;
+    }
+
+    .password-layout--shortPassword > .password-primary {
+        grid-row: 1;
+        padding: 24px 18px;
+    }
+
+    .password-helper {
+        margin-bottom: 18px;
+        font-size: 0.84rem;
+    }
+
+    .password-layout--shortPassword > .rule-list {
+        grid-row: 2;
+    }
+
+    .password-layout--shortPassword > .genie-companion {
+        display: grid;
+        grid-row: 3;
+        margin-top: -8px;
+    }
+
+    .password-layout--shortPassword > .genie-companion img {
+        width: 210px;
+        max-height: 220px;
+    }
+
+    .closing-celebration {
+        grid-template-columns: minmax(0, 1fr) 126px;
+    }
+
+    .closing-celebration > .genie-companion img {
+        width: 118px;
+        max-height: 160px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .closing-celebration > .genie-companion img {
+        animation: none;
+    }
+}
