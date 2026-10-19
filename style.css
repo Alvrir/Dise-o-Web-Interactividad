@@ -2502,7 +2502,7 @@ select:focus-visible {
     grid-template-columns: minmax(440px, 1fr) minmax(440px, 1fr);
     position: relative;
     isolation: isolate;
-    min-height: 460px;
+    min-height: 100%;
     align-items: start;
 }
 
@@ -2551,15 +2551,15 @@ select:focus-visible {
 .password-layout--shortPassword > .genie-companion {
     display: grid;
     position: absolute;
-    inset: 8px 0 0;
-    place-items: center;
+    inset: 0;
+    place-items: end center;
     pointer-events: none;
     z-index: 1;
 }
 
 .password-layout--shortPassword > .genie-companion img {
-    width: min(44vw, 500px);
-    max-height: 440px;
+    width: min(55vw, 625px);
+    max-height: 550px;
     opacity: 0.34;
     filter: blur(2px) drop-shadow(0 22px 30px rgba(0, 0, 0, 0.32));
 }
@@ -2574,9 +2574,21 @@ select:focus-visible {
 }
 
 .fake-final > .genie-companion img {
-    width: min(100%, 300px);
-    max-height: 350px;
+    width: min(100%, 480px);
+    max-height: 560px;
     animation: fakeFinalGenieIn 1.3s ease-out both, fakeFinalGenieFloat 3.2s ease-in-out 1.3s infinite;
+}
+
+.fake-final {
+    width: min(1180px, 100%);
+    min-height: 100%;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 480px);
+    align-items: stretch;
+}
+
+.fake-final > .genie-companion {
+    align-self: stretch;
+    place-items: end center;
 }
 
 /* Stored final results remain a compact, centered group instead of stretched columns. */
@@ -2703,8 +2715,8 @@ select:focus-visible {
     }
 
     .password-layout--shortPassword > .genie-companion img {
-        width: 210px;
-        max-height: 220px;
+        width: 260px;
+        max-height: 275px;
     }
 
     .completed-game-screen > .actions {
