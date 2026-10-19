@@ -2564,6 +2564,10 @@ select:focus-visible {
     filter: blur(2px) drop-shadow(0 22px 30px rgba(0, 0, 0, 0.32));
 }
 
+.password-layout--finalPassword > .genie-companion {
+    display: none;
+}
+
 .closing-celebration {
     grid-template-columns: minmax(0, 1fr) 320px;
 }
