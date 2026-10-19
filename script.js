@@ -468,7 +468,7 @@ function renderEvents() {
             <div class="events-lab">
                 <header class="lab-header">
                 <span class="section-kicker">ACTIVIDAD 2 · EVENTOS</span>
-                <h2>LABORATORIO DE INTERACTIVIDAD</h2>
+                <h2>INTERACTIVIDAD</h2>
                 <p class="lead">Tu navegador puede detectar lo que hacés. Probá diferentes acciones y mirá cómo responde.</p>
             </header>
                 <div class="event-grid" aria-label="Experimentos de eventos">
@@ -1279,7 +1279,7 @@ function renderFakeFinal() {
                 </div>
             </div>
             ${renderGenieCompanion({
-                pose: "pensando",
+                pose: "idle",
                 message: "¡Excelente! Pero todavía queda un último desafío."
             })}
         </section>
@@ -1308,14 +1308,14 @@ function renderClosing() {
         <section class="closing-screen">
             <header class="closing-celebration">
                 <div>
-                    <span class="section-kicker">LABORATORIO COMPLETADO</span>
+                    <span class="section-kicker">RECORRIDO COMPLETADO</span>
                     <h2>¡FELICITACIONES!</h2>
-                    <p>Completaste todos los desafíos del laboratorio web.</p>
+                    <p>Completaste todos los desafíos.</p>
                     <p class="lead">Ahora conocés un poco más sobre cómo las páginas detectan y responden a tus acciones.</p>
                 </div>
                 ${renderGenieCompanion({
                     pose: "idle",
-                    message: "¡Excelente trabajo! Ya dominás las pistas del laboratorio."
+                    message: "¡Excelente trabajo! Ya dominás las pistas de la experiencia."
                 })}
             </header>
             <div class="screen-grid closing-summary">

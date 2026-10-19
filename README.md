@@ -545,7 +545,9 @@ Fuera de la actividad original de adivinación, `renderGenieCompanion()` genera 
 
 Los mensajes son breves y contextuales. En móviles, el personaje se reduce a una fila para no ocultar controles ni alargar la pantalla de manera innecesaria. Las animaciones respetan `prefers-reduced-motion`.
 
-En la verificación de alumno, el personaje tiene una presencia algo mayor junto al resultado. En el primer Password Game queda centrado, ocupa la altura central de la actividad y se difumina por debajo de los dos paneles ampliados del campo y las reglas. En celular vuelve al flujo normal para no interferir con el contenido. Al completar la experiencia, el genio de la pantalla final aparece más grande con una entrada suave y un movimiento vertical discreto.
+En la verificación de alumno, el personaje tiene una presencia algo mayor junto al resultado. En el primer Password Game queda centrado, ocupa la altura central de la actividad y se difumina por debajo de los dos paneles ampliados del campo y las reglas. En celular vuelve al flujo normal para no interferir con el contenido. En la actividad 6, el genio sonriente aparece más grande con una entrada suave y un movimiento vertical discreto. La actividad 8 conserva un cierre estático y claro.
+
+Los textos visibles usan Cinzel y sus títulos principales usan Cinzel Decorative. Se eliminaron las menciones visibles a “laboratorio web”; la actividad de eventos se titula “Interactividad” y el cierre utiliza “Recorrido completado” y “Completaste todos los desafíos”.
 
 ## Aclaración del Password Game final
 
