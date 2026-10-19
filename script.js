@@ -40,6 +40,7 @@ const state = {
     },
     alumnoEncontrado: null,
     lastEvent: "todavía ninguno",
+    discoveredEvents: [],
     shortPassword: "",
     finalPassword: "",
     finalPasswordRevealedCount: 0,
@@ -256,7 +257,7 @@ function updateProgress(screen) {
 
 function renderStart() {
     app.innerHTML = `
-        <section>
+        <section class="start-screen">
             <h2 class="hero-title">INTERACTIVIDAD Y VALIDACIÓN</h2>
             <p class="lead">Una página que reacciona a vos.</p>
             <p class="lead">Descubrí cómo una página web puede detectar tus acciones, procesar información y responder.</p>
@@ -452,42 +453,101 @@ function wait(milliseconds) {
 
 function renderEvents() {
     app.innerHTML = `
-        <section>
-            <p class="lead">Probá realizar diferentes acciones y mirá cómo cambia el último evento detectado.</p>
-            <div class="event-grid">
-                <button id="click-demo" type="button">Hacer click</button>
-                <div id="hover-demo" class="event-target interactive" tabindex="0">Pasar el mouse o tocar</div>
-                <div>
+        <section class="events-lab">
+            <header class="lab-header">
+                <span class="section-kicker">ACTIVIDAD 2 · EVENTOS</span>
+                <h2>LABORATORIO DE INTERACTIVIDAD</h2>
+                <p class="lead">Tu navegador puede detectar lo que hacés. Probá diferentes acciones y mirá cómo responde.</p>
+            </header>
+            <div class="event-grid" aria-label="Experimentos de eventos">
+                <article class="event-card" data-event-card="click">
+                    <div class="event-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v10m0 0 4-4m-4 4-4-4M5 14v4a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-4"/></svg></div>
+                    <span class="event-tag">01 · CLICK</span>
+                    <h3>Activá el pulso</h3>
+                    <p>Un click dispara una respuesta inmediata.</p>
+                    <button id="click-demo" class="event-control" type="button">PROBAR CLICK</button>
+                </article>
+                <article class="event-card" data-event-card="mouseover">
+                    <div class="event-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h10M4 19h6"/><path d="m16 15 4 4m0-4-4 4"/></svg></div>
+                    <span class="event-tag">02 · PUNTERO</span>
+                    <h3>Acercá el cursor</h3>
+                    <p>Con mouse se detecta <code>mouseover</code>; al tocar, <code>pointerdown</code>.</p>
+                    <div id="hover-demo" class="event-target interactive" tabindex="0" role="button" aria-label="Probar evento de puntero">ZONA SENSIBLE</div>
+                </article>
+                <article class="event-card" data-event-card="input">
+                    <div class="event-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h.01M10 9h.01M13 9h.01M16 9h.01M7 13h.01M10 13h.01M13 13h4"/></svg></div>
+                    <span class="event-tag">03 · INPUT</span>
+                    <h3>Escribí algo</h3>
+                    <p>Cada cambio del campo genera un evento.</p>
                     <label class="field">
-                        <span>Campo de texto</span>
-                        <input id="input-demo" type="text" placeholder="Escribí algo">
+                        <span class="sr-only">Campo de texto para probar input</span>
+                        <input id="input-demo" type="text" placeholder="Escribí una señal">
                     </label>
-                </div>
-                <div>
+                </article>
+                <article class="event-card" data-event-card="keydown">
+                    <div class="event-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h.01M10 9h.01M13 9h.01M16 9h.01M7 13h.01M10 13h.01M13 13h4"/><path d="m16 9 2 2-2 2"/></svg></div>
+                    <span class="event-tag">04 · KEYDOWN</span>
+                    <h3>Presioná una tecla</h3>
+                    <p>Con teclado físico, el navegador informa cuál fue.</p>
                     <label class="field">
-                        <span>Zona de teclas</span>
+                        <span class="sr-only">Campo para probar keydown</span>
                         <input id="key-demo" type="text" placeholder="Presioná una tecla">
                     </label>
-                </div>
+                </article>
             </div>
-            <div id="last-event" class="last-event">ÚLTIMO EVENTO: ${state.lastEvent}</div>
+            <section class="event-console" aria-live="polite">
+                <div class="event-console-header">
+                    <span>EVENTO DETECTADO</span>
+                    <strong id="event-discovery-count">Eventos descubiertos: ${state.discoveredEvents.length}/4</strong>
+                </div>
+                <strong id="last-event" class="event-name">${state.lastEvent}</strong>
+                <p id="event-description">Esperando una interacción para mostrar qué ocurrió.</p>
+            </section>
             <div class="actions">
                 <button data-next="form">CONTINUAR →</button>
             </div>
         </section>
     `;
 
-    const updateLastEvent = eventName => {
+    const eventDescriptions = {
+        click: "El navegador detectó un click sobre el control interactivo.",
+        mouseover: "El cursor entró en la zona sensible y disparó mouseover.",
+        pointerdown: "La pantalla táctil detectó un toque mediante pointerdown.",
+        input: "El valor del campo cambió mientras escribías.",
+        keydown: key => `El navegador detectó que presionaste la tecla ${key}.`,
+        focus: "El control recibió foco desde el teclado."
+    };
+
+    const updateLastEvent = (eventName, detail = "") => {
         state.lastEvent = eventName;
-        document.querySelector("#last-event").textContent = `ÚLTIMO EVENTO: ${eventName}`;
+        const discoveryName = eventName === "pointerdown" || eventName === "focus" ? "mouseover" : eventName;
+
+        if (!state.discoveredEvents.includes(discoveryName)) {
+            state.discoveredEvents.push(discoveryName);
+        }
+
+        document.querySelector("#last-event").textContent = eventName;
+        document.querySelector("#event-description").textContent = typeof eventDescriptions[eventName] === "function"
+            ? eventDescriptions[eventName](detail)
+            : eventDescriptions[eventName];
+        document.querySelector("#event-discovery-count").textContent = `Eventos descubiertos: ${state.discoveredEvents.length}/4`;
+        document.querySelector(`[data-event-card="${discoveryName}"]`)?.classList.add("is-discovered");
     };
 
     document.querySelector("#click-demo").addEventListener("click", () => updateLastEvent("click"));
     document.querySelector("#hover-demo").addEventListener("mouseover", () => updateLastEvent("mouseover"));
-    document.querySelector("#hover-demo").addEventListener("touchstart", () => updateLastEvent("touchstart"));
+    document.querySelector("#hover-demo").addEventListener("pointerdown", event => {
+        if (event.pointerType !== "mouse") {
+            updateLastEvent("pointerdown");
+        }
+    });
     document.querySelector("#hover-demo").addEventListener("focus", () => updateLastEvent("focus"));
     document.querySelector("#input-demo").addEventListener("input", () => updateLastEvent("input"));
-    document.querySelector("#key-demo").addEventListener("keydown", () => updateLastEvent("keydown"));
+    document.querySelector("#key-demo").addEventListener("keydown", event => updateLastEvent("keydown", event.key));
+
+    state.discoveredEvents.forEach(eventName => {
+        document.querySelector(`[data-event-card="${eventName}"]`)?.classList.add("is-discovered");
+    });
 
     bindNextButtons();
 }

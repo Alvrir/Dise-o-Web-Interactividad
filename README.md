@@ -2,6 +2,8 @@
 
 Página educativa e interactiva para una exposición de Diseño Web de primer año.
 
+La interfaz usa un lenguaje de **laboratorio digital oscuro**: fondo azul profundo con grilla técnica, superficies azul petróleo, acentos celestes y turquesa para los estados activos, y amarillo para las acciones principales. Las actividades comparten el mismo sistema visual para que el recorrido se sienta como una experiencia única, sin cambiar su lógica didáctica.
+
 La idea principal es que la persona no solo lea conceptos, sino que los experimente: hace click, escribe, completa formularios, ve validaciones y juega dos versiones de un Password Game.
 
 ## Página publicada
@@ -66,6 +68,8 @@ Página Diseño Web/
 |   |-- alumnos.json
 |
 |-- assets/
+|   |-- genio/
+|   |-- logos/
 |   |-- screens/
 |       |-- .gitkeep
 |
@@ -100,6 +104,10 @@ Contiene todo el diseño visual:
 - panel de herramientas de desarrollador;
 - tip de F12;
 - cierre con tarjetas preparadas para miniaturas.
+
+Al final del archivo está el bloque `Digital lab visual system`, que concentra las sobreescrituras del rediseño. Ahí están las variables de color, las superficies translúcidas, la grilla de fondo, los componentes compartidos y los cortes responsive. La paleta principal es `#0b1623`, `#12283a`, `#183b50`, `#5397d0`, `#fabf3f`, `#27b6b9`, `#f4f7fb` y `#a9bacb`.
+
+Las fuentes se cargan desde Google Fonts en `index.html`: `Outfit` para títulos y `Inter` para texto e interfaz. Si no están disponibles, el navegador usa las fuentes de reserva definidas en CSS.
 
 El layout principal utiliza una columna flex de altura completa (`100dvh`). El encabezado conserva su altura natural y `.screen` ocupa todo el espacio restante del navegador, sin imponer una altura mínima adicional en celulares.
 
@@ -207,6 +215,20 @@ bindNextButtons()
 ```
 
 Al cambiar de pantalla, `showScreen()` enfoca el contenido principal con `preventScroll`. Esto conserva la accesibilidad del foco sin desplazar automáticamente la página hacia abajo, especialmente en celulares.
+
+## Laboratorio de interactividad
+
+La actividad de eventos se renderiza con `renderEvents()` como un laboratorio de cuatro experimentos: `click`, `mouseover` o `pointerdown`, `input` y `keydown`. Cada experimento tiene una tarjeta, una breve consigna y un control real para probarlo.
+
+El panel inferior muestra:
+
+- el último evento detectado;
+- una explicación en lenguaje simple de lo que ocurrió;
+- el contador `Eventos descubiertos: N/4`.
+
+El contador se guarda solo durante la sesión abierta. Completar los cuatro no bloquea el botón para continuar: la exploración es libre. En escritorio hay cuatro tarjetas por fila cuando entra el ancho disponible, se reducen a dos columnas en anchos intermedios y a una sola columna en celular.
+
+En equipos con mouse, la segunda tarjeta detecta el evento real `mouseover`. Al tocar en un dispositivo móvil se registra `pointerdown`, sin afirmar falsamente que ocurrió un evento de mouse. El foco con teclado también permite descubrir esa tarjeta.
 
 ## Estado central de la aplicación
 
@@ -560,6 +582,7 @@ Partes importantes:
 - `.app-shell`: contenedor de ancho y altura completos;
 - `.topbar`: cabecera con progreso, que también es el acceso oculto a las herramientas de desarrollador al mantenerlo presionado cinco segundos;
 - `.screen`: caja principal flexible que ocupa el espacio restante del viewport;
+- `.events-lab`, `.event-grid`, `.event-card` y `.event-console`: laboratorio de la actividad de eventos;
 - `.progress-card`: barra de progreso;
 - `.student-layout`: formulario y verificaciones en dos columnas;
 - `.form-grid`: campos del formulario;
@@ -672,6 +695,7 @@ Se genera automáticamente desde las herramientas de desarrollador porque incluy
 - CSS
 - JavaScript
 - JSON local
+- Google Fonts (`Inter` y `Outfit`)
 
 No se usa:
 
@@ -694,4 +718,4 @@ Mostrar de forma práctica:
 - diferencia entre información útil e información confiable;
 - reglas dinámicas mediante un Password Game.
 
-Este proyecto todavía es una base inicial. La prioridad es que funcione completo y sea fácil de modificar.
+La prioridad es que el recorrido funcione completo, sea visualmente claro en PC y celular, y continúe siendo fácil de modificar.
