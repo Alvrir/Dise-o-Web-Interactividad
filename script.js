@@ -269,7 +269,7 @@ function updateProgress(screen) {
 function renderStart() {
     app.innerHTML = `
         <section class="start-screen">
-            <h2 class="hero-title">INTERACTIVIDAD Y VALIDACIÓN</h2>
+            <h2 class="hero-title">INTERACTIVIDAD <span>Y VALIDACIÓN</span></h2>
             <p class="lead">Una página que reacciona a vos.</p>
             <p class="lead">Descubrí cómo una página web puede detectar tus acciones, procesar información y responder.</p>
             <div class="hero-actions">

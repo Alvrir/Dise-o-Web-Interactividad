@@ -2725,7 +2725,21 @@ select:focus-visible {
     font-family: "Cinzel Decorative", Cinzel, Inter, Arial, sans-serif;
 }
 
+.hero-title {
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+}
+
 @media (max-width: 820px) {
+    body::before {
+        inset: -8px;
+        height: calc(100svh + 16px);
+        background-attachment: fixed;
+        background-position: center center;
+        transform: translateZ(0);
+    }
+
     .student-layout .result-panel .genie-companion {
         display: grid;
     }
@@ -2733,6 +2747,51 @@ select:focus-visible {
     .student-layout .result-panel .genie-companion img {
         width: 138px;
         max-height: 165px;
+    }
+
+    .hero-title {
+        font-size: 1.8rem;
+        line-height: 1.1;
+        overflow-wrap: normal;
+        word-break: normal;
+    }
+
+    .hero-title span {
+        display: block;
+        white-space: nowrap;
+    }
+
+    .events-lab {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .events-lab .lab-header {
+        order: 0;
+    }
+
+    .events-lab .event-console {
+        position: sticky;
+        top: 12px;
+        z-index: 4;
+        order: 1;
+        margin: 0 0 18px;
+        padding: 14px 16px;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+    }
+
+    .events-lab .event-grid {
+        order: 2;
+        margin-top: 0;
+    }
+
+    .events-lab > .actions {
+        order: 3;
+    }
+
+    .events-lab .event-name {
+        margin-top: 6px;
+        font-size: 1.45rem;
     }
 
     .password-layout--shortPassword {
