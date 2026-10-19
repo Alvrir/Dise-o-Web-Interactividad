@@ -1325,9 +1325,6 @@ function renderClosing() {
                     </ul>
                     <p class="lead">Todo esto forma parte de la interactividad web.</p>
                 </div>
-                <div class="callout">
-                    Esta zona ya queda preparada para sumar miniaturas reales dentro de <strong>assets/screens/</strong>.
-                </div>
             </div>
             <div class="summary-grid">
                 ${closingConcepts.map(renderConceptCard).join("")}

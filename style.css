@@ -2603,12 +2603,12 @@ select:focus-visible {
 }
 
 .closing-celebration {
-    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-columns: minmax(0, 1fr) 390px;
 }
 
 .closing-celebration > .genie-companion img {
-    width: min(100%, 290px);
-    max-height: 350px;
+    width: min(100%, 355px);
+    max-height: 430px;
 }
 
 .fake-final > .genie-companion img {
@@ -2638,6 +2638,11 @@ select:focus-visible {
 
 .closing-actions button {
     width: 100%;
+}
+
+.closing-summary {
+    grid-template-columns: minmax(0, 1fr);
+    width: min(100%, 820px);
 }
 
 /* Stored final results remain a compact, centered group instead of stretched columns. */
