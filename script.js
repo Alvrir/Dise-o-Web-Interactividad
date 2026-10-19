@@ -7,7 +7,7 @@ const devClose = document.querySelector("#dev-close");
 const devScreenSelect = document.querySelector("#dev-screen-select");
 const devMessage = document.querySelector("#dev-message");
 const finalResultStoragePrefix = "interactividad-password-final-result:";
-const BACKGROUND_IMAGE = "";
+const BACKGROUND_IMAGE = "assets/background/background.png";
 const GENIE_ASSETS = {
     idle: "assets/genio/idle.png",
     pensando: "assets/genio/pensando.png",
@@ -115,11 +115,6 @@ const finalPasswordRules = [
         id: "symbol",
         description: "Al menos un símbolo.",
         validate: password => /[^A-Za-zÁÉÍÓÚáéíóúÑñ0-9]/.test(password)
-    },
-    {
-        id: "digitSum",
-        description: "Los números aislados deben sumar 15.",
-        validate: password => sumPasswordDigits(password) === 15
     },
     {
         id: "currentYear",
@@ -1260,12 +1255,6 @@ function renderSponsorLogos(logos) {
             ${logos.map((logo, index) => `<img src="${logo}" alt="Logo de sponsor ${index + 1}">`).join("")}
         </span>
     `;
-}
-
-function sumPasswordDigits(password) {
-    return (password.match(/\d+/g) || [])
-        .filter(digits => digits.length === 1)
-        .reduce((total, digit) => total + Number(digit), 0);
 }
 
 function containsMonth(password) {

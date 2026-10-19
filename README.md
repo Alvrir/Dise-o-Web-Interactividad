@@ -109,7 +109,7 @@ Contiene todo el diseño visual:
 
 Al final del archivo están los bloques `Digital lab visual system` y `Second-stage composition refinements`. Ahí están las variables de color, las superficies translúcidas, los componentes compartidos, la mascota y los cortes responsive. La paleta principal es `#0b1623`, `#12283a`, `#183b50`, `#5397d0`, `#fabf3f`, `#27b6b9`, `#f4f7fb` y `#a9bacb`.
 
-Las fuentes se cargan desde Google Fonts en `index.html`: `Outfit` para títulos y `Inter` para texto e interfaz. Si no están disponibles, el navegador usa las fuentes de reserva definidas en CSS.
+La tipografía se carga localmente desde `assets/font/`: `Cinzel` se usa en texto e interfaz, y `Cinzel Decorative` en los títulos destacados. Esto evita depender de la carga de fuentes externas. El navegador usa las fuentes de reserva declaradas en CSS si fuera necesario.
 
 El layout principal utiliza una columna flex de altura completa (`100dvh`). El encabezado conserva su altura natural y `.screen` ocupa todo el espacio restante del navegador, sin imponer una altura mínima adicional en celulares.
 
@@ -402,16 +402,15 @@ El nivel final pide:
 3. una mayúscula;
 4. un número;
 5. un símbolo;
-6. que los números aislados sumen 15: los dígitos pegados se ignoran; por ejemplo, `2a4` cuenta `2 + 4`, mientras que `222a3b66c` cuenta solamente `3`;
-7. el número del año actual;
-8. el año actual escrito en números romanos;
-9. el resultado de `10 × 42`;
-10. el nombre del navegador detectado;
-11. un mes del año;
-12. un número romano;
-13. uno de los textos `Binco`, `Manaos` o `Milkaut`; alcanza con una sola de esas palabras.
-14. más de 45 caracteres.
-15. el nombre de la ciudad: `Rojas`.
+6. el número del año actual;
+7. el año actual escrito en números romanos;
+8. el resultado de `10 × 42`;
+9. el nombre del navegador detectado;
+10. un mes del año;
+11. un número romano;
+12. uno de los textos `Binco`, `Manaos` o `Milkaut`; alcanza con una sola de esas palabras.
+13. más de 45 caracteres.
+14. el nombre de la ciudad: `Rojas`.
 
 La última regla muestra los tres logos de `assets/logos/` en recuadros de 72 px de alto. Cada imagen cubre su recuadro completo y cada regla usa `.is-valid` o `.is-invalid` para recibir un fondo verde o rojo suave.
 
@@ -549,16 +548,10 @@ Los mensajes son breves y contextuales. En móviles, el personaje se reduce a un
 La configuración está centralizada al inicio de `script.js`:
 
 ```javascript
-const BACKGROUND_IMAGE = "";
-```
-
-Mientras ese valor sea vacío, no se solicita ninguna imagen y se muestra el fondo degradado oscuro de respaldo. Para activar el archivo local indicado por el proyecto, cambiar solo esa línea a:
-
-```javascript
 const BACKGROUND_IMAGE = "assets/background/background.png";
 ```
 
-`configureBackground()` publica la ruta como variable CSS y `body::before` la presenta con `background-size: cover`, una opacidad moderada y un blur sutil. Así conserva la proporción y el texto sigue siendo legible. La grilla decorativa se eliminó; esto no afecta los layouts que usan `display: grid`.
+`configureBackground()` publica la ruta como variable CSS y `body::before` la presenta con `background-size: cover`, una opacidad moderada y un blur sutil. Así conserva la proporción y el texto sigue siendo legible. Para volver temporalmente al degradado de respaldo sin solicitar la imagen, dejar la constante como `""`. La grilla decorativa se eliminó; esto no afecta los layouts que usan `display: grid`.
 
 ## Tip de F12
 
@@ -735,7 +728,7 @@ Se genera automáticamente desde las herramientas de desarrollador porque incluy
 - CSS
 - JavaScript
 - JSON local
-- Google Fonts (`Inter` y `Outfit`)
+- Fuentes locales Cinzel (`.otf`)
 
 No se usa:
 
