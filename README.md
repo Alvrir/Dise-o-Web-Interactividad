@@ -373,6 +373,8 @@ En el nivel final, el contenedor del botón `CONTINUAR` se oculta por completo h
 
 En celular, al enfocar el campo del nivel final la página se desplaza suavemente para dejar el input arriba del área visible y las condiciones debajo, evitando que el teclado las tape.
 
+En escritorio, el Password Game final usa dos columnas anchas sin reservar espacio para el genio oculto: una para temporizador y contraseña, y otra más amplia para las condiciones. Esto evita que las reglas largas se quiebren en muchas líneas. En celular se conserva una única columna.
+
 Los dos Password Game muestran, a la derecha del campo de contraseña, un contador numérico sin recuadro. El input usa el espacio restante para que el contador no se superponga.
 
 La función que decide qué reglas se muestran es:

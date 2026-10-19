@@ -2568,6 +2568,30 @@ select:focus-visible {
     display: none;
 }
 
+.password-layout--finalPassword {
+    width: min(1540px, 100%);
+    grid-template-columns: minmax(470px, 0.98fr) minmax(520px, 1.2fr);
+    gap: clamp(32px, 4vw, 68px);
+    align-items: start;
+}
+
+.password-layout--finalPassword > .password-primary {
+    grid-column: 1;
+    grid-row: 1;
+    padding: clamp(34px, 3.4vw, 54px);
+}
+
+.password-layout--finalPassword > .rule-list {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+}
+
+.password-layout--finalPassword .rule-item {
+    padding: 18px 22px;
+    font-size: 1.04rem;
+}
+
 .closing-celebration {
     grid-template-columns: minmax(0, 1fr) 320px;
 }
@@ -2699,6 +2723,26 @@ select:focus-visible {
     .password-layout--shortPassword {
         grid-template-columns: minmax(0, 1fr);
         min-height: 0;
+    }
+
+    .password-layout--finalPassword {
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 18px;
+    }
+
+    .password-layout--finalPassword > .password-primary,
+    .password-layout--finalPassword > .rule-list {
+        grid-column: 1;
+    }
+
+    .password-layout--finalPassword > .password-primary {
+        grid-row: 1;
+        padding: 24px 18px;
+    }
+
+    .password-layout--finalPassword > .rule-list {
+        grid-row: 2;
     }
 
     .password-layout--shortPassword > .password-primary,
