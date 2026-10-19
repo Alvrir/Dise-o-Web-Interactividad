@@ -7,6 +7,12 @@ const devClose = document.querySelector("#dev-close");
 const devScreenSelect = document.querySelector("#dev-screen-select");
 const devMessage = document.querySelector("#dev-message");
 const finalResultStoragePrefix = "interactividad-password-final-result:";
+const BACKGROUND_IMAGE = "";
+const GENIE_ASSETS = {
+    idle: "assets/genio/idle.png",
+    pensando: "assets/genio/pensando.png",
+    celu: "assets/genio/celu.png"
+};
 let finalTimerFrame = null;
 let finalRestartCooldownInterval = null;
 let developerHoldTimeout = null;
@@ -205,6 +211,7 @@ const closingConcepts = [
 init();
 
 async function init() {
+    configureBackground();
     await loadAlumnos();
     initDeveloperTools();
     showScreen("start");
@@ -247,6 +254,15 @@ function showScreen(screenId) {
     app.focus({ preventScroll: true });
 }
 
+function configureBackground() {
+    if (!BACKGROUND_IMAGE.trim()) {
+        document.documentElement.style.removeProperty("--custom-background-image");
+        return;
+    }
+
+    document.documentElement.style.setProperty("--custom-background-image", `url("${BACKGROUND_IMAGE}")`);
+}
+
 function updateProgress(screen) {
     const index = screens.findIndex(item => item.id === screen.id);
     const percentage = index <= 0 ? 4 : Math.round((index / (screens.length - 1)) * 100);
@@ -277,7 +293,7 @@ function renderBrowserInfo() {
     app.innerHTML = `
         <section class="genie-screen">
             <div class="genie-stage">
-                <img id="genie-image" class="genie-image" src="assets/genio/idle.png" alt="Genio esperando para comenzar">
+                <img id="genie-image" class="genie-image" src="${GENIE_ASSETS.idle}" alt="Genio esperando para comenzar">
                 <div class="genie-dialog">
                     <p id="genie-message">¡Hola! Puedo adivinar algunas cosas sobre el dispositivo desde el que me visitás.</p>
                     <button id="genie-action" type="button">EMPEZAR ADIVINACIÓN</button>
@@ -399,7 +415,7 @@ function initGenieExperience(environmentPromise) {
 
     function setGeniePose(pose, altText) {
         image.classList.remove("is-appearing");
-        image.src = `assets/genio/${pose}.png`;
+        image.src = GENIE_ASSETS[pose];
         image.alt = altText;
         image.classList.toggle("is-thinking", pose === "pensando");
 
@@ -453,13 +469,14 @@ function wait(milliseconds) {
 
 function renderEvents() {
     app.innerHTML = `
-        <section class="events-lab">
-            <header class="lab-header">
+        <section class="activity-layout events-activity">
+            <div class="events-lab">
+                <header class="lab-header">
                 <span class="section-kicker">ACTIVIDAD 2 · EVENTOS</span>
                 <h2>LABORATORIO DE INTERACTIVIDAD</h2>
                 <p class="lead">Tu navegador puede detectar lo que hacés. Probá diferentes acciones y mirá cómo responde.</p>
             </header>
-            <div class="event-grid" aria-label="Experimentos de eventos">
+                <div class="event-grid" aria-label="Experimentos de eventos">
                 <article class="event-card" data-event-card="click">
                     <div class="event-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v10m0 0 4-4m-4 4-4-4M5 14v4a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-4"/></svg></div>
                     <span class="event-tag">01 · CLICK</span>
@@ -494,18 +511,23 @@ function renderEvents() {
                         <input id="key-demo" type="text" placeholder="Presioná una tecla">
                     </label>
                 </article>
-            </div>
-            <section class="event-console" aria-live="polite">
+                </div>
+                <section class="event-console" aria-live="polite">
                 <div class="event-console-header">
                     <span>EVENTO DETECTADO</span>
                     <strong id="event-discovery-count">Eventos descubiertos: ${state.discoveredEvents.length}/4</strong>
                 </div>
                 <strong id="last-event" class="event-name">${state.lastEvent}</strong>
                 <p id="event-description">Esperando una interacción para mostrar qué ocurrió.</p>
-            </section>
-            <div class="actions">
-                <button data-next="form">CONTINUAR →</button>
+                </section>
+                <div class="actions">
+                    <button data-next="form">CONTINUAR →</button>
+                </div>
             </div>
+            ${renderGenieCompanion({
+                pose: "celu",
+                message: "¡Cada movimiento cuenta! Probá interactuar con los elementos."
+            })}
         </section>
     `;
 
@@ -586,6 +608,10 @@ function renderForm() {
                     <li class="validation-item"><span class="status waiting">?</span><span>Esperando la carga de los datos.</span></li>
                     <li class="validation-item"><span class="status waiting">?</span><span>Consulta a la base de datos pendiente.</span></li>
                 </ul>
+                ${renderGenieCompanion({
+                    pose: "pensando",
+                    message: "Voy a revisar si los datos coinciden con la base local."
+                })}
             </section>
         </section>
     `;
@@ -677,6 +703,8 @@ function renderShortPassword() {
         inputId: "short-password-input",
         rules: shortPasswordRules,
         ruleMode: "always",
+        geniePose: "pensando",
+        genieMessage: "¿Pensaste que crear una contraseña era tan fácil?",
         nextScreen: "fakeFinal"
     });
 }
@@ -698,6 +726,8 @@ function renderFinalPassword() {
         revealedCountKey: "finalPasswordRevealedCount",
         completedOrderKey: "finalPasswordCompletionOrder",
         continueAtEnd: true,
+        geniePose: "pensando",
+        genieMessage: "Concentrate: cada condición desbloquea la siguiente pista.",
         nextScreen: "closing"
     });
 }
@@ -705,7 +735,7 @@ function renderFinalPassword() {
 function renderPasswordScreen(config) {
     app.innerHTML = `
         <section class="password-layout">
-            <div>
+            <div class="password-primary">
                 <p class="lead">${config.intro}</p>
                 ${config.stateKey === "finalPassword" ? `
                     <p class="live-timer" aria-live="off">
@@ -724,6 +754,10 @@ function renderPasswordScreen(config) {
                     <button id="password-continue" type="button" class="hidden" data-next="${config.nextScreen}">CONTINUAR →</button>
                 </div>
             </div>
+            ${renderGenieCompanion({
+                pose: config.geniePose,
+                message: config.genieMessage
+            })}
             <ul id="password-rules" class="rule-list"></ul>
         </section>
     `;
@@ -839,6 +873,10 @@ function renderCompletedFinalPassword(result) {
                 <span class="result-summary-password">${escapeHtml(getResultPassword(result))}</span>
                 <span>${formatDuration(result.durationMs)} · ${result.characterCount} letras</span>
             </div>
+            ${renderGenieCompanion({
+                pose: "idle",
+                message: "¡Excelente! Guardé tu resultado para que puedas volver a verlo."
+            })}
             <div class="actions password-actions-end">
                 <button id="show-final-result" type="button">MOSTRAR RESULTADO</button>
                 <div class="result-next-actions">
@@ -883,7 +921,18 @@ function showFinalResultModal(result) {
 
     document.body.append(modal);
     document.querySelector("#close-final-result").addEventListener("click", () => modal.remove());
-    document.querySelector("#save-final-result").addEventListener("click", () => downloadFinalResultImage(result));
+    document.querySelector("#save-final-result").addEventListener("click", async event => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        button.textContent = "PREPARANDO IMAGEN...";
+
+        try {
+            await downloadFinalResultImage(result);
+        } finally {
+            button.disabled = false;
+            button.textContent = "GUARDAR IMAGEN";
+        }
+    });
 }
 
 function getFinalResultKey(dni = state.formData.dni) {
@@ -991,45 +1040,73 @@ function escapeHtml(value) {
         .replaceAll("'", "&#039;");
 }
 
-function downloadFinalResultImage(result) {
+async function downloadFinalResultImage(result) {
     const canvas = document.createElement("canvas");
     canvas.width = 1200;
     canvas.height = 920;
     const context = canvas.getContext("2d");
     const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, "#eaf7ef");
-    gradient.addColorStop(1, "#d9f3f1");
+    gradient.addColorStop(0, "#0b1623");
+    gradient.addColorStop(1, "#183b50");
     context.fillStyle = gradient;
     context.fillRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = "#075f66";
+
+    context.strokeStyle = "rgba(83, 151, 208, 0.42)";
+    context.lineWidth = 2;
+    context.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
+    context.fillStyle = "#27b6b9";
     context.font = "700 34px Arial";
     context.fillText("RESULTADO", 80, 100);
-    context.fillStyle = "#15202b";
-    context.font = "700 68px Arial";
+    context.fillStyle = "#f4f7fb";
+    context.font = "700 62px Arial";
     context.fillText(String(result.nombre).slice(0, 28), 80, 190);
     context.font = "700 30px Arial";
-    context.fillStyle = "#5b6b7a";
+    context.fillStyle = "#a9bacb";
     context.fillText("CONTRASEÑA", 80, 280);
-    context.fillStyle = "#15202b";
-    context.font = "700 40px Arial";
-    const passwordEndY = drawCanvasPassword(context, getResultPassword(result), 80, 345, 1040, 52);
+    context.fillStyle = "#f4f7fb";
+    context.font = "700 36px Arial";
+    const passwordEndY = drawCanvasPassword(context, getResultPassword(result), 80, 345, 620, 50);
     const metricLabelY = passwordEndY + 100;
     context.font = "700 30px Arial";
-    context.fillStyle = "#5b6b7a";
+    context.fillStyle = "#a9bacb";
     context.fillText("TIEMPO", 80, metricLabelY);
-    context.fillText("LETRAS", 650, metricLabelY);
-    context.font = "700 112px Arial";
-    context.fillStyle = "#15202b";
+    context.fillText("LETRAS", 470, metricLabelY);
+    context.font = "700 78px Arial";
+    context.fillStyle = "#fabf3f";
     context.fillText(formatDuration(result.durationMs), 80, metricLabelY + 130);
-    context.fillText(String(result.characterCount), 650, metricLabelY + 130);
+    context.fillText(String(result.characterCount), 470, metricLabelY + 130);
     context.font = "700 25px Arial";
-    context.fillStyle = "#075f66";
+    context.fillStyle = "#27b6b9";
     context.fillText("Interactividad y validación", 80, metricLabelY + 250);
+
+    const genieImage = await loadCanvasImage(GENIE_ASSETS.idle);
+    if (genieImage) {
+        drawCanvasGenie(context, genieImage, 740, 145, 370, 610);
+    }
 
     const link = document.createElement("a");
     link.download = `resultado-${String(result.nombre).replace(/[^a-z0-9]+/gi, "-").toLowerCase() || "jugador"}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
+}
+
+function loadCanvasImage(source) {
+    return new Promise(resolve => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => resolve(null);
+        image.src = source;
+    });
+}
+
+function drawCanvasGenie(context, image, x, y, maxWidth, maxHeight) {
+    const ratio = Math.min(maxWidth / image.naturalWidth, maxHeight / image.naturalHeight);
+    const width = image.naturalWidth * ratio;
+    const height = image.naturalHeight * ratio;
+    const drawX = x + (maxWidth - width) / 2;
+    const drawY = y + (maxHeight - height) / 2;
+
+    context.drawImage(image, drawX, drawY, width, height);
 }
 
 function drawCanvasPassword(context, password, x, y, maxWidth, lineHeight) {
@@ -1203,11 +1280,17 @@ function containsMonth(password) {
 function renderFakeFinal() {
     app.innerHTML = `
         <section class="fake-final">
-            <p id="fake-final-message" class="fake-final-message">Completaste todas las condiciones.</p>
-            <div class="actions">
-                <button id="fake-final-button" type="button">ESPERÁ...</button>
-                <button id="fake-final-continue" type="button" class="hidden" data-next="finalPassword">CONTINUAR →</button>
+            <div class="fake-final-content">
+                <p id="fake-final-message" class="fake-final-message">Completaste todas las condiciones.</p>
+                <div class="actions">
+                    <button id="fake-final-button" type="button">ESPERÁ...</button>
+                    <button id="fake-final-continue" type="button" class="hidden" data-next="finalPassword">CONTINUAR →</button>
+                </div>
             </div>
+            ${renderGenieCompanion({
+                pose: "pensando",
+                message: "¡Excelente! Pero todavía queda un último desafío."
+            })}
         </section>
     `;
 
@@ -1231,8 +1314,20 @@ function renderFakeFinal() {
 
 function renderClosing() {
     app.innerHTML = `
-        <section>
-            <div class="screen-grid">
+        <section class="closing-screen">
+            <header class="closing-celebration">
+                <div>
+                    <span class="section-kicker">LABORATORIO COMPLETADO</span>
+                    <h2>¡FELICITACIONES!</h2>
+                    <p>Completaste todos los desafíos del laboratorio web.</p>
+                    <p class="lead">Ahora conocés un poco más sobre cómo las páginas detectan y responden a tus acciones.</p>
+                </div>
+                ${renderGenieCompanion({
+                    pose: "idle",
+                    message: "¡Excelente trabajo! Ya dominás las pistas del laboratorio."
+                })}
+            </header>
+            <div class="screen-grid closing-summary">
                 <div>
                     <p class="lead">El recorrido conectó acciones reales del usuario con eventos, código JavaScript, validación y respuestas visibles.</p>
                     <ul class="flow-list">
@@ -1304,6 +1399,25 @@ function initDeveloperTools() {
     document.querySelector("#dev-fill-student").addEventListener("click", fillDeveloperStudent);
     document.querySelector("#dev-complete-password").addEventListener("click", completeDeveloperPassword);
     document.querySelector("#dev-open-readme").addEventListener("click", openReadme);
+}
+
+function renderGenieCompanion({ message, pose = "idle" }) {
+    const source = GENIE_ASSETS[pose] || GENIE_ASSETS.idle;
+    const alt = pose === "pensando"
+        ? "Akinator pensando"
+        : pose === "celu"
+            ? "Akinator observando un celular"
+            : "Akinator sonriendo";
+
+    return `
+        <aside class="genie-companion genie-companion--${pose}">
+            <img src="${source}" alt="${alt}">
+            <div class="genie-companion-message">
+                <span>AKINATOR</span>
+                <p>${message}</p>
+            </div>
+        </aside>
+    `;
 }
 
 function initDeveloperHoldTrigger() {

@@ -2,7 +2,9 @@
 
 Página educativa e interactiva para una exposición de Diseño Web de primer año.
 
-La interfaz usa un lenguaje de **laboratorio digital oscuro**: fondo azul profundo con grilla técnica, superficies azul petróleo, acentos celestes y turquesa para los estados activos, y amarillo para las acciones principales. Las actividades comparten el mismo sistema visual para que el recorrido se sienta como una experiencia única, sin cambiar su lógica didáctica.
+La interfaz usa un lenguaje de **laboratorio digital oscuro**: fondo azul profundo, superficies azul petróleo, acentos celestes y turquesas para los estados activos, y amarillo para las acciones principales. Las actividades comparten el mismo sistema visual para que el recorrido se sienta como una experiencia única, sin cambiar su lógica didáctica.
+
+La segunda etapa elimina la grilla decorativa, incorpora a Akinator como mascota visual recurrente y equilibra el uso del espacio en formularios, reglas y cierre del recorrido.
 
 La idea principal es que la persona no solo lea conceptos, sino que los experimente: hace click, escribe, completa formularios, ve validaciones y juega dos versiones de un Password Game.
 
@@ -105,7 +107,7 @@ Contiene todo el diseño visual:
 - tip de F12;
 - cierre con tarjetas preparadas para miniaturas.
 
-Al final del archivo está el bloque `Digital lab visual system`, que concentra las sobreescrituras del rediseño. Ahí están las variables de color, las superficies translúcidas, la grilla de fondo, los componentes compartidos y los cortes responsive. La paleta principal es `#0b1623`, `#12283a`, `#183b50`, `#5397d0`, `#fabf3f`, `#27b6b9`, `#f4f7fb` y `#a9bacb`.
+Al final del archivo están los bloques `Digital lab visual system` y `Second-stage composition refinements`. Ahí están las variables de color, las superficies translúcidas, los componentes compartidos, la mascota y los cortes responsive. La paleta principal es `#0b1623`, `#12283a`, `#183b50`, `#5397d0`, `#fabf3f`, `#27b6b9`, `#f4f7fb` y `#a9bacb`.
 
 Las fuentes se cargan desde Google Fonts en `index.html`: `Outfit` para títulos y `Inter` para texto e interfaz. Si no están disponibles, el navegador usa las fuentes de reserva definidas en CSS.
 
@@ -229,6 +231,8 @@ El panel inferior muestra:
 El contador se guarda solo durante la sesión abierta. Completar los cuatro no bloquea el botón para continuar: la exploración es libre. En escritorio hay cuatro tarjetas por fila cuando entra el ancho disponible, se reducen a dos columnas en anchos intermedios y a una sola columna en celular.
 
 En equipos con mouse, la segunda tarjeta detecta el evento real `mouseover`. Al tocar en un dispositivo móvil se registra `pointerdown`, sin afirmar falsamente que ocurrió un evento de mouse. El foco con teclado también permite descubrir esa tarjeta.
+
+La actividad muestra una versión compacta de Akinator junto al laboratorio: queda como columna secundaria en pantallas muy anchas y pasa a una fila horizontal debajo de los experimentos cuando falta espacio.
 
 ## Estado central de la aplicación
 
@@ -389,7 +393,7 @@ Al escribir la primera letra en el Password Game final comienza un temporizador 
 
 La tarjeta se guarda en el navegador del jugador usando su DNI como clave local. El resultado incluye la contraseña final, el tiempo y la cantidad de letras.
 
-La tarjeta tiene una `×` para cerrarla, un botón `MOSTRAR RESULTADO` para abrirla otra vez y `GUARDAR IMAGEN`, que descarga una imagen PNG con la contraseña, el tiempo y la cantidad de letras para compartirla o capturarla. En la pantalla posterior al resultado aparece `REINICIAR PARTIDA` debajo de `CONTINUAR`; se habilita 20 segundos después de terminar para permitir otra partida.
+La tarjeta tiene una `×` para cerrarla, un botón `MOSTRAR RESULTADO` para abrirla otra vez y `GUARDAR IMAGEN`, que descarga una imagen PNG con la contraseña, el tiempo y la cantidad de letras para compartirla o capturarla. La imagen exportada usa el tema oscuro del laboratorio e incorpora la imagen sonriendo de Akinator, cargada antes de dibujarse en el Canvas. En la pantalla posterior al resultado aparece `REINICIAR PARTIDA` debajo de `CONTINUAR`; se habilita 20 segundos después de terminar para permitir otra partida.
 
 El nivel final pide:
 
@@ -524,6 +528,38 @@ formatDeviceGuess()
 formatBatteryGuess()
 ```
 
+## Akinator como mascota
+
+Las tres imágenes existentes se centralizan en `script.js` dentro de:
+
+```javascript
+const GENIE_ASSETS = {
+    idle: "assets/genio/idle.png",
+    pensando: "assets/genio/pensando.png",
+    celu: "assets/genio/celu.png"
+};
+```
+
+Fuera de la actividad original de adivinación, `renderGenieCompanion()` genera una versión compacta con imagen, nombre y mensaje contextual. Se usa en eventos, verificación de alumno, los dos Password Game, el falso final, el resultado guardado y la felicitación de la actividad 8. La pantalla original del genio conserva sus poses, tiempos y animaciones propios.
+
+Los mensajes son breves y contextuales. En móviles, el personaje se reduce a una fila para no ocultar controles ni alargar la pantalla de manera innecesaria. Las animaciones respetan `prefers-reduced-motion`.
+
+## Fondo personalizado
+
+La configuración está centralizada al inicio de `script.js`:
+
+```javascript
+const BACKGROUND_IMAGE = "";
+```
+
+Mientras ese valor sea vacío, no se solicita ninguna imagen y se muestra el fondo degradado oscuro de respaldo. Para activar el archivo local indicado por el proyecto, cambiar solo esa línea a:
+
+```javascript
+const BACKGROUND_IMAGE = "assets/background/background.png";
+```
+
+`configureBackground()` publica la ruta como variable CSS y `body::before` la presenta con `background-size: cover`, una opacidad moderada y un blur sutil. Así conserva la proporción y el texto sigue siendo legible. La grilla decorativa se eliminó; esto no afecta los layouts que usan `display: grid`.
+
 ## Tip de F12
 
 En la pantalla de información del navegador aparece un tip que indica:
@@ -585,6 +621,9 @@ Partes importantes:
 - `.events-lab`, `.event-grid`, `.event-card` y `.event-console`: laboratorio de la actividad de eventos;
 - `.progress-card`: barra de progreso;
 - `.student-layout`: formulario y verificaciones en dos columnas;
+- `.password-primary`: panel principal ampliado del Password Game;
+- `.genie-companion`: mascota reutilizable con su mensaje contextual;
+- `.closing-celebration`: cabecera de felicitación de la actividad 8;
 - `.form-grid`: campos del formulario;
 - `.rule-item`: reglas del Password Game y sus estados rojo/verde;
 - `.sponsor-logos`: fila de imágenes dentro de la regla de sponsors;
@@ -666,6 +705,7 @@ Para agregar imágenes reales:
 - Si se modifica `alumnos.json`, revisar que sea JSON válido.
 - Si se agregan reglas de contraseña, cada regla necesita `id`, `description` y `validate`.
 - Si se cambia el nombre de un input del formulario, revisar también `validateStudentForm()`.
+- Si se cambia `BACKGROUND_IMAGE`, usar una ruta relativa real y conservarla vacía cuando no se quiera cargar ningún fondo.
 
 ## Datos de prueba
 
