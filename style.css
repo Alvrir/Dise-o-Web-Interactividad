@@ -2488,13 +2488,15 @@ select:focus-visible {
 /* Context-specific mascot placement. */
 .student-layout .result-panel .genie-companion {
     display: grid;
+    width: 100%;
     justify-items: center;
+    align-items: end;
     margin-top: 18px;
 }
 
 .student-layout .result-panel .genie-companion img {
-    width: 142px;
-    max-height: 170px;
+    width: 175px;
+    max-height: 210px;
 }
 
 .password-layout--shortPassword {
@@ -2724,8 +2726,8 @@ select:focus-visible {
     }
 
     .student-layout .result-panel .genie-companion img {
-        width: 112px;
-        max-height: 132px;
+        width: 138px;
+        max-height: 165px;
     }
 
     .password-layout--shortPassword {
