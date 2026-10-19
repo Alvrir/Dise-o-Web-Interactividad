@@ -551,6 +551,8 @@ Los textos visibles usan Cinzel y sus títulos principales usan Cinzel Decorativ
 
 En la actividad de eventos, tocar o hacer click en `ZONA SENSIBLE` informa `pointerdown`, también cuando se usa mouse. El foco del control se conserva para navegación con teclado, pero ya no reemplaza el evento mostrado. La pantalla que recupera una partida final guardada centra la tarjeta de resultado y organiza sus tres acciones en una grilla estable: una acción grande a la izquierda y las dos acciones de avance a la derecha; en móvil pasan a una sola columna.
 
+Al final de la actividad 8 hay dos controles del mismo tamaño: `VOLVER AL INICIO` regresa a la pantalla de bienvenida y `PANTALLA ANTERIOR` vuelve directamente al Password Game final. En escritorio se muestran lado a lado, alineados al final del recorrido; en móvil se apilan.
+
 ## Aclaración del Password Game final
 
 Antes del campo del nivel final se muestra este aviso breve:

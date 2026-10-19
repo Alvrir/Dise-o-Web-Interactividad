@@ -2595,6 +2595,17 @@ select:focus-visible {
     place-items: end center;
 }
 
+.closing-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(210px, 1fr));
+    width: min(100%, 520px);
+    margin: clamp(32px, 5vw, 56px) 0 0 auto;
+}
+
+.closing-actions button {
+    width: 100%;
+}
+
 /* Stored final results remain a compact, centered group instead of stretched columns. */
 .completed-game-screen {
     width: min(760px, 100%);
@@ -2729,6 +2740,12 @@ select:focus-visible {
 
     .completed-game-screen #show-final-result {
         grid-row: auto;
+    }
+
+    .closing-actions {
+        grid-template-columns: minmax(0, 1fr);
+        width: 100%;
+        margin-left: 0;
     }
 
     .closing-celebration {

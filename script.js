@@ -1324,9 +1324,6 @@ function renderClosing() {
                         <li>RESPUESTA</li>
                     </ul>
                     <p class="lead">Todo esto forma parte de la interactividad web.</p>
-                    <div class="actions">
-                        <button type="button" data-next="start">FINALIZAR</button>
-                    </div>
                 </div>
                 <div class="callout">
                     Esta zona ya queda preparada para sumar miniaturas reales dentro de <strong>assets/screens/</strong>.
@@ -1334,6 +1331,10 @@ function renderClosing() {
             </div>
             <div class="summary-grid">
                 ${closingConcepts.map(renderConceptCard).join("")}
+            </div>
+            <div class="actions closing-actions">
+                <button type="button" data-next="start">VOLVER AL INICIO</button>
+                <button type="button" class="secondary-button" data-next="finalPassword">PANTALLA ANTERIOR</button>
             </div>
         </section>
     `;
