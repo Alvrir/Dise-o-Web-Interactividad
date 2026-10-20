@@ -805,4 +805,4 @@ Mostrar de forma práctica:
 
 La prioridad es que el recorrido funcione completo, sea visualmente claro en PC y celular, y continúe siendo fácil de modificar.
 
-En celular, la mascota de la actividad 6 se muestra centrada visualmente sobre el desafío, compensando el margen transparente propio de la ilustración, con un tamaño amplio y sin superponerse a su botón.
+En celular, la mascota de la actividad 6 se muestra centrada visualmente sobre el desafío. La corrección se aplica sobre la imagen, compensando su margen transparente interno sin afectar su animación, con un tamaño amplio y sin superponerse a su botón.
