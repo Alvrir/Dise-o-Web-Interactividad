@@ -449,36 +449,6 @@ La regla de sponsors muestra los tres logos de `assets/logos/` en recuadros de 7
 
 Las consignas del año, navegador y sponsors no revelan sus respuestas en pantalla. La validación detecta esos valores internamente según el navegador y el año actuales.
 
-## Herramientas de desarrollador internas
-
-La página tiene un acceso oculto:
-
-```text
-mantener apretado el recuadro de progreso durante 5 segundos
-```
-
-Al completar los cinco segundos se abre el panel de herramientas de desarrollador, pensado para testear y armar la página más rápido. Soltar antes no abre nada.
-
-Desde ese panel se puede:
-
-- saltar a cualquier pantalla;
-- ir a la pantalla anterior;
-- ir a la pantalla siguiente;
-- completar automáticamente el alumno de prueba;
-- completar automáticamente una contraseña válida;
-- abrir el `README.md` en otra pestaña.
-
-Este acceso está disponible en el modo libre; se deshabilita durante una competencia.
-
-Funciones relacionadas:
-
-```javascript
-initDeveloperTools()
-fillDeveloperStudent()
-completeDeveloperPassword()
-moveDeveloperScreen(direction)
-```
-
 ## Battery Status API
 
 La pantalla `¿Qué sabe la página sobre vos?` intenta consultar la batería mediante:
