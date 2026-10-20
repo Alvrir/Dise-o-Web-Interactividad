@@ -2671,6 +2671,46 @@ select:focus-visible {
     margin-bottom: clamp(18px, 2.5vw, 30px);
 }
 
+@media (min-width: 821px) {
+    .closing-screen {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(220px, 30%);
+        column-gap: 32px;
+        align-items: start;
+    }
+
+    .closing-celebration {
+        display: contents;
+    }
+
+    .closing-celebration > div {
+        grid-column: 1;
+        grid-row: 1;
+        min-width: 0;
+    }
+
+    .closing-celebration > .genie-companion {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        align-self: start;
+    }
+
+    .closing-screen > .closing-summary {
+        grid-column: 1;
+        grid-row: 2;
+        margin-top: 20px;
+    }
+
+    .closing-summary > div > .lead:first-child {
+        margin-top: 0;
+    }
+
+    .closing-screen > .summary-grid,
+    .closing-screen > .closing-actions {
+        grid-column: 1 / -1;
+    }
+}
+
 /* Stored final results remain a compact, centered group instead of stretched columns. */
 .completed-game-screen {
     width: min(760px, 100%);
