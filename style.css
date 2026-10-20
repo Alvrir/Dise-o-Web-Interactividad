@@ -2894,14 +2894,16 @@ select:focus-visible {
         order: 1;
         display: grid;
         width: 100%;
+        align-self: center;
+        justify-self: center;
         place-items: center;
         margin: 0 0 16px;
     }
 
     .fake-final > .genie-companion img {
         display: block;
-        width: min(72vw, 250px);
-        max-height: 280px;
+        width: min(80vw, 290px);
+        max-height: 320px;
         margin: 0 auto;
     }
 
