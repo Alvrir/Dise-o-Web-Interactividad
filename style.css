@@ -2897,6 +2897,8 @@ select:focus-visible {
         position: static;
         order: 1;
         display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
         width: 100%;
         align-self: center;
         justify-self: center;
