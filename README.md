@@ -2,6 +2,10 @@
 
 Página educativa e interactiva para una exposición de Diseño Web de primer año.
 
+La interfaz usa un lenguaje de **laboratorio digital oscuro**: fondo azul profundo, superficies azul petróleo, acentos celestes y turquesas para los estados activos, y amarillo para las acciones principales. Las actividades comparten el mismo sistema visual para que el recorrido se sienta como una experiencia única, sin cambiar su lógica didáctica.
+
+La segunda etapa elimina la grilla decorativa, incorpora a Akinator como mascota visual recurrente y equilibra el uso del espacio en formularios, reglas y cierre del recorrido.
+
 La idea principal es que la persona no solo lea conceptos, sino que los experimente: hace click, escribe, completa formularios, ve validaciones y juega dos versiones de un Password Game.
 
 ## Página publicada
@@ -17,6 +21,33 @@ El repositorio de GitHub es:
 ```text
 https://github.com/Alvrir/Dise-o-Web-Interactividad
 ```
+
+## Competencias integradas a la exposición
+
+El enlace generado por el panel (`index.html?competencia=ID`) abre **la primera pantalla**, con el botón COMENZAR y las actividades originales en orden. No muestra una inscripción separada ni anuncia la competencia antes de la victoria. El acceso directo al juego final se conserva sólo en el modo libre.
+
+- Se reutiliza el nombre del formulario original para identificar el resultado y el ranking. No se pide otro apodo.
+- Al llegar al juego final se prepara la participación automáticamente. El cronómetro empieza al escribir, no durante las actividades previas ni mientras conecta.
+- Sólo una victoria confirmada consume un intento (dos por defecto). Los reintentos de envío no duplican resultados y el servidor controla el límite.
+- Al ganar se revela el ranking, la mejor marca y los intentos restantes. CONTINUAR lleva al cierre de la exposición; volver a intentar repite sólo el juego final después del cooldown de 20 segundos.
+- El recorrido y formulario se recuperan localmente al recargar. Cada competencia mantiene separado su progreso y sus resultados del modo libre.
+- El ranking muestra una fila por participante, se actualiza con Realtime y tiene una consulta de respaldo cada 15 segundos. El contador indica participantes inscriptos al llegar al juego final, no personas conectadas.
+- Los enlaces y QR identifican una competencia concreta. Al finalizarla se conserva el historial y se rechazan resultados nuevos.
+
+Páginas publicadas después del despliegue:
+
+- [Administración](https://alvrir.github.io/Dise-o-Web-Interactividad/competencias/admin.html)
+- [Ranking de la competencia activa](https://alvrir.github.io/Dise-o-Web-Interactividad/competencias/ranking.html)
+
+La configuración pública se encuentra en `competencias/config.js`: URL en la línea 2 y publishable key en la línea 3. Nunca incluir claves secretas. El esquema SQL, permisos del administrador, autenticación anónima, pruebas y pasos de uso están detallados en [competencias/README.md](competencias/README.md).
+
+Para compartir con celulares, generar el QR desde el panel **publicado**: el panel local genera enlaces a localhost, que no sirven desde otro dispositivo. Las herramientas de desarrollo no se habilitan durante el recorrido competitivo.
+
+Las victorias pendientes se reenvían automáticamente al volver a su pantalla, conservando el UUID para evitar duplicados. Si falla la conexión al reiniciar, se conserva el resultado anterior y se permite reintentar.
+
+### Verificación de la integración
+
+Se verificaron localmente ocho pruebas de lógica, navegación y recuperación de errores y 28 comprobaciones del esquema SQL con PostgreSQL embebido. También se comprobó en el navegador que el enlace abre el inicio y recupera la actividad al recargar. La apertura de la primera pantalla desde “Abrir juego” fue confirmada por el usuario. Se comprobó además la conexión real a Supabase: el ranking muestra la competencia activa, un resultado existente y la suscripción Realtime en estado “En vivo”. No se generaron victorias artificiales en esa competencia. Queda pendiente una prueba completa desde otro dispositivo y de reconexión de red real; las pruebas SQL locales no sustituyen esa comprobación.
 
 ## Regla de mantenimiento
 
@@ -66,6 +97,8 @@ Página Diseño Web/
 |   |-- alumnos.json
 |
 |-- assets/
+|   |-- genio/
+|   |-- logos/
 |   |-- screens/
 |       |-- .gitkeep
 |
@@ -100,6 +133,12 @@ Contiene todo el diseño visual:
 - panel de herramientas de desarrollador;
 - tip de F12;
 - cierre con tarjetas preparadas para miniaturas.
+
+Al final del archivo están los bloques `Digital lab visual system` y `Second-stage composition refinements`. Ahí están las variables de color, las superficies translúcidas, los componentes compartidos, la mascota y los cortes responsive. La paleta principal es `#0b1623`, `#12283a`, `#183b50`, `#1ca6f2`, `#fabf3f`, `#27b6b9`, `#f4f7fb` y `#a9bacb`. El highlight azul `#1ca6f2` se usa en bordes, foco y progreso.
+
+Los paneles principales usan un tratamiento de vidrio: fondo oscuro semitransparente, `backdrop-filter` con blur y bordes azules suaves. Esto deja visible la imagen de fondo sin perjudicar la lectura de controles y textos.
+
+La tipografía se carga localmente desde `assets/font/`: `Cinzel` se usa en texto e interfaz, y `Cinzel Decorative` en los títulos destacados. Esto evita depender de la carga de fuentes externas. El navegador usa las fuentes de reserva declaradas en CSS si fuera necesario.
 
 El layout principal utiliza una columna flex de altura completa (`100dvh`). El encabezado conserva su altura natural y `.screen` ocupa todo el espacio restante del navegador, sin imponer una altura mínima adicional en celulares.
 
@@ -208,6 +247,22 @@ bindNextButtons()
 
 Al cambiar de pantalla, `showScreen()` enfoca el contenido principal con `preventScroll`. Esto conserva la accesibilidad del foco sin desplazar automáticamente la página hacia abajo, especialmente en celulares.
 
+## Laboratorio de interactividad
+
+La actividad de eventos se renderiza con `renderEvents()` como un laboratorio de cuatro experimentos: `click`, `mouseover` o `pointerdown`, `input` y `keydown`. Cada experimento tiene una tarjeta, una breve consigna y un control real para probarlo.
+
+El panel inferior muestra:
+
+- el último evento detectado;
+- una explicación en lenguaje simple de lo que ocurrió;
+- el contador `Eventos descubiertos: N/4`.
+
+El contador se guarda solo durante la sesión abierta. Completar los cuatro no bloquea el botón para continuar: la exploración es libre. En escritorio hay cuatro tarjetas por fila cuando entra el ancho disponible, se reducen a dos columnas en anchos intermedios y a una sola columna en celular.
+
+En equipos con mouse, la segunda tarjeta detecta el evento real `mouseover` al acercar el cursor y `pointerdown` al hacer click. Al tocar en un dispositivo móvil también se registra `pointerdown`. El foco con teclado sigue disponible para acceder al control, sin reemplazar el último evento mostrado.
+
+La actividad muestra una versión compacta de Akinator junto al laboratorio: queda como columna secundaria en pantallas muy anchas y pasa a una fila horizontal debajo de los experimentos cuando falta espacio.
+
 ## Estado central de la aplicación
 
 En `script.js` existe un objeto llamado:
@@ -229,7 +284,7 @@ Sirve para guardar datos mientras la página está abierta:
 - contraseña del juego final;
 - inicio y orden de cumplimiento del Password Game final.
 
-No se usa base de datos real ni servidor. El resultado del Password Game final sí se guarda con `localStorage` en el dispositivo de cada jugador.
+El modo libre no necesita base de datos ni servidor de aplicación. El progreso del Password Game final (texto, cronómetro y condiciones) y su resultado se guardan con `localStorage` en el dispositivo. El modo competencia utiliza Supabase para participantes, resultados, permisos y ranking; el texto de la contraseña, DNI y edad nunca se envían a Supabase.
 
 ## Cómo modificar alumnos
 
@@ -345,7 +400,11 @@ En el nivel final, el contenedor del botón `CONTINUAR` se oculta por completo h
 
 En celular, al enfocar el campo del nivel final la página se desplaza suavemente para dejar el input arriba del área visible y las condiciones debajo, evitando que el teclado las tape.
 
+En escritorio, el Password Game final usa dos columnas anchas sin reservar espacio para el genio oculto: una para temporizador y contraseña, y otra más amplia para las condiciones. Esto evita que las reglas largas se quiebren en muchas líneas. En celular se conserva una única columna.
+
 Los dos Password Game muestran, a la derecha del campo de contraseña, un contador numérico sin recuadro. El input usa el espacio restante para que el contador no se superponga.
+
+El texto escrito en los campos de contraseña usa Verdana o Segoe UI en vez de la fuente decorativa general. Así se distinguen con claridad mayúsculas y minúsculas mientras se completa el desafío.
 
 La función que decide qué reglas se muestran es:
 
@@ -367,7 +426,7 @@ Al escribir la primera letra en el Password Game final comienza un temporizador 
 
 La tarjeta se guarda en el navegador del jugador usando su DNI como clave local. El resultado incluye la contraseña final, el tiempo y la cantidad de letras.
 
-La tarjeta tiene una `×` para cerrarla, un botón `MOSTRAR RESULTADO` para abrirla otra vez y `GUARDAR IMAGEN`, que descarga una imagen PNG con la contraseña, el tiempo y la cantidad de letras para compartirla o capturarla. En la pantalla posterior al resultado aparece `REINICIAR PARTIDA` debajo de `CONTINUAR`; se habilita 20 segundos después de terminar para permitir otra partida.
+La tarjeta tiene una `×` para cerrarla, un botón `MOSTRAR RESULTADO` para abrirla otra vez y `GUARDAR IMAGEN`, que descarga una imagen PNG con la contraseña, el tiempo y la cantidad de letras para compartirla o capturarla. La imagen exportada usa el tema oscuro del laboratorio e incorpora la imagen sonriendo de Akinator, cargada antes de dibujarse en el Canvas. En la pantalla posterior al resultado aparece `REINICIAR PARTIDA` debajo de `CONTINUAR`; se habilita 20 segundos después de terminar para permitir otra partida.
 
 El nivel final pide:
 
@@ -376,16 +435,15 @@ El nivel final pide:
 3. una mayúscula;
 4. un número;
 5. un símbolo;
-6. que los números aislados sumen 15: los dígitos pegados se ignoran; por ejemplo, `2a4` cuenta `2 + 4`, mientras que `222a3b66c` cuenta solamente `3`;
-7. el número del año actual;
-8. el año actual escrito en números romanos;
-9. el resultado de `10 × 42`;
-10. el nombre del navegador detectado;
-11. un mes del año;
-12. un número romano;
-13. uno de los textos `Binco`, `Manaos` o `Milkaut`; alcanza con una sola de esas palabras.
-14. más de 45 caracteres.
-15. el nombre de la ciudad: `Rojas`.
+6. el número del año actual;
+7. el año actual escrito en números romanos;
+8. el resultado de `10 × 42`;
+9. el nombre del navegador detectado;
+10. un mes del año;
+11. un número romano;
+12. uno de los textos `Binco`, `Manaos` o `Milkaut`; alcanza con una sola de esas palabras.
+13. más de 45 caracteres.
+14. el nombre de la ciudad: `Rojas`.
 
 La última regla muestra los tres logos de `assets/logos/` en recuadros de 72 px de alto. Cada imagen cubre su recuadro completo y cada regla usa `.is-valid` o `.is-invalid` para recibir un fondo verde o rojo suave.
 
@@ -502,6 +560,56 @@ formatDeviceGuess()
 formatBatteryGuess()
 ```
 
+## Akinator como mascota
+
+Las tres imágenes existentes se centralizan en `script.js` dentro de:
+
+```javascript
+const GENIE_ASSETS = {
+    idle: "assets/genio/idle.png",
+    pensando: "assets/genio/pensando.png",
+    celu: "assets/genio/celu.png"
+};
+```
+
+Fuera de la actividad original de adivinación, `renderGenieCompanion()` genera una versión compacta con imagen, nombre y mensaje contextual. Se usa en eventos, verificación de alumno, los dos Password Game, el falso final, el resultado guardado y la felicitación de la actividad 8. La pantalla original del genio conserva sus poses, tiempos y animaciones propios.
+
+Los mensajes son breves y contextuales. En móviles, el personaje se reduce a una fila para no ocultar controles ni alargar la pantalla de manera innecesaria. Las animaciones respetan `prefers-reduced-motion`.
+
+En la verificación de alumno, el personaje aparece centrado debajo de la lista de verificaciones y con una presencia algo mayor dentro de su recuadro. En el primer Password Game queda centrado, ocupa toda la altura disponible, se alinea con el borde inferior del recuadro principal y se difumina por debajo de los dos paneles ampliados del campo y las reglas. El Password Game final no muestra personaje, para dejar todo el espacio al temporizador, el campo y las condiciones. En celular vuelve al flujo normal para no interferir con el contenido. En la actividad 6, el genio sonriente ocupa la columna lateral amplia, aprovechando el espacio vacío con una entrada suave y un movimiento vertical discreto. La actividad 8 muestra un genio más grande junto al cierre, sin el recuadro técnico para miniaturas.
+
+Los textos visibles usan Cinzel y sus títulos principales usan Cinzel Decorative. Se eliminaron las menciones visibles a “laboratorio web”; la actividad de eventos se titula “Interactividad” y el cierre utiliza “Recorrido completado” y “Completaste todos los desafíos”.
+
+En móvil, el título inicial separa “Interactividad” de “Y validación” en líneas completas y usa un tamaño fijo más compacto. Esto evita que el navegador corte letras individuales en pantallas angostas. El fondo personalizado usa una altura visual estable (`100svh`) para conservar su encuadre al desplazarse, sin los saltos provocados por la barra dinámica del navegador móvil.
+
+En la actividad de eventos para móvil, el recuadro `EVENTO DETECTADO` se mueve debajo de la explicación y queda fijo mientras se recorren las tarjetas. Es más compacto, pero conserva el contador, el último evento y su descripción. En la verificación de alumno y el primer Password Game, las imágenes del genio usan una sola columna centrada en móvil. El falso final recupera un genio visible en la esquina superior derecha y deja el texto y botón centrados debajo.
+
+En la actividad de eventos, tocar o hacer click en `ZONA SENSIBLE` informa `pointerdown`, también cuando se usa mouse. El foco del control se conserva para navegación con teclado, pero ya no reemplaza el evento mostrado. La pantalla que recupera una partida final guardada centra la tarjeta de resultado y organiza sus tres acciones en una grilla estable: una acción grande a la izquierda y las dos acciones de avance a la derecha; en móvil pasan a una sola columna.
+
+El Password Game final incluye una condición adicional que elige aleatoriamente uno de seis colores característicos: rojo, azul, amarillo, verde, blanco o negro. La regla muestra solo una muestra de color; la contraseña debe incluir el nombre de ese color.
+
+Al final de la actividad 8 hay dos controles del mismo tamaño: `VOLVER AL INICIO` regresa a la pantalla de bienvenida y `PANTALLA ANTERIOR` vuelve directamente al Password Game final. En escritorio se muestran lado a lado, alineados al final del recorrido; en móvil se apilan.
+
+## Aclaración del Password Game final
+
+Antes del campo del nivel final se muestra este aviso breve:
+
+```text
+Empezá a escribir: el tiempo inicia con tu primera letra y se irán revelando las condiciones.
+```
+
+El texto no cambia las validaciones ni el orden progresivo de las reglas; solamente explica el inicio del temporizador y de las condiciones para que el desafío resulte más intuitivo.
+
+## Fondo personalizado
+
+La configuración está centralizada al inicio de `script.js`:
+
+```javascript
+const BACKGROUND_IMAGE = "assets/background/background.png";
+```
+
+`configureBackground()` publica la ruta como variable CSS y `body::before` la presenta con `background-size: cover`, una opacidad moderada y un blur sutil. Así conserva la proporción y el texto sigue siendo legible. Para volver temporalmente al degradado de respaldo sin solicitar la imagen, dejar la constante como `""`. La grilla decorativa se eliminó; esto no afecta los layouts que usan `display: grid`.
+
 ## Tip de F12
 
 En la pantalla de información del navegador aparece un tip que indica:
@@ -560,8 +668,12 @@ Partes importantes:
 - `.app-shell`: contenedor de ancho y altura completos;
 - `.topbar`: cabecera con progreso, que también es el acceso oculto a las herramientas de desarrollador al mantenerlo presionado cinco segundos;
 - `.screen`: caja principal flexible que ocupa el espacio restante del viewport;
+- `.events-lab`, `.event-grid`, `.event-card` y `.event-console`: laboratorio de la actividad de eventos;
 - `.progress-card`: barra de progreso;
 - `.student-layout`: formulario y verificaciones en dos columnas;
+- `.password-primary`: panel principal ampliado del Password Game;
+- `.genie-companion`: mascota reutilizable con su mensaje contextual;
+- `.closing-celebration`: cabecera de felicitación de la actividad 8;
 - `.form-grid`: campos del formulario;
 - `.rule-item`: reglas del Password Game y sus estados rojo/verde;
 - `.sponsor-logos`: fila de imágenes dentro de la regla de sponsors;
@@ -643,6 +755,7 @@ Para agregar imágenes reales:
 - Si se modifica `alumnos.json`, revisar que sea JSON válido.
 - Si se agregan reglas de contraseña, cada regla necesita `id`, `description` y `validate`.
 - Si se cambia el nombre de un input del formulario, revisar también `validateStudentForm()`.
+- Si se cambia `BACKGROUND_IMAGE`, usar una ruta relativa real y conservarla vacía cuando no se quiera cargar ningún fondo.
 
 ## Datos de prueba
 
@@ -672,13 +785,9 @@ Se genera automáticamente desde las herramientas de desarrollador porque incluy
 - CSS
 - JavaScript
 - JSON local
+- Fuentes locales Cinzel (`.otf`)
 
-No se usa:
-
-- SQL;
-- backend;
-- frameworks;
-- librerías externas.
+El modo competencia agrega PostgreSQL y funciones SQL en Supabase, Supabase Auth y Realtime, el cliente oficial `supabase-js` y la biblioteca `qrcode`, con versiones fijadas. El sitio permanece estático en GitHub Pages, sin frameworks ni un servidor propio. El modo libre no carga esas bibliotecas externas.
 
 ## Objetivo del proyecto
 
@@ -694,4 +803,4 @@ Mostrar de forma práctica:
 - diferencia entre información útil e información confiable;
 - reglas dinámicas mediante un Password Game.
 
-Este proyecto todavía es una base inicial. La prioridad es que funcione completo y sea fácil de modificar.
+La prioridad es que el recorrido funcione completo, sea visualmente claro en PC y celular, y continúe siendo fácil de modificar.

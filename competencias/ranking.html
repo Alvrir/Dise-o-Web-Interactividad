@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Ranking · Password Game</title>
+    <link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="competencias.css">
+</head>
+<body class="competition-page">
+    <main class="competition-shell ranking-shell">
+        <header class="competition-header"><div><p class="eyebrow">PASSWORD GAME · CLASIFICACIÓN</p><h1 id="event-name">Ranking en vivo</h1><p id="event-status"></p></div>
+            <div><span id="connection" role="status">Conectando…</span><p><a href="../index.html">Modo libre</a></p></div></header>
+        <p id="ranking-error" role="alert"></p>
+        <div class="competition-counters"><p><strong id="registered">0</strong> participantes</p><p><strong id="finished">0</strong> completaron el desafío</p></div>
+        <section id="podium" class="podium" aria-label="Los tres mejores"></section>
+        <section class="ranking-panel"><div class="ranking-title"><h2>Clasificación</h2><button id="show-all" class="secondary-button" hidden>Ver ranking completo</button></div>
+            <p id="empty-state">Cargando competencia…</p>
+            <div class="ranking-table-wrap"><table><thead><tr><th scope="col">Posición</th><th scope="col">Nombre</th><th scope="col">Mejor tiempo</th><th scope="col">Intentos</th></tr></thead><tbody id="ranking-rows"></tbody></table></div>
+            <p class="ranking-note">Orden por milisegundos; en un empate, primero quien registró esa marca antes. La pantalla muestra centésimas.</p>
+        </section>
+    </main><script type="module" src="ranking.js"></script>
+</body></html>

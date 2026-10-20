@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Administración · Password Game</title><link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="competencias.css"></head>
+<body class="competition-page"><main class="competition-shell admin-shell">
+    <header class="competition-header"><div><p class="eyebrow">PASSWORD GAME</p><h1>Mis competencias</h1></div><a href="../index.html">Volver al sitio</a></header>
+    <p id="admin-error" role="alert"></p>
+    <section id="login-panel" class="ranking-panel"><h2>Acceso del administrador</h2>
+        <form id="login-form"><label class="field">Correo<input name="email" type="email" autocomplete="username" required></label><label class="field">Contraseña<input name="password" type="password" autocomplete="current-password" required></label><button>Ingresar</button></form></section>
+    <section id="admin-panel" hidden>
+        <div class="admin-session"><p id="admin-user"></p><button id="logout" class="secondary-button">Cerrar sesión</button></div>
+        <section class="ranking-panel"><h2>Nueva competencia</h2><form id="create-form" class="create-form"><label class="field">Nombre<input name="name" maxlength="100" required placeholder="Exposición Diseño Web 2026"></label><label class="field">Victorias por participante<input name="max" type="number" min="1" max="20" value="2" required></label><button>Crear competencia</button></form></section>
+        <section id="event-links" class="ranking-panel" hidden></section>
+        <h2>Competencias e historial</h2><div id="events-list"></div>
+    </section>
+</main><script type="module" src="admin.js"></script></body></html>

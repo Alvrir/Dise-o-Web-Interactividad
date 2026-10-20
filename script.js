@@ -7,9 +7,49 @@ const devClose = document.querySelector("#dev-close");
 const devScreenSelect = document.querySelector("#dev-screen-select");
 const devMessage = document.querySelector("#dev-message");
 const finalResultStoragePrefix = "interactividad-password-final-result:";
+const BACKGROUND_IMAGE = "assets/background/background.png";
+const GENIE_ASSETS = {
+    idle: "assets/genio/idle.png",
+    pensando: "assets/genio/pensando.png",
+    celu: "assets/genio/celu.png"
+};
 let finalTimerFrame = null;
 let finalRestartCooldownInterval = null;
 let developerHoldTimeout = null;
+const competitionMode = new URLSearchParams(location.search).has("competencia");
+let competitionRuntime = null;
+
+function finalSnapshot() {
+    return {
+        password: state.finalPassword,
+        revealed: state.finalPasswordRevealedCount,
+        order: state.finalPasswordCompletionOrder,
+        startedAt: state.finalPasswordStartedAt,
+        context: passwordContext
+    };
+}
+
+function restoreFinalSnapshot(snapshot) {
+    resetFinalAttempt();
+    if (!snapshot || typeof snapshot.password !== "string") return;
+    state.finalPassword = snapshot.password;
+    state.finalPasswordRevealedCount = Number(snapshot.revealed) || 0;
+    state.finalPasswordCompletionOrder = Array.isArray(snapshot.order) ? snapshot.order : [];
+    state.finalPasswordStartedAt = Number(snapshot.startedAt) || null;
+    if (snapshot.context?.targetColor?.name) {
+        Object.assign(passwordContext, snapshot.context);
+        finalPasswordRules.find(rule => rule.id === "targetColor").color = passwordContext.targetColor;
+    }
+}
+
+function saveFinalProgress() {
+    try {
+        if (competitionMode) competitionRuntime?.save(finalSnapshot());
+        else localStorage.setItem(`interactividad-password-progress:${state.formData.dni || "sin-dni"}`, JSON.stringify(finalSnapshot()));
+    } catch (error) {
+        console.warn("No se pudo conservar el progreso en este dispositivo.", error);
+    }
+}
 
 const fallbackAlumnos = [
     {
@@ -40,6 +80,7 @@ const state = {
     },
     alumnoEncontrado: null,
     lastEvent: "todavía ninguno",
+    discoveredEvents: [],
     shortPassword: "",
     finalPassword: "",
     finalPasswordRevealedCount: 0,
@@ -62,7 +103,8 @@ const screens = [
 const passwordContext = {
     currentYear: String(new Date().getFullYear()),
     currentYearRoman: toRomanNumeral(new Date().getFullYear()),
-    browserName: getBrowserPasswordTerm()
+    browserName: getBrowserPasswordTerm(),
+    targetColor: getRandomPasswordColor()
 };
 
 const shortPasswordRules = [
@@ -110,11 +152,6 @@ const finalPasswordRules = [
         validate: password => /[^A-Za-zÁÉÍÓÚáéíóúÑñ0-9]/.test(password)
     },
     {
-        id: "digitSum",
-        description: "Los números aislados deben sumar 15.",
-        validate: password => sumPasswordDigits(password) === 15
-    },
-    {
         id: "currentYear",
         description: "Debe contener el año actual.",
         validate: password => password.includes(passwordContext.currentYear)
@@ -149,6 +186,12 @@ const finalPasswordRules = [
         description: "Debe contener uno de nuestros sponsors.",
         logos: ["assets/logos/1.png", "assets/logos/2.png", "assets/logos/3.png"],
         validate: password => ["binco", "manaos", "milkaut"].some(sponsor => normalizeText(password).includes(sponsor))
+    },
+    {
+        id: "targetColor",
+        description: "Debe contener el siguiente color:",
+        color: passwordContext.targetColor,
+        validate: password => normalizeText(password).includes(passwordContext.targetColor.name)
     },
     {
         id: "longPassword",
@@ -204,9 +247,50 @@ const closingConcepts = [
 init();
 
 async function init() {
+    configureBackground();
     await loadAlumnos();
-    initDeveloperTools();
+    if (competitionMode) {
+        const css = document.createElement("link");
+        css.rel = "stylesheet";
+        css.href = "competencias/competencias.css";
+        document.head.append(css);
+        try {
+            const { startCompetition } = await import("./competencias/game.js");
+            startCompetition({
+                attach: runtime => { competitionRuntime = runtime; },
+                restore: restoreFinalSnapshot,
+                play: () => showScreen("finalPassword"),
+                continue: () => showScreen("closing"),
+                isFinal: () => state.currentScreen === "finalPassword"
+            });
+        } catch (error) {
+            app.textContent = "No se pudo abrir la exposición. Revisá la conexión y recargá la página.";
+            return;
+        }
+        try {
+            const journey = JSON.parse(localStorage.getItem(journeyKey()));
+            if (journey?.formData) {
+                state.formData = journey.formData;
+                state.activePlayerDni = journey.activePlayerDni || "";
+                showScreen(screens.some(screen => screen.id === journey.screen) ? journey.screen : "start");
+                return;
+            }
+        } catch { /* Si no hay un recorrido guardado, comenzar normalmente. */ }
+    } else {
+        initDeveloperTools();
+    }
     showScreen("start");
+}
+
+function journeyKey() {
+    return `pw-journey:${new URLSearchParams(location.search).get("competencia")}`;
+}
+
+function saveJourney(screen = state.currentScreen) {
+    if (!competitionMode) return;
+    try {
+        localStorage.setItem(journeyKey(), JSON.stringify({ screen, formData: state.formData, activePlayerDni: state.activePlayerDni }));
+    } catch { /* No bloquear las actividades si se llena el almacenamiento. */ }
 }
 
 async function loadAlumnos() {
@@ -226,7 +310,17 @@ async function loadAlumnos() {
     }
 }
 
-function showScreen(screenId) {
+async function showScreen(screenId) {
+    if (competitionMode && screenId === "finalPassword") {
+        if (!state.formData.nombre || !state.activePlayerDni) {
+            showScreen("form");
+            return;
+        }
+        state.currentScreen = screenId;
+        saveJourney(screenId);
+        if (!await competitionRuntime.prepare(state.formData.nombre)) return;
+    }
+    competitionRuntime?.leave();
     const screen = screens.find(item => item.id === screenId);
 
     if (!screen) {
@@ -236,6 +330,7 @@ function showScreen(screenId) {
     stopFinalTimer();
     stopFinalRestartCooldown();
     state.currentScreen = screenId;
+    saveJourney(screenId);
     updateProgress(screen);
     updateDeveloperScreenSelect(screenId);
     app.innerHTML = "";
@@ -244,6 +339,15 @@ function showScreen(screenId) {
     void app.offsetWidth;
     app.classList.add("is-entering");
     app.focus({ preventScroll: true });
+}
+
+function configureBackground() {
+    if (!BACKGROUND_IMAGE.trim()) {
+        document.documentElement.style.removeProperty("--custom-background-image");
+        return;
+    }
+
+    document.documentElement.style.setProperty("--custom-background-image", `url("${BACKGROUND_IMAGE}")`);
 }
 
 function updateProgress(screen) {
@@ -256,13 +360,13 @@ function updateProgress(screen) {
 
 function renderStart() {
     app.innerHTML = `
-        <section>
-            <h2 class="hero-title">INTERACTIVIDAD Y VALIDACIÓN</h2>
+        <section class="start-screen">
+            <h2 class="hero-title">INTERACTIVIDAD <span>Y VALIDACIÓN</span></h2>
             <p class="lead">Una página que reacciona a vos.</p>
             <p class="lead">Descubrí cómo una página web puede detectar tus acciones, procesar información y responder.</p>
             <div class="hero-actions">
                 <button data-next="browser">COMENZAR</button>
-                <button data-next="finalPassword" class="secondary-button">IR AL PASSWORD GAME FINAL</button>
+                ${competitionMode ? "" : '<button data-next="finalPassword" class="secondary-button">IR AL PASSWORD GAME FINAL</button>'}
             </div>
         </section>
     `;
@@ -276,7 +380,7 @@ function renderBrowserInfo() {
     app.innerHTML = `
         <section class="genie-screen">
             <div class="genie-stage">
-                <img id="genie-image" class="genie-image" src="assets/genio/idle.png" alt="Genio esperando para comenzar">
+                <img id="genie-image" class="genie-image" src="${GENIE_ASSETS.idle}" alt="Genio esperando para comenzar">
                 <div class="genie-dialog">
                     <p id="genie-message">¡Hola! Puedo adivinar algunas cosas sobre el dispositivo desde el que me visitás.</p>
                     <button id="genie-action" type="button">EMPEZAR ADIVINACIÓN</button>
@@ -398,7 +502,7 @@ function initGenieExperience(environmentPromise) {
 
     function setGeniePose(pose, altText) {
         image.classList.remove("is-appearing");
-        image.src = `assets/genio/${pose}.png`;
+        image.src = GENIE_ASSETS[pose];
         image.alt = altText;
         image.classList.toggle("is-thinking", pose === "pensando");
 
@@ -452,42 +556,101 @@ function wait(milliseconds) {
 
 function renderEvents() {
     app.innerHTML = `
-        <section>
-            <p class="lead">Probá realizar diferentes acciones y mirá cómo cambia el último evento detectado.</p>
-            <div class="event-grid">
-                <button id="click-demo" type="button">Hacer click</button>
-                <div id="hover-demo" class="event-target interactive" tabindex="0">Pasar el mouse o tocar</div>
-                <div>
+        <section class="activity-layout events-activity">
+            <div class="events-lab">
+                <header class="lab-header">
+                <span class="section-kicker">ACTIVIDAD 2 · EVENTOS</span>
+                <h2>INTERACTIVIDAD</h2>
+                <p class="lead">Tu navegador puede detectar lo que hacés. Probá diferentes acciones y mirá cómo responde.</p>
+            </header>
+                <div class="event-grid" aria-label="Experimentos de eventos">
+                <article class="event-card" data-event-card="click">
+                    <div class="event-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v10m0 0 4-4m-4 4-4-4M5 14v4a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-4"/></svg></div>
+                    <span class="event-tag">01 · CLICK</span>
+                    <h3>Activá el pulso</h3>
+                    <p>Un click dispara una respuesta inmediata.</p>
+                    <button id="click-demo" class="event-control" type="button">PROBAR CLICK</button>
+                </article>
+                <article class="event-card" data-event-card="mouseover">
+                    <div class="event-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h10M4 19h6"/><path d="m16 15 4 4m0-4-4 4"/></svg></div>
+                    <span class="event-tag">02 · PUNTERO</span>
+                    <h3>Acercá el cursor</h3>
+                    <p>Con mouse se detecta <code>mouseover</code>; al tocar, <code>pointerdown</code>.</p>
+                    <div id="hover-demo" class="event-target interactive" tabindex="0" role="button" aria-label="Probar evento de puntero">ZONA SENSIBLE</div>
+                </article>
+                <article class="event-card" data-event-card="input">
+                    <div class="event-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h.01M10 9h.01M13 9h.01M16 9h.01M7 13h.01M10 13h.01M13 13h4"/></svg></div>
+                    <span class="event-tag">03 · INPUT</span>
+                    <h3>Escribí algo</h3>
+                    <p>Cada cambio del campo genera un evento.</p>
                     <label class="field">
-                        <span>Campo de texto</span>
-                        <input id="input-demo" type="text" placeholder="Escribí algo">
+                        <span class="sr-only">Campo de texto para probar input</span>
+                        <input id="input-demo" type="text" placeholder="Escribí una señal">
                     </label>
-                </div>
-                <div>
+                </article>
+                <article class="event-card" data-event-card="keydown">
+                    <div class="event-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h.01M10 9h.01M13 9h.01M16 9h.01M7 13h.01M10 13h.01M13 13h4"/><path d="m16 9 2 2-2 2"/></svg></div>
+                    <span class="event-tag">04 · KEYDOWN</span>
+                    <h3>Presioná una tecla</h3>
+                    <p>Con teclado físico, el navegador informa cuál fue.</p>
                     <label class="field">
-                        <span>Zona de teclas</span>
+                        <span class="sr-only">Campo para probar keydown</span>
                         <input id="key-demo" type="text" placeholder="Presioná una tecla">
                     </label>
+                </article>
+                </div>
+                <section class="event-console" aria-live="polite">
+                <div class="event-console-header">
+                    <span>EVENTO DETECTADO</span>
+                    <strong id="event-discovery-count">Eventos descubiertos: ${state.discoveredEvents.length}/4</strong>
+                </div>
+                <strong id="last-event" class="event-name">${state.lastEvent}</strong>
+                <p id="event-description">Esperando una interacción para mostrar qué ocurrió.</p>
+                </section>
+                <div class="actions">
+                    <button data-next="form">CONTINUAR →</button>
                 </div>
             </div>
-            <div id="last-event" class="last-event">ÚLTIMO EVENTO: ${state.lastEvent}</div>
-            <div class="actions">
-                <button data-next="form">CONTINUAR →</button>
-            </div>
+            ${renderGenieCompanion({
+                pose: "celu",
+                message: "¡Cada movimiento cuenta! Probá interactuar con los elementos."
+            })}
         </section>
     `;
 
-    const updateLastEvent = eventName => {
+    const eventDescriptions = {
+        click: "El navegador detectó un click sobre el control interactivo.",
+        mouseover: "El cursor entró en la zona sensible y disparó mouseover.",
+        pointerdown: "El navegador detectó la pulsación sobre la zona sensible mediante pointerdown.",
+        input: "El valor del campo cambió mientras escribías.",
+        keydown: key => `El navegador detectó que presionaste la tecla ${key}.`
+    };
+
+    const updateLastEvent = (eventName, detail = "") => {
         state.lastEvent = eventName;
-        document.querySelector("#last-event").textContent = `ÚLTIMO EVENTO: ${eventName}`;
+        const discoveryName = eventName === "pointerdown" ? "mouseover" : eventName;
+
+        if (!state.discoveredEvents.includes(discoveryName)) {
+            state.discoveredEvents.push(discoveryName);
+        }
+
+        document.querySelector("#last-event").textContent = eventName;
+        document.querySelector("#event-description").textContent = typeof eventDescriptions[eventName] === "function"
+            ? eventDescriptions[eventName](detail)
+            : eventDescriptions[eventName];
+        document.querySelector("#event-discovery-count").textContent = `Eventos descubiertos: ${state.discoveredEvents.length}/4`;
+        document.querySelector(`[data-event-card="${discoveryName}"]`)?.classList.add("is-discovered");
     };
 
     document.querySelector("#click-demo").addEventListener("click", () => updateLastEvent("click"));
     document.querySelector("#hover-demo").addEventListener("mouseover", () => updateLastEvent("mouseover"));
-    document.querySelector("#hover-demo").addEventListener("touchstart", () => updateLastEvent("touchstart"));
-    document.querySelector("#hover-demo").addEventListener("focus", () => updateLastEvent("focus"));
+    document.querySelector("#hover-demo").addEventListener("pointerdown", () => updateLastEvent("pointerdown"));
     document.querySelector("#input-demo").addEventListener("input", () => updateLastEvent("input"));
-    document.querySelector("#key-demo").addEventListener("keydown", () => updateLastEvent("keydown"));
+    document.querySelector("#key-demo").addEventListener("keydown", event => updateLastEvent("keydown", event.key));
+
+    state.discoveredEvents.forEach(eventName => {
+        document.querySelector(`[data-event-card="${eventName}"]`)?.classList.add("is-discovered");
+    });
 
     bindNextButtons();
 }
@@ -502,15 +665,15 @@ function renderForm() {
                     <div class="form-grid">
                         <div class="field">
                             <label for="nombre">Nombre y apellido</label>
-                            <input id="nombre" name="nombre" type="text" autocomplete="name" value="${state.formData.nombre}" placeholder="Juan Perez">
+                            <input id="nombre" name="nombre" type="text" autocomplete="name" value="${escapeHtml(state.formData.nombre)}" placeholder="Juan Perez">
                         </div>
                         <div class="field">
                             <label for="dni">DNI</label>
-                            <input id="dni" name="dni" type="text" inputmode="numeric" value="${state.formData.dni}" placeholder="12345678">
+                            <input id="dni" name="dni" type="text" inputmode="numeric" value="${escapeHtml(state.formData.dni)}" placeholder="12345678">
                         </div>
                         <div class="field">
                             <label for="edad">Edad</label>
-                            <input id="edad" name="edad" type="text" inputmode="numeric" value="${state.formData.edad}" placeholder="18">
+                            <input id="edad" name="edad" type="text" inputmode="numeric" value="${escapeHtml(state.formData.edad)}" placeholder="18">
                         </div>
                     </div>
                     <p class="hint">Alumno de prueba: Juan Perez, DNI 12345678, edad 18.</p>
@@ -526,6 +689,10 @@ function renderForm() {
                     <li class="validation-item"><span class="status waiting">?</span><span>Esperando la carga de los datos.</span></li>
                     <li class="validation-item"><span class="status waiting">?</span><span>Consulta a la base de datos pendiente.</span></li>
                 </ul>
+                ${renderGenieCompanion({
+                    pose: "pensando",
+                    message: "Voy a revisar si los datos coinciden con la base local."
+                })}
             </section>
         </section>
     `;
@@ -547,6 +714,7 @@ function renderForm() {
             state.activePlayerDni = state.formData.dni;
             resetFinalAttempt();
         }
+        saveJourney();
     });
 
     bindNextButtons();
@@ -617,20 +785,30 @@ function renderShortPassword() {
         inputId: "short-password-input",
         rules: shortPasswordRules,
         ruleMode: "always",
+        geniePose: "pensando",
+        genieMessage: "¿Pensaste que crear una contraseña era tan fácil?",
         nextScreen: "fakeFinal"
     });
 }
 
 function renderFinalPassword() {
-    const storedResult = getStoredFinalResult();
+    if (competitionMode && competitionRuntime?.showCompleted()) return;
+    const storedResult = competitionMode ? null : getStoredFinalResult();
 
     if (storedResult) {
         renderCompletedFinalPassword(storedResult);
         return;
     }
 
+    if (!competitionMode && !state.finalPasswordStartedAt) {
+        try {
+            restoreFinalSnapshot(JSON.parse(localStorage.getItem(`interactividad-password-progress:${state.formData.dni || "sin-dni"}`)));
+        } catch { /* Un almacenamiento dañado no impide jugar. */ }
+    }
+
     renderPasswordScreen({
         intro: "Ahora sí. Cumplí todas las condiciones.",
+        helper: "Empezá a escribir: el tiempo inicia con tu primera letra y se irán revelando las condiciones.",
         stateKey: "finalPassword",
         inputId: "final-password-input",
         rules: finalPasswordRules,
@@ -638,15 +816,18 @@ function renderFinalPassword() {
         revealedCountKey: "finalPasswordRevealedCount",
         completedOrderKey: "finalPasswordCompletionOrder",
         continueAtEnd: true,
+        geniePose: "pensando",
+        genieMessage: "Concentrate: cada condición desbloquea la siguiente pista.",
         nextScreen: "closing"
     });
 }
 
 function renderPasswordScreen(config) {
     app.innerHTML = `
-        <section class="password-layout">
-            <div>
+        <section class="password-layout password-layout--${config.stateKey}">
+            <div class="password-primary">
                 <p class="lead">${config.intro}</p>
+                ${config.helper ? `<p class="password-helper">${config.helper}</p>` : ""}
                 ${config.stateKey === "finalPassword" ? `
                     <p class="live-timer" aria-live="off">
                         <span>TIEMPO</span>
@@ -656,7 +837,7 @@ function renderPasswordScreen(config) {
                 <label class="field" for="${config.inputId}">
                     <span>Contraseña</span>
                     <span class="password-input-row">
-                        <input id="${config.inputId}" type="text" value="${state[config.stateKey]}" autocomplete="off">
+                        <input id="${config.inputId}" type="text" value="${escapeHtml(state[config.stateKey])}" autocomplete="off">
                         <span id="password-character-count" class="password-character-count" aria-live="polite">0</span>
                     </span>
                 </label>
@@ -664,6 +845,10 @@ function renderPasswordScreen(config) {
                     <button id="password-continue" type="button" class="hidden" data-next="${config.nextScreen}">CONTINUAR →</button>
                 </div>
             </div>
+            ${renderGenieCompanion({
+                pose: config.geniePose,
+                message: config.genieMessage
+            })}
             <ul id="password-rules" class="rule-list"></ul>
         </section>
     `;
@@ -694,6 +879,8 @@ function renderPasswordScreen(config) {
 
             if (allValid) {
                 completeFinalPassword(input.value.length);
+            } else {
+                saveFinalProgress();
             }
         }
     };
@@ -743,7 +930,13 @@ function completeFinalPassword(characterCount) {
         completedAt: new Date().toISOString()
     };
 
+    if (competitionMode) {
+        competitionRuntime.complete(result);
+        return;
+    }
+
     saveFinalResult(result);
+    try { localStorage.removeItem(`interactividad-password-progress:${state.formData.dni || "sin-dni"}`); } catch { /* Sin almacenamiento disponible. */ }
     renderCompletedFinalPassword(result);
     showFinalResultModal(result);
 }
@@ -779,6 +972,10 @@ function renderCompletedFinalPassword(result) {
                 <span class="result-summary-password">${escapeHtml(getResultPassword(result))}</span>
                 <span>${formatDuration(result.durationMs)} · ${result.characterCount} letras</span>
             </div>
+            ${renderGenieCompanion({
+                pose: "idle",
+                message: "¡Excelente! Guardé tu resultado para que puedas volver a verlo."
+            })}
             <div class="actions password-actions-end">
                 <button id="show-final-result" type="button">MOSTRAR RESULTADO</button>
                 <div class="result-next-actions">
@@ -823,7 +1020,18 @@ function showFinalResultModal(result) {
 
     document.body.append(modal);
     document.querySelector("#close-final-result").addEventListener("click", () => modal.remove());
-    document.querySelector("#save-final-result").addEventListener("click", () => downloadFinalResultImage(result));
+    document.querySelector("#save-final-result").addEventListener("click", async event => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        button.textContent = "PREPARANDO IMAGEN...";
+
+        try {
+            await downloadFinalResultImage(result);
+        } finally {
+            button.disabled = false;
+            button.textContent = "GUARDAR IMAGEN";
+        }
+    });
 }
 
 function getFinalResultKey(dni = state.formData.dni) {
@@ -863,6 +1071,7 @@ function resetCurrentPlayerGame() {
     stopFinalRestartCooldown();
     try {
         localStorage.removeItem(getFinalResultKey());
+        localStorage.removeItem(`interactividad-password-progress:${state.formData.dni || "sin-dni"}`);
     } catch (error) {
         console.warn("No se pudo borrar el resultado guardado.", error);
     }
@@ -931,45 +1140,73 @@ function escapeHtml(value) {
         .replaceAll("'", "&#039;");
 }
 
-function downloadFinalResultImage(result) {
+async function downloadFinalResultImage(result) {
     const canvas = document.createElement("canvas");
     canvas.width = 1200;
     canvas.height = 920;
     const context = canvas.getContext("2d");
     const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, "#eaf7ef");
-    gradient.addColorStop(1, "#d9f3f1");
+    gradient.addColorStop(0, "#0b1623");
+    gradient.addColorStop(1, "#183b50");
     context.fillStyle = gradient;
     context.fillRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = "#075f66";
+
+    context.strokeStyle = "rgba(83, 151, 208, 0.42)";
+    context.lineWidth = 2;
+    context.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
+    context.fillStyle = "#27b6b9";
     context.font = "700 34px Arial";
     context.fillText("RESULTADO", 80, 100);
-    context.fillStyle = "#15202b";
-    context.font = "700 68px Arial";
+    context.fillStyle = "#f4f7fb";
+    context.font = "700 62px Arial";
     context.fillText(String(result.nombre).slice(0, 28), 80, 190);
     context.font = "700 30px Arial";
-    context.fillStyle = "#5b6b7a";
+    context.fillStyle = "#a9bacb";
     context.fillText("CONTRASEÑA", 80, 280);
-    context.fillStyle = "#15202b";
-    context.font = "700 40px Arial";
-    const passwordEndY = drawCanvasPassword(context, getResultPassword(result), 80, 345, 1040, 52);
+    context.fillStyle = "#f4f7fb";
+    context.font = "700 36px Arial";
+    const passwordEndY = drawCanvasPassword(context, getResultPassword(result), 80, 345, 620, 50);
     const metricLabelY = passwordEndY + 100;
     context.font = "700 30px Arial";
-    context.fillStyle = "#5b6b7a";
+    context.fillStyle = "#a9bacb";
     context.fillText("TIEMPO", 80, metricLabelY);
-    context.fillText("LETRAS", 650, metricLabelY);
-    context.font = "700 112px Arial";
-    context.fillStyle = "#15202b";
+    context.fillText("LETRAS", 470, metricLabelY);
+    context.font = "700 78px Arial";
+    context.fillStyle = "#fabf3f";
     context.fillText(formatDuration(result.durationMs), 80, metricLabelY + 130);
-    context.fillText(String(result.characterCount), 650, metricLabelY + 130);
+    context.fillText(String(result.characterCount), 470, metricLabelY + 130);
     context.font = "700 25px Arial";
-    context.fillStyle = "#075f66";
+    context.fillStyle = "#27b6b9";
     context.fillText("Interactividad y validación", 80, metricLabelY + 250);
+
+    const genieImage = await loadCanvasImage(GENIE_ASSETS.idle);
+    if (genieImage) {
+        drawCanvasGenie(context, genieImage, 740, 145, 370, 610);
+    }
 
     const link = document.createElement("a");
     link.download = `resultado-${String(result.nombre).replace(/[^a-z0-9]+/gi, "-").toLowerCase() || "jugador"}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
+}
+
+function loadCanvasImage(source) {
+    return new Promise(resolve => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => resolve(null);
+        image.src = source;
+    });
+}
+
+function drawCanvasGenie(context, image, x, y, maxWidth, maxHeight) {
+    const ratio = Math.min(maxWidth / image.naturalWidth, maxHeight / image.naturalHeight);
+    const width = image.naturalWidth * ratio;
+    const height = image.naturalHeight * ratio;
+    const drawX = x + (maxWidth - width) / 2;
+    const drawY = y + (maxHeight - height) / 2;
+
+    context.drawImage(image, drawX, drawY, width, height);
 }
 
 function drawCanvasPassword(context, password, x, y, maxWidth, lineHeight) {
@@ -995,6 +1232,7 @@ function validatePassword(password, rules) {
         id: rule.id,
         description: rule.description,
         logos: rule.logos || [],
+        color: rule.color || null,
         order,
         ok: rule.validate(password)
     }));
@@ -1080,6 +1318,7 @@ function renderPasswordRules(list, results) {
             <div class="rule-content">
                 <span>${result.description}</span>
                 ${renderSponsorLogos(result.logos)}
+                ${renderPasswordColor(result.color)}
             </div>
         `;
         list.append(item);
@@ -1125,10 +1364,25 @@ function renderSponsorLogos(logos) {
     `;
 }
 
-function sumPasswordDigits(password) {
-    return (password.match(/\d+/g) || [])
-        .filter(digits => digits.length === 1)
-        .reduce((total, digit) => total + Number(digit), 0);
+function renderPasswordColor(color) {
+    if (!color) {
+        return "";
+    }
+
+    return `<span class="password-color-swatch" style="--password-target-color: ${color.hex}" aria-label="Color requerido"></span>`;
+}
+
+function getRandomPasswordColor() {
+    const colors = [
+        { name: "rojo", hex: "#dc3d3d" },
+        { name: "azul", hex: "#1c78d4" },
+        { name: "amarillo", hex: "#f5c542" },
+        { name: "verde", hex: "#32a462" },
+        { name: "blanco", hex: "#ffffff" },
+        { name: "negro", hex: "#111111" }
+    ];
+
+    return colors[Math.floor(Math.random() * colors.length)];
 }
 
 function containsMonth(password) {
@@ -1143,11 +1397,17 @@ function containsMonth(password) {
 function renderFakeFinal() {
     app.innerHTML = `
         <section class="fake-final">
-            <p id="fake-final-message" class="fake-final-message">Completaste todas las condiciones.</p>
-            <div class="actions">
-                <button id="fake-final-button" type="button">ESPERÁ...</button>
-                <button id="fake-final-continue" type="button" class="hidden" data-next="finalPassword">CONTINUAR →</button>
+            <div class="fake-final-content">
+                <p id="fake-final-message" class="fake-final-message">Completaste todas las condiciones.</p>
+                <div class="actions">
+                    <button id="fake-final-button" type="button">ESPERÁ...</button>
+                    <button id="fake-final-continue" type="button" class="hidden" data-next="finalPassword">CONTINUAR →</button>
+                </div>
             </div>
+            ${renderGenieCompanion({
+                pose: "idle",
+                message: "¡Excelente! Pero todavía queda un último desafío."
+            })}
         </section>
     `;
 
@@ -1171,8 +1431,20 @@ function renderFakeFinal() {
 
 function renderClosing() {
     app.innerHTML = `
-        <section>
-            <div class="screen-grid">
+        <section class="closing-screen">
+            <header class="closing-celebration">
+                <div>
+                    <span class="section-kicker">RECORRIDO COMPLETADO</span>
+                    <h2>¡FELICITACIONES!</h2>
+                    <p>Completaste todos los desafíos.</p>
+                    <p class="lead">Ahora conocés un poco más sobre cómo las páginas detectan y responden a tus acciones.</p>
+                </div>
+                ${renderGenieCompanion({
+                    pose: "idle",
+                    message: "¡Excelente trabajo! Ya dominás las pistas de la experiencia."
+                })}
+            </header>
+            <div class="screen-grid closing-summary">
                 <div>
                     <p class="lead">El recorrido conectó acciones reales del usuario con eventos, código JavaScript, validación y respuestas visibles.</p>
                     <ul class="flow-list">
@@ -1184,16 +1456,14 @@ function renderClosing() {
                         <li>RESPUESTA</li>
                     </ul>
                     <p class="lead">Todo esto forma parte de la interactividad web.</p>
-                    <div class="actions">
-                        <button type="button" data-next="start">FINALIZAR</button>
-                    </div>
-                </div>
-                <div class="callout">
-                    Esta zona ya queda preparada para sumar miniaturas reales dentro de <strong>assets/screens/</strong>.
                 </div>
             </div>
             <div class="summary-grid">
                 ${closingConcepts.map(renderConceptCard).join("")}
+            </div>
+            <div class="actions closing-actions">
+                <button type="button" data-next="start">VOLVER AL INICIO</button>
+                <button type="button" class="secondary-button" data-next="finalPassword">PANTALLA ANTERIOR</button>
             </div>
         </section>
     `;
@@ -1244,6 +1514,25 @@ function initDeveloperTools() {
     document.querySelector("#dev-fill-student").addEventListener("click", fillDeveloperStudent);
     document.querySelector("#dev-complete-password").addEventListener("click", completeDeveloperPassword);
     document.querySelector("#dev-open-readme").addEventListener("click", openReadme);
+}
+
+function renderGenieCompanion({ message, pose = "idle" }) {
+    const source = GENIE_ASSETS[pose] || GENIE_ASSETS.idle;
+    const alt = pose === "pensando"
+        ? "Akinator pensando"
+        : pose === "celu"
+            ? "Akinator observando un celular"
+            : "Akinator sonriendo";
+
+    return `
+        <aside class="genie-companion genie-companion--${pose}">
+            <img src="${source}" alt="${alt}">
+            <div class="genie-companion-message">
+                <span>AKINATOR</span>
+                <p>${message}</p>
+            </div>
+        </aside>
+    `;
 }
 
 function initDeveloperHoldTrigger() {
@@ -1318,6 +1607,7 @@ function fillDeveloperStudent() {
 }
 
 function completeDeveloperPassword() {
+    if (competitionMode) return;
     const passwordByScreen = {
         shortPassword: "Clave123",
         finalPassword: buildValidFinalPassword()
