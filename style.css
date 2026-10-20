@@ -2965,6 +2965,8 @@ select:focus-visible {
     .closing-celebration > .genie-companion {
         grid-area: genie;
         display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
         width: 100%;
         place-items: center;
     }

@@ -807,4 +807,4 @@ La prioridad es que el recorrido funcione completo, sea visualmente claro en PC 
 
 En celular, la mascota de la actividad 6 usa una única columna sin separación interna: no debe heredar las dos columnas del componente con mensaje, porque ese mensaje está oculto. La imagen conserva la compensación de su margen transparente y su animación, sin superponerse al botón.
 
-El cierre de la actividad 8 organiza el texto y la mascota en una única columna en celular para evitar solapamientos; además, la separación antes del resumen del recorrido es más compacta en PC y móvil.
+El cierre de la actividad 8 organiza el texto y la mascota en una única columna en celular para evitar solapamientos. El contenedor interno de la mascota también usa una sola columna sin separación, para centrar la imagen sin reservar espacio al mensaje oculto. Además, la separación antes del resumen del recorrido es más compacta en PC y móvil.
