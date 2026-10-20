@@ -4,8 +4,6 @@ Página educativa e interactiva para una exposición de Diseño Web de primer a�
 
 La interfaz usa un lenguaje de **laboratorio digital oscuro**: fondo azul profundo, superficies azul petróleo, acentos celestes y turquesas para los estados activos, y amarillo para las acciones principales. Las actividades comparten el mismo sistema visual para que el recorrido se sienta como una experiencia única, sin cambiar su lógica didáctica.
 
-La segunda etapa elimina la grilla decorativa, incorpora a Akinator como mascota visual recurrente y equilibra el uso del espacio en formularios, reglas y cierre del recorrido.
-
 La idea principal es que la persona no solo lea conceptos, sino que los experimente: hace click, escribe, completa formularios, ve validaciones y juega dos versiones de un Password Game.
 
 ## Página publicada
@@ -34,20 +32,18 @@ El enlace generado por el panel (`index.html?competencia=ID`) abre **la primera 
 - El ranking muestra una fila por participante, se actualiza con Realtime y tiene una consulta de respaldo cada 15 segundos. El contador indica participantes inscriptos al llegar al juego final, no personas conectadas.
 - Los enlaces y QR identifican una competencia concreta. Al finalizarla se conserva el historial y se rechazan resultados nuevos.
 
-Páginas publicadas después del despliegue:
+Páginas de competencias:
 
 - [Administración](https://alvrir.github.io/Dise-o-Web-Interactividad/competencias/admin.html)
 - [Ranking de la competencia activa](https://alvrir.github.io/Dise-o-Web-Interactividad/competencias/ranking.html)
 
-La configuración pública se encuentra en `competencias/config.js`: URL en la línea 2 y publishable key en la línea 3. Nunca incluir claves secretas. El esquema SQL, permisos del administrador, autenticación anónima, pruebas y pasos de uso están detallados en [competencias/README.md](competencias/README.md).
+La configuración pública se encuentra en `competencias/config.js`, en `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY`. Nunca incluir claves secretas. El esquema SQL, permisos del administrador, autenticación anónima, pruebas y pasos de uso están detallados en [competencias/README.md](competencias/README.md).
 
 Para compartir con celulares, generar el QR desde el panel **publicado**: el panel local genera enlaces a localhost, que no sirven desde otro dispositivo. Las herramientas de desarrollo no se habilitan durante el recorrido competitivo.
 
 Las victorias pendientes se reenvían automáticamente al volver a su pantalla, conservando el UUID para evitar duplicados. Si falla la conexión al reiniciar, se conserva el resultado anterior y se permite reintentar.
 
-### Verificación de la integración
-
-Se verificaron localmente ocho pruebas de lógica, navegación y recuperación de errores y 28 comprobaciones del esquema SQL con PostgreSQL embebido. También se comprobó en el navegador que el enlace abre el inicio y recupera la actividad al recargar. La apertura de la primera pantalla desde “Abrir juego” fue confirmada por el usuario. Se comprobó además la conexión real a Supabase: el ranking muestra la competencia activa, un resultado existente y la suscripción Realtime en estado “En vivo”. No se generaron victorias artificiales en esa competencia. Queda pendiente una prueba completa desde otro dispositivo y de reconexión de red real; las pruebas SQL locales no sustituyen esa comprobación.
+Antes de una exposición con competencias, probar el recorrido desde otro dispositivo y la recuperación tras una pérdida de conexión. Las pruebas locales no sustituyen esa comprobación.
 
 ## Regla de mantenimiento
 
@@ -97,10 +93,15 @@ Página Diseño Web/
 |   |-- alumnos.json
 |
 |-- assets/
+|   |-- background/
+|   |-- font/
 |   |-- genio/
 |   |-- logos/
 |   |-- screens/
 |       |-- .gitkeep
+|
+|-- competencias/
+|   |-- README.md
 |
 |-- README.md
 ```
@@ -111,9 +112,7 @@ Página Diseño Web/
 
 Contiene la estructura base de la página:
 
-- cabecera con el indicador de progreso y las herramientas de desarrollador;
-- indicador de progreso;
-- botón de herramientas de desarrollador;
+- cabecera con el indicador de progreso, que permite abrir las herramientas al mantenerlo presionado;
 - panel de herramientas de desarrollador;
 - contenedor principal donde JavaScript dibuja cada pantalla.
 
@@ -134,9 +133,9 @@ Contiene todo el diseño visual:
 - tip de F12;
 - cierre con tarjetas preparadas para miniaturas.
 
-Al final del archivo están los bloques `Digital lab visual system` y `Second-stage composition refinements`. Ahí están las variables de color, las superficies translúcidas, los componentes compartidos, la mascota y los cortes responsive. La paleta principal es `#0b1623`, `#12283a`, `#183b50`, `#1ca6f2`, `#fabf3f`, `#27b6b9`, `#f4f7fb` y `#a9bacb`. El highlight azul `#1ca6f2` se usa en bordes, foco y progreso.
+Los estilos incluyen variables de color, superficies translúcidas, componentes compartidos y cortes responsive. Hay ajustes específicos hacia el final del archivo que pueden sobrescribir reglas anteriores; revisar la cascada al modificar un componente. La paleta principal es `#0b1623`, `#12283a`, `#183b50`, `#1ca6f2`, `#fabf3f`, `#27b6b9`, `#f4f7fb` y `#a9bacb`. El highlight azul `#1ca6f2` se usa en bordes, foco y progreso.
 
-Los paneles principales usan un tratamiento de vidrio: fondo oscuro semitransparente, `backdrop-filter` con blur y bordes azules suaves. Todos los desenfoques visuales están ajustados al 90% de su intensidad original para dejar ver mejor el fondo sin perjudicar la lectura de controles y textos.
+Los paneles principales usan un tratamiento de vidrio: fondo oscuro semitransparente, `backdrop-filter` con blur y bordes azules suaves.
 
 La tipografía se carga localmente desde `assets/font/`: `Cinzel` se usa en texto e interfaz, y `Cinzel Decorative` en los títulos destacados. Esto evita depender de la carga de fuentes externas. El navegador usa las fuentes de reserva declaradas en CSS si fuera necesario.
 
@@ -261,7 +260,7 @@ El contador se guarda solo durante la sesión abierta. Completar los cuatro no b
 
 En equipos con mouse, la segunda tarjeta detecta el evento real `mouseover` al acercar el cursor y `pointerdown` al hacer click. Al tocar en un dispositivo móvil también se registra `pointerdown`. El foco con teclado sigue disponible para acceder al control, sin reemplazar el último evento mostrado.
 
-La actividad muestra una versión compacta de Akinator junto al laboratorio: queda como columna secundaria en pantallas muy anchas y pasa a una fila horizontal debajo de los experimentos cuando falta espacio.
+En pantallas muy anchas, Akinator acompaña el laboratorio como columna secundaria. En tamaños menores se oculta para dejar espacio a los controles. En móvil, el panel `EVENTO DETECTADO` aparece antes de las tarjetas y permanece visible mediante `position: sticky`.
 
 ## Estado central de la aplicación
 
@@ -442,10 +441,11 @@ El nivel final pide:
 10. un mes del año;
 11. un número romano;
 12. uno de los textos `Binco`, `Manaos` o `Milkaut`; alcanza con una sola de esas palabras.
-13. más de 45 caracteres.
-14. el nombre de la ciudad: `Rojas`.
+13. el nombre del color mostrado: rojo, azul, amarillo, verde, blanco o negro, elegido aleatoriamente;
+14. más de 45 caracteres;
+15. el nombre de la ciudad: `Rojas`.
 
-La última regla muestra los tres logos de `assets/logos/` en recuadros de 72 px de alto. Cada imagen cubre su recuadro completo y cada regla usa `.is-valid` o `.is-invalid` para recibir un fondo verde o rojo suave.
+La regla de sponsors muestra los tres logos de `assets/logos/` en recuadros de 72 px de alto. Cada imagen cubre su recuadro completo y cada regla usa `.is-valid` o `.is-invalid` para recibir un fondo verde o rojo suave.
 
 Las consignas del año, navegador y sponsors no revelan sus respuestas en pantalla. La validación detecta esos valores internamente según el navegador y el año actuales.
 
@@ -468,7 +468,7 @@ Desde ese panel se puede:
 - completar automáticamente una contraseña válida;
 - abrir el `README.md` en otra pestaña.
 
-Esto es solo para desarrollo y exposición. Si se quiere ocultar más adelante, se puede borrar o comentar el panel en `index.html` y las funciones de herramientas en `script.js`.
+Este acceso está disponible en el modo libre; se deshabilita durante una competencia.
 
 Funciones relacionadas:
 
@@ -572,33 +572,15 @@ const GENIE_ASSETS = {
 };
 ```
 
-Fuera de la actividad original de adivinación, `renderGenieCompanion()` genera una versión compacta con imagen, nombre y mensaje contextual. Se usa en eventos, verificación de alumno, los dos Password Game, el falso final, el resultado guardado y la felicitación de la actividad 8. La pantalla original del genio conserva sus poses, tiempos y animaciones propios.
-
-Los mensajes son breves y contextuales. En móviles, el personaje se reduce a una fila para no ocultar controles ni alargar la pantalla de manera innecesaria. Las animaciones respetan `prefers-reduced-motion`.
+Fuera de la actividad original de adivinación, `renderGenieCompanion()` genera el componente reutilizable. Su mensaje contextual está oculto por CSS. El personaje se muestra en eventos en pantallas muy anchas, verificación de alumno, Password Game corto, falso final y cierre; se oculta en el Password Game final y en el resultado guardado. Las animaciones respetan `prefers-reduced-motion`.
 
 En la verificación de alumno, el personaje aparece centrado debajo de la lista de verificaciones y con una presencia algo mayor dentro de su recuadro. En el primer Password Game queda centrado, ocupa toda la altura disponible, se alinea con el borde inferior del recuadro principal y se difumina por debajo de los dos paneles ampliados del campo y las reglas. El Password Game final no muestra personaje, para dejar todo el espacio al temporizador, el campo y las condiciones. En celular vuelve al flujo normal para no interferir con el contenido. En la actividad 6, el genio sonriente ocupa la columna lateral amplia, aprovechando el espacio vacío con una entrada suave y un movimiento vertical discreto. La actividad 8 muestra un genio más grande junto al cierre, sin el recuadro técnico para miniaturas.
 
-Los textos visibles usan Cinzel y sus títulos principales usan Cinzel Decorative. Se eliminaron las menciones visibles a “laboratorio web”; la actividad de eventos se titula “Interactividad” y el cierre utiliza “Recorrido completado” y “Completaste todos los desafíos”.
-
 En móvil, el título inicial separa “Interactividad” de “Y validación” en líneas completas y usa un tamaño fijo más compacto. Esto evita que el navegador corte letras individuales en pantallas angostas. El fondo personalizado usa una altura visual estable (`100svh`) para conservar su encuadre al desplazarse, sin los saltos provocados por la barra dinámica del navegador móvil.
 
-En la actividad de eventos para móvil, el recuadro `EVENTO DETECTADO` se mueve debajo de la explicación y queda fijo mientras se recorren las tarjetas. Es más compacto, pero conserva el contador, el último evento y su descripción. En la verificación de alumno y el primer Password Game, las imágenes del genio usan una sola columna centrada en móvil. El falso final recupera un genio visible en la esquina superior derecha y deja el texto y botón centrados debajo.
-
-En la actividad de eventos, tocar o hacer click en `ZONA SENSIBLE` informa `pointerdown`, también cuando se usa mouse. El foco del control se conserva para navegación con teclado, pero ya no reemplaza el evento mostrado. La pantalla que recupera una partida final guardada centra la tarjeta de resultado y organiza sus tres acciones en una grilla estable: una acción grande a la izquierda y las dos acciones de avance a la derecha; en móvil pasan a una sola columna.
-
-El Password Game final incluye una condición adicional que elige aleatoriamente uno de seis colores característicos: rojo, azul, amarillo, verde, blanco o negro. La regla muestra solo una muestra de color; la contraseña debe incluir el nombre de ese color.
+En móvil, las mascotas de verificación, Password Game corto, actividad 6 y cierre usan una única columna interna para no reservar espacio al mensaje oculto. En la actividad 6, el genio aparece sobre el texto y el botón. En el cierre de escritorio, ocupa dos filas a la derecha para que los párrafos queden consecutivos a la izquierda sin depender de su altura.
 
 Al final de la actividad 8 hay dos controles del mismo tamaño: `VOLVER AL INICIO` regresa a la pantalla de bienvenida y `PANTALLA ANTERIOR` vuelve directamente al Password Game final. En escritorio se muestran lado a lado, alineados al final del recorrido; en móvil se apilan.
-
-## Aclaración del Password Game final
-
-Antes del campo del nivel final se muestra este aviso breve:
-
-```text
-Empezá a escribir: el tiempo inicia con tu primera letra y se irán revelando las condiciones.
-```
-
-El texto no cambia las validaciones ni el orden progresivo de las reglas; solamente explica el inicio del temporizador y de las condiciones para que el desafío resulte más intuitivo.
 
 ## Fondo personalizado
 
@@ -739,13 +721,13 @@ Cada concepto tiene:
 }
 ```
 
-Por ahora se muestran espacios preparados para miniaturas.
+Actualmente `renderConceptCard()` muestra el nombre de la actividad en un placeholder; el atributo `data-image` no carga una imagen por sí solo.
 
 Para agregar imágenes reales:
 
 1. guardar la imagen en `assets/screens/`;
 2. usar el mismo nombre indicado en `image`;
-3. más adelante se puede ajustar `renderConceptCard()` para mostrar `<img>` en lugar del placeholder.
+3. modificar `renderConceptCard()` para renderizar un `<img>` con esa ruta en lugar del placeholder.
 
 ## Cosas importantes para no romper
 
@@ -804,7 +786,3 @@ Mostrar de forma práctica:
 - reglas dinámicas mediante un Password Game.
 
 La prioridad es que el recorrido funcione completo, sea visualmente claro en PC y celular, y continúe siendo fácil de modificar.
-
-En celular, la mascota de la actividad 6 usa una única columna sin separación interna: no debe heredar las dos columnas del componente con mensaje, porque ese mensaje está oculto. La imagen conserva la compensación de su margen transparente y su animación, sin superponerse al botón.
-
-El cierre de la actividad 8 organiza el texto y la mascota en una única columna en celular para evitar solapamientos. El contenedor interno de la mascota también usa una sola columna sin separación, para centrar la imagen sin reservar espacio al mensaje oculto. En PC, la mascota ocupa dos filas a la derecha; la felicitación y el resumen quedan consecutivos a la izquierda, separados por 20 px, sin depender de la altura de la imagen.
