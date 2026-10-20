@@ -136,7 +136,7 @@ Contiene todo el diseño visual:
 
 Al final del archivo están los bloques `Digital lab visual system` y `Second-stage composition refinements`. Ahí están las variables de color, las superficies translúcidas, los componentes compartidos, la mascota y los cortes responsive. La paleta principal es `#0b1623`, `#12283a`, `#183b50`, `#1ca6f2`, `#fabf3f`, `#27b6b9`, `#f4f7fb` y `#a9bacb`. El highlight azul `#1ca6f2` se usa en bordes, foco y progreso.
 
-Los paneles principales usan un tratamiento de vidrio: fondo oscuro semitransparente, `backdrop-filter` con blur y bordes azules suaves. Esto deja visible la imagen de fondo sin perjudicar la lectura de controles y textos.
+Los paneles principales usan un tratamiento de vidrio: fondo oscuro semitransparente, `backdrop-filter` con blur y bordes azules suaves. Todos los desenfoques visuales están ajustados al 90% de su intensidad original para dejar ver mejor el fondo sin perjudicar la lectura de controles y textos.
 
 La tipografía se carga localmente desde `assets/font/`: `Cinzel` se usa en texto e interfaz, y `Cinzel Decorative` en los títulos destacados. Esto evita depender de la carga de fuentes externas. El navegador usa las fuentes de reserva declaradas en CSS si fuera necesario.
 
