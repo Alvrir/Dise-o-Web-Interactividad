@@ -2500,9 +2500,10 @@ select:focus-visible {
 /* Context-specific mascot placement. */
 .student-layout .result-panel .genie-companion {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     width: 100%;
     justify-items: center;
-    align-items: end;
+    place-items: center;
     margin-top: 18px;
 }
 
@@ -2637,8 +2638,17 @@ select:focus-visible {
 }
 
 .fake-final > .genie-companion {
+    display: grid;
     align-self: stretch;
     place-items: end center;
+    pointer-events: none;
+}
+
+.fake-final-content {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    align-content: center;
 }
 
 .closing-actions {
@@ -2859,6 +2869,7 @@ select:focus-visible {
         position: static;
         inset: auto;
         grid-row: 3;
+        grid-template-columns: minmax(0, 1fr);
         width: 100%;
         justify-self: stretch;
         place-items: center;
@@ -2872,37 +2883,33 @@ select:focus-visible {
     }
 
     .fake-final {
-        position: relative;
-        display: grid;
-        grid-template-columns: minmax(0, 1fr);
-        min-height: 430px;
-        align-items: start;
-    }
-
-    .fake-final-content {
-        position: relative;
-        z-index: 2;
-        width: 100%;
-        padding-top: 136px;
-        text-align: center;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        align-items: stretch;
     }
 
     .fake-final > .genie-companion {
-        position: absolute;
-        top: 12px;
-        right: 0;
-        z-index: 1;
+        position: static;
+        order: 1;
         display: grid;
-        width: 118px;
+        width: 100%;
         place-items: center;
-        pointer-events: none;
+        margin: 0 0 16px;
     }
 
     .fake-final > .genie-companion img {
         display: block;
-        width: 112px;
-        max-height: 146px;
+        width: min(72vw, 250px);
+        max-height: 280px;
         margin: 0 auto;
+    }
+
+    .fake-final-content {
+        order: 2;
+        width: 100%;
+        padding-top: 0;
+        text-align: center;
     }
 
     .fake-final-message {

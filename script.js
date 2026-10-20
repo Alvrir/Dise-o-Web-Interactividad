@@ -66,6 +66,11 @@ const fallbackAlumnos = [
         dni: "11223344",
         nombre: "Ana Gomez",
         edad: 19
+    },
+    {
+        dni: "41928374",
+        nombre: "Alvaro Irazoqui",
+        edad: 17
     }
 ];
 
@@ -740,10 +745,9 @@ function validateStudentForm(formData) {
         && edadOnlyNumbers
         && edad >= 12
         && edad <= 99;
-    const alumno = validFormat ? findAlumnoByDni(formData.dni) : null;
+    const alumno = validFormat ? findAlumnoByName(formData.nombre) : null;
     const studentMatches = Boolean(alumno)
-        && normalizeText(alumno.nombre) === normalizeText(formData.nombre)
-        && Number(alumno.edad) === edad;
+        && normalizeText(alumno.nombre) === normalizeText(formData.nombre);
 
     state.alumnoEncontrado = studentMatches ? alumno : null;
     addResult(results, validFormat, "Los datos tienen un formato válido.", "Revisá los datos ingresados.");
@@ -774,8 +778,8 @@ function renderValidationResults(results) {
     continueButton.classList.toggle("hidden", !allValid);
 }
 
-function findAlumnoByDni(dni) {
-    return state.alumnos.find(alumno => String(alumno.dni) === String(dni)) || null;
+function findAlumnoByName(nombre) {
+    return state.alumnos.find(alumno => normalizeText(alumno.nombre) === normalizeText(nombre)) || null;
 }
 
 function renderShortPassword() {

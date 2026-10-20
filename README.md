@@ -335,12 +335,12 @@ La pantalla está dividida en dos columnas en PC: el formulario queda a la izqui
 La función agrupa la respuesta en solo dos verificaciones:
 
 1. controla que nombre, DNI y edad tengan un formato válido;
-2. informa `El alumno está en la base de datos` cuando DNI, nombre y edad coinciden, o `El alumno no está en la base de datos` cuando no coinciden.
+2. informa `El alumno está en la base de datos` cuando el nombre y apellido coinciden con una entrada del JSON, o `El alumno no está en la base de datos` cuando no coinciden. DNI y edad se mantienen en pantalla y se validan solo por formato.
 
 Para buscar un alumno se usa:
 
 ```javascript
-findAlumnoByDni(dni)
+findAlumnoByName(nombre)
 ```
 
 ## Dónde cambiar las reglas del Password Game
