@@ -2898,6 +2898,7 @@ select:focus-visible {
         justify-self: center;
         place-items: center;
         margin: 0 0 16px;
+        transform: translateX(4%);
     }
 
     .fake-final > .genie-companion img {
