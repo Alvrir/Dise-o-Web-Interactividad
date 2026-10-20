@@ -2667,6 +2667,10 @@ select:focus-visible {
     width: min(100%, 820px);
 }
 
+.closing-celebration {
+    margin-bottom: clamp(18px, 2.5vw, 30px);
+}
+
 /* Stored final results remain a compact, centered group instead of stretched columns. */
 .completed-game-screen {
     width: min(760px, 100%);
@@ -2940,12 +2944,43 @@ select:focus-visible {
     }
 
     .closing-celebration {
-        grid-template-columns: minmax(0, 1fr) 126px;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "copy"
+            "genie";
+        justify-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+        text-align: center;
+    }
+
+    .closing-celebration > div {
+        grid-area: copy;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .closing-celebration > .genie-companion {
+        grid-area: genie;
+        display: grid;
+        width: 100%;
+        place-items: center;
     }
 
     .closing-celebration > .genie-companion img {
-        width: 118px;
-        max-height: 160px;
+        width: min(62vw, 220px);
+        max-height: 250px;
+        margin: 0 auto;
+    }
+
+    .closing-celebration h2 {
+        font-size: clamp(1.75rem, 8vw, 2.65rem);
+        line-height: 1.05;
+        overflow-wrap: anywhere;
+    }
+
+    .closing-celebration .lead {
+        margin: 14px auto 0;
     }
 }
 

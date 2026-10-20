@@ -806,3 +806,5 @@ Mostrar de forma práctica:
 La prioridad es que el recorrido funcione completo, sea visualmente claro en PC y celular, y continúe siendo fácil de modificar.
 
 En celular, la mascota de la actividad 6 se muestra centrada visualmente sobre el desafío. La corrección se aplica sobre la imagen, compensando su margen transparente interno sin afectar su animación, con un tamaño amplio y sin superponerse a su botón.
+
+El cierre de la actividad 8 organiza el texto y la mascota en una única columna en celular para evitar solapamientos; además, la separación antes del resumen del recorrido es más compacta en PC y móvil.
