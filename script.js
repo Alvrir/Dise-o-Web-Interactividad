@@ -109,7 +109,8 @@ const passwordContext = {
     currentYear: String(new Date().getFullYear()),
     currentYearRoman: toRomanNumeral(new Date().getFullYear()),
     browserName: getBrowserPasswordTerm(),
-    targetColor: getRandomPasswordColor()
+    targetColor: getRandomPasswordColor(),
+    targetLength: null
 };
 
 const shortPasswordRules = [
@@ -182,11 +183,6 @@ const finalPasswordRules = [
         validate: password => containsMonth(password)
     },
     {
-        id: "romanNumeral",
-        description: "Debe contener un número romano.",
-        validate: password => /[IVXLCDM]/.test(password)
-    },
-    {
         id: "sponsor",
         description: "Debe contener uno de nuestros sponsors.",
         logos: ["assets/logos/1.png", "assets/logos/2.png", "assets/logos/3.png"],
@@ -200,8 +196,10 @@ const finalPasswordRules = [
     },
     {
         id: "longPassword",
-        description: "La contraseña debe tener más de 45 caracteres.",
-        validate: password => password.length > 45
+        get description() {
+            return `La contraseña debe tener al menos ${passwordContext.targetLength ?? "más"} caracteres.`;
+        },
+        validate: password => passwordContext.targetLength !== null && password.length >= passwordContext.targetLength
     },
     {
         id: "cityName",
@@ -1126,6 +1124,7 @@ function getResultPassword(result) {
 }
 
 function resetFinalAttempt() {
+    passwordContext.targetLength = null;
     state.finalPassword = "";
     state.finalPasswordRevealedCount = 0;
     state.finalPasswordCompletionOrder = [];
@@ -1323,6 +1322,15 @@ function getVisiblePasswordResults(results, config) {
     }
 
     state[config.revealedCountKey] = revealedCount;
+
+    const lengthIndex = results.findIndex(result => result.id === "longPassword");
+    if (config.stateKey === "finalPassword" && lengthIndex >= 0 && lengthIndex < revealedCount
+        && passwordContext.targetLength === null) {
+        passwordContext.targetLength = state.finalPassword.length + 5 + Math.floor(Math.random() * 14);
+        const rule = finalPasswordRules.find(rule => rule.id === "longPassword");
+        results[lengthIndex].description = rule.description;
+        results[lengthIndex].ok = rule.validate(state.finalPassword);
+    }
 
     return results.slice(0, revealedCount);
 }
@@ -1691,6 +1699,10 @@ function completeDeveloperPassword() {
 
     input.value = password;
     input.dispatchEvent(new Event("input", { bubbles: true }));
+    if (state.currentScreen === "finalPassword" && passwordContext.targetLength > input.value.length) {
+        input.value = input.value.padEnd(passwordContext.targetLength, "a");
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+    }
     setDeveloperMessage("Contraseña de prueba cargada.");
 }
 
@@ -1704,7 +1716,7 @@ function buildValidFinalPassword() {
     }
 
     balancingDigits.push(String(remainingSum));
-    return `Ab!${passwordContext.currentYear}mayo${passwordContext.currentYearRoman}VManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividadRojas`;
+    return `Ab!${passwordContext.currentYear}mayo${passwordContext.currentYearRoman}VManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividadRojas${passwordContext.targetColor.name}`;
 }
 
 function setDeveloperMessage(message) {

@@ -445,11 +445,12 @@ El nivel final pide:
 8. el resultado de `10 × 42`;
 9. el nombre del navegador detectado;
 10. un mes del año;
-11. un número romano;
-12. uno de los textos `Binco`, `Manaos` o `Milkaut`; alcanza con una sola de esas palabras.
-13. el nombre del color mostrado: rojo, azul, amarillo, verde, blanco o negro, elegido aleatoriamente;
-14. más de 45 caracteres;
-15. el nombre de la ciudad: `Rojas`.
+11. uno de los textos `Binco`, `Manaos` o `Milkaut`; alcanza con una sola de esas palabras;
+12. el nombre del color mostrado: rojo, azul, amarillo, verde, blanco o negro, elegido aleatoriamente;
+13. alcanzar una longitud fijada al revelarse esta regla: caracteres actuales más un entero aleatorio entre 5 y 18, ambos incluidos;
+14. el nombre de la ciudad: `Rojas`.
+
+La longitud objetivo se guarda en el progreso de la partida, también en competencias. No cambia al escribir, borrar o recargar; se vuelve a calcular en una nueva partida. Cuenta todos los caracteres, igual que el contador del campo. Se conserva la regla del año actual en números romanos.
 
 La regla de sponsors muestra los tres logos de `assets/logos/` en recuadros de 72 px de alto. Cada imagen cubre su recuadro completo y cada regla usa `.is-valid` o `.is-invalid` para recibir un fondo verde o rojo suave.
 

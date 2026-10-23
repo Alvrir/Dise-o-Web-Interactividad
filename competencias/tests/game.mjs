@@ -21,11 +21,35 @@ function harness(search = '') {
     vm.runInContext(source, ctx);
     return { run: code => vm.runInContext(code, ctx), storage, elements };
 }
-test('las ocho actividades y las 15 reglas finales se conservan', () => {
+test('las ocho actividades y las 14 reglas finales se conservan', () => {
     const h = harness();
     assert.equal(h.run('screens.length'),8); // Incluye inicio; formulario contiene actividades 3 y 4.
-    assert.equal(h.run('finalPasswordRules.length'),15);
+    assert.equal(h.run('finalPasswordRules.length'),14);
+    assert.equal(h.run('finalPasswordRules.some(r => r.id === "romanNumeral")'),false);
+    assert.equal(h.run('finalPasswordRules.some(r => r.id === "currentYearRoman")'),true);
     assert.equal(h.run('shortPasswordRules.length'),3);
+});
+
+test('longitud aleatoria se fija al revelarse, persiste y se reinicia por partida', () => {
+    const h = harness();
+    h.run(`const cfg={stateKey:'finalPassword',revealedCountKey:'finalPasswordRevealedCount'};
+        state.finalPassword='a';
+        getVisiblePasswordResults(validatePassword(state.finalPassword,finalPasswordRules),cfg);`);
+    assert.equal(h.run('passwordContext.targetLength'),null);
+    for (const [random, extra] of [[0,5],[0.999999,18]]) {
+        h.run(`resetFinalAttempt(); Math.random=()=>${random}; state.finalPassword=buildValidFinalPassword();
+            getVisiblePasswordResults(validatePassword(state.finalPassword,finalPasswordRules),cfg);`);
+        assert.equal(h.run('passwordContext.targetLength-state.finalPassword.length'),extra);
+        const target = h.run('passwordContext.targetLength');
+        h.run(`saveFinalProgress(); restoreFinalSnapshot(JSON.parse(localStorage.getItem('interactividad-password-progress:sin-dni')));`);
+        assert.equal(h.run('passwordContext.targetLength'),target);
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='longPassword').validate('a'.repeat(${target-1}))`),false);
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='longPassword').validate('a'.repeat(${target}))`),true);
+        h.run(`state.finalPassword='a'; getVisiblePasswordResults(validatePassword(state.finalPassword,finalPasswordRules),cfg);`);
+        assert.equal(h.run('passwordContext.targetLength'),target);
+    }
+    h.run('resetFinalAttempt()');
+    assert.equal(h.run('passwordContext.targetLength'),null);
 });
 
 test('eventos desbloquea solo al completar las cuatro tarjetas, incluido teclado virtual', () => {
