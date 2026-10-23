@@ -80,7 +80,7 @@ test('eventos desbloquea solo al completar las cuatro tarjetas, incluido teclado
     h.run('renderEvents()');
     assert.match(h.elements.get('#app').innerHTML, /id="continue-after-events"[^>]*disabled/);
     assert.match(h.elements.get('#app').innerHTML, /<summary>Para pensar/);
-    assert.match(h.elements.get('#app').innerHTML, /<code>toggle<\/code>/);
+    assert.match(h.elements.get('#app').innerHTML, /<code>scroll<\/code>/);
     assert.doesNotMatch(h.elements.get('#app').innerHTML, /genie-companion/);
     h.elements.get('#click-demo').listeners.click();
     h.elements.get('#click-demo').listeners.click();

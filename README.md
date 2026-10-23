@@ -260,7 +260,7 @@ El contador se guarda durante la sesión abierta. CONTINUAR se habilita al proba
 
 En equipos con mouse, la segunda tarjeta detecta el evento real `mouseover` al acercar el cursor y `pointerdown` al hacer click. Al tocar en un dispositivo móvil también se registra `pointerdown`. El foco con teclado sigue disponible para acceder al control, sin reemplazar el último evento mostrado.
 
-La actividad de eventos no muestra al genio. Su lugar lo ocupa “Para pensar…”, un desplegable nativo (`details` / `summary`) con ejemplos agrupados de eventos de puntero, teclado, formularios, página y multimedia. Aparece a un costado en pantallas muy anchas y debajo del laboratorio en tamaños menores. Abrirlo no es obligatorio para avanzar. En móvil, el panel `EVENTO DETECTADO` aparece antes de las tarjetas y permanece visible mediante `position: sticky`.
+La actividad de eventos no muestra al genio. Su lugar lo ocupa “Para pensar…”, un desplegable nativo (`details` / `summary`) con seis ejemplos breves sin categorías: `dblclick`, `submit`, `paste`, `scroll`, `resize` y `play`. Aparece a un costado en pantallas muy anchas y debajo del laboratorio en tamaños menores. Abrirlo no es obligatorio para avanzar. En móvil, el panel `EVENTO DETECTADO` aparece antes de las tarjetas y permanece visible mediante `position: sticky`.
 
 ## Estado central de la aplicación
 
