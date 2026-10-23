@@ -2545,6 +2545,12 @@ select:focus-visible {
     line-height: 1.6;
 }
 
+.password-description {
+    margin: 0 0 18px;
+    line-height: 1.55;
+    color: var(--ink);
+}
+
 .password-layout--shortPassword .password-input-row input {
     min-height: 76px;
     font-size: 1.28rem;

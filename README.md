@@ -425,6 +425,8 @@ El botón de continuar aparece recién cuando todas las reglas están cumplidas.
 
 ## Resultado del Password Game final
 
+La presentación del desafío se organiza en título ("Ahora sí, creá tu verdadera contraseña"), consigna sobre las condiciones progresivas y aviso de que el tiempo comienza con la primera letra. Estos textos se configuran en `renderFinalPassword()` mediante `intro`, `description` y `helper`.
+
 Al escribir la primera letra en el Password Game final comienza un temporizador local visible en la pantalla, con formato `minutos:segundos.milésimas`. Cuando todas las reglas quedan cumplidas al mismo tiempo aparece una tarjeta con el nombre y apellido del formulario, el tiempo total con la misma precisión y la cantidad de letras.
 
 La tarjeta se guarda en el navegador del jugador usando su DNI como clave local. El resultado incluye la contraseña final, el tiempo y la cantidad de letras.
