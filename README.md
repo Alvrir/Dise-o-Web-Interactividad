@@ -260,7 +260,7 @@ El contador se guarda durante la sesión abierta. CONTINUAR se habilita al proba
 
 En equipos con mouse, la segunda tarjeta detecta el evento real `mouseover` al acercar el cursor y `pointerdown` al hacer click. Al tocar en un dispositivo móvil también se registra `pointerdown`. El foco con teclado sigue disponible para acceder al control, sin reemplazar el último evento mostrado.
 
-En pantallas muy anchas, Akinator acompaña el laboratorio como columna secundaria. En tamaños menores se oculta para dejar espacio a los controles. En móvil, el panel `EVENTO DETECTADO` aparece antes de las tarjetas y permanece visible mediante `position: sticky`.
+La actividad de eventos no muestra al genio. Su lugar lo ocupa “Para pensar…”, un desplegable nativo (`details` / `summary`) con ejemplos agrupados de eventos de puntero, teclado, formularios, página y multimedia. Aparece a un costado en pantallas muy anchas y debajo del laboratorio en tamaños menores. Abrirlo no es obligatorio para avanzar. En móvil, el panel `EVENTO DETECTADO` aparece antes de las tarjetas y permanece visible mediante `position: sticky`.
 
 ## Estado central de la aplicación
 
@@ -690,7 +690,7 @@ Al completar el primer Password Game, sonríe y muestra “Eso estuvo fácil, ¿
 
 `renderClosing()` saluda por el primer nombre del formulario, escapado como texto; sin nombre muestra “¡Felicitaciones!”. La frase “No era magia: eran tus acciones y el código trabajando juntos” conecta el cierre con la adivinanza inicial. Tres recuerdos resumen lo aprendido, en lugar de las tarjetas de conceptos.
 
-El globo “Para pensar…” invita a conversar sobre otros eventos posibles y las respuestas que podría dar la página. No es otro formulario ni una condición para avanzar. Los botones finales siguen siendo VOLVER AL INICIO y PANTALLA ANTERIOR. Los estilos se encuentran en `.genie-remark`, `.closing-memories` y `.reflection-bubble`.
+“Para pensar…” pertenece a la actividad de eventos, no al cierre. Los botones finales siguen siendo VOLVER AL INICIO y PANTALLA ANTERIOR. Los estilos se encuentran en `.genie-remark`, `.closing-memories`, `.reflection-bubble` y `.events-reflection`.
 
 ## Cosas importantes para no romper
 

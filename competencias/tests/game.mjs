@@ -26,7 +26,7 @@ test('cierre personaliza sin interpretar HTML y conserva ambas salidas', () => {
     h.run(`state.formData.nombre='<img> Apellido'; renderClosing();`);
     const markup = h.elements.get('#app').innerHTML;
     assert.match(markup, /¡Bien hecho, &lt;img&gt;!/);
-    assert.match(markup, /Para pensar/);
+    assert.doesNotMatch(markup, /Para pensar/);
     assert.match(markup, /data-next="start"/);
     assert.match(markup, /data-next="finalPassword"/);
     h.run(`state.formData.nombre=''; renderClosing();`);
@@ -79,6 +79,9 @@ test('eventos desbloquea solo al completar las cuatro tarjetas, incluido teclado
     const h = harness();
     h.run('renderEvents()');
     assert.match(h.elements.get('#app').innerHTML, /id="continue-after-events"[^>]*disabled/);
+    assert.match(h.elements.get('#app').innerHTML, /<summary>Para pensar/);
+    assert.match(h.elements.get('#app').innerHTML, /<code>toggle<\/code>/);
+    assert.doesNotMatch(h.elements.get('#app').innerHTML, /genie-companion/);
     h.elements.get('#click-demo').listeners.click();
     h.elements.get('#click-demo').listeners.click();
     assert.equal(h.run('state.discoveredEvents.length'), 1);

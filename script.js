@@ -629,10 +629,42 @@ function renderEvents() {
                 </div>
                 <p id="events-hint" class="hint">${state.discoveredEvents.length === 4 ? "¡Probaste las cuatro tarjetas! Ya podés continuar." : "Probá las cuatro tarjetas para continuar."}</p>
             </div>
-            ${renderGenieCompanion({
-                pose: "celu",
-                message: "¡Cada movimiento cuenta! Probá interactuar con los elementos."
-            })}
+            <aside class="reflection-bubble events-reflection">
+                <details>
+                    <summary>Para pensar…</summary>
+                    <p>Además de hacer clic, tocar o escribir, ¿qué otra cosa podría pasar en una página? ¿Cómo podría responder?</p>
+                    <h3>Mouse, tacto y teclado</h3>
+                    <ul>
+                        <li><code>dblclick</code>: hacer doble clic.</li>
+                        <li><code>contextmenu</code>: abrir el menú contextual.</li>
+                        <li><code>pointermove</code>: mover un puntero.</li>
+                        <li><code>pointerup</code>: soltar el mouse o levantar el dedo.</li>
+                        <li><code>pointerenter</code> / <code>pointerleave</code>: entrar o salir de una zona.</li>
+                        <li><code>keyup</code>: soltar una tecla.</li>
+                        <li><code>wheel</code>: girar la rueda del mouse o usar el gesto equivalente.</li>
+                    </ul>
+                    <h3>Campos y formularios</h3>
+                    <ul>
+                        <li><code>focus</code> / <code>blur</code>: entrar o salir de un campo.</li>
+                        <li><code>change</code>: confirmar un cambio de valor.</li>
+                        <li><code>submit</code>: enviar un formulario.</li>
+                        <li><code>reset</code>: restablecer un formulario.</li>
+                        <li><code>copy</code>, <code>cut</code> y <code>paste</code>: copiar, cortar y pegar.</li>
+                        <li><code>dragstart</code> / <code>drop</code>: empezar a arrastrar un elemento y soltarlo en una zona válida.</li>
+                    </ul>
+                    <h3>La página y su contenido</h3>
+                    <ul>
+                        <li><code>scroll</code>: desplazar el contenido.</li>
+                        <li><code>resize</code>: cambiar el tamaño de la ventana.</li>
+                        <li><code>DOMContentLoaded</code>: terminar de preparar la estructura de la página.</li>
+                        <li><code>load</code> / <code>error</code>: completar o fallar la carga de un recurso.</li>
+                        <li><code>visibilitychange</code>: cambiar la visibilidad de la pestaña.</li>
+                        <li><code>online</code> / <code>offline</code>: cambiar el estado de conexión que informa el navegador.</li>
+                        <li><code>play</code>, <code>pause</code> y <code>ended</code>: reproducir, pausar o terminar un audio o video.</li>
+                        <li><code>toggle</code>: abrir o cerrar un desplegable como este.</li>
+                    </ul>
+                </details>
+            </aside>
         </section>
     `;
 
@@ -1567,10 +1599,6 @@ function renderClosing() {
                     </ul>
                 </div>
             </div>
-            <aside class="reflection-bubble" aria-labelledby="reflection-title">
-                <h3 id="reflection-title">Para pensar…</h3>
-                <p>Además de hacer clic, tocar o escribir, ¿qué otra cosa podría pasar en una página y generar un evento? ¿Cómo podría responder la página?</p>
-            </aside>
             <div class="actions closing-actions">
                 <button type="button" data-next="start">VOLVER AL INICIO</button>
                 <button type="button" class="secondary-button" data-next="finalPassword">PANTALLA ANTERIOR</button>
