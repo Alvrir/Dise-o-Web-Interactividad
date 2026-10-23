@@ -45,6 +45,23 @@ test('eventos desbloquea solo al completar las cuatro tarjetas, incluido teclado
     assert.doesNotMatch(h.elements.get('#app').innerHTML, /id="continue-after-events"[^>]*disabled/);
 });
 
+test('keydown conserva la letra ante input y admite teclados virtuales', () => {
+    const h = harness();
+    h.run('renderEvents()');
+    const key = h.elements.get('#key-demo');
+    key.listeners.keydown({key:'a'});
+    key.listeners.input({data:'a'});
+    assert.equal(h.run('state.lastEvent'), 'keydown');
+    assert.match(h.elements.get('#event-description').textContent, /tecla a/);
+    key.listeners.keyup();
+    key.listeners.keydown({key:'Unidentified'});
+    key.listeners.input({data:'ñ'});
+    assert.equal(h.run('state.lastEvent'), 'input');
+    assert.match(h.elements.get('#event-description').textContent, /ingresó: ñ/);
+    key.listeners.input({inputType:'deleteContentBackward'});
+    assert.match(h.elements.get('#event-description').textContent, /borró/);
+});
+
 test('la zona sensible permite completar la tarjeta con teclado sin contar foco', () => {
     const h = harness();
     h.run('renderEvents()');

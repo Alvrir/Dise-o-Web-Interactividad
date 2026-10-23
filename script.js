@@ -664,9 +664,28 @@ function renderEvents() {
         }
     });
     document.querySelector("#input-demo").addEventListener("input", () => updateLastEvent("input"));
-    document.querySelector("#key-demo").addEventListener("keydown", event => updateLastEvent("keydown", event.key));
-    // Algunos teclados virtuales solo emiten input; registrar el evento real.
-    document.querySelector("#key-demo").addEventListener("input", () => updateLastEvent("input", "", "keydown"));
+    const keyDemo = document.querySelector("#key-demo");
+    let identifiedKey = false;
+    keyDemo.addEventListener("keydown", event => {
+        identifiedKey = Boolean(event.key) && !event.isComposing
+            && !["Unidentified", "Process", "Dead"].includes(event.key);
+        if (identifiedKey) updateLastEvent("keydown", event.key === " " ? "Espacio" : event.key);
+    });
+    keyDemo.addEventListener("keyup", () => { identifiedKey = false; });
+    keyDemo.addEventListener("blur", () => { identifiedKey = false; });
+    // El input posterior no debe tapar una tecla identificada por keydown.
+    keyDemo.addEventListener("input", (event = {}) => {
+        if (identifiedKey) {
+            identifiedKey = false;
+            return;
+        }
+        updateLastEvent("input", "", "keydown");
+        document.querySelector("#event-description").textContent = event.data
+            ? `El teclado ingresó: ${event.data}. Este navegador lo informa mediante input.`
+            : event.inputType?.startsWith("delete")
+                ? "El teclado borró texto mediante input."
+                : `El campo cambió mediante input. Texto actual: ${keyDemo.value || "(vacío)"}.`;
+    });
 
     state.discoveredEvents.forEach(eventName => {
         document.querySelector(`[data-event-card="${eventName}"]`)?.classList.add("is-discovered");

@@ -264,6 +264,8 @@ En pantallas muy anchas, Akinator acompaña el laboratorio como columna secundar
 
 ## Estado central de la aplicación
 
+La tarjeta de teclado conserva la tecla informada por `keydown` aunque después llegue `input`. Si el teclado virtual no identifica la tecla, el panel muestra el texto ingresado o el borrado con el nombre real del evento `input`.
+
 En `script.js` existe un objeto llamado:
 
 ```javascript
