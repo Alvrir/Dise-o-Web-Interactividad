@@ -735,6 +735,7 @@ function renderForm() {
             </div>
             <section class="result-panel" aria-live="polite">
                 <h2>VERIFICACIÓN</h2>
+                <p id="student-genie-message" class="genie-remark">Veamos si estás en la lista.</p>
                 <ul id="validation-results" class="validation-list">
                     <li class="validation-item"><span class="status waiting">?</span><span>Esperando la carga de los datos.</span></li>
                     <li class="validation-item"><span class="status waiting">?</span><span>Consulta a la base de datos pendiente.</span></li>
@@ -812,6 +813,13 @@ function renderValidationResults(results) {
     const list = document.querySelector("#validation-results");
     const continueButton = document.querySelector("#continue-after-form");
     const allValid = results.every(result => result.ok);
+
+    const studentGenie = document.querySelector(".student-layout .genie-companion img");
+    studentGenie.src = allValid ? GENIE_ASSETS.idle : GENIE_ASSETS.pensando;
+    studentGenie.alt = allValid ? "Akinator sonriendo" : "Akinator pensando";
+    document.querySelector("#student-genie-message").textContent = allValid
+        ? "¡Acá estás! Podemos seguir."
+        : "Todavía no puedo confirmarlo. Revisemos tus datos.";
 
     list.innerHTML = results.map(result => `
         <li class="validation-item">
@@ -904,6 +912,7 @@ function renderPasswordScreen(config) {
                 <p class="lead">${config.intro}</p>
                 ${config.description ? `<p class="password-description">${config.description}</p>` : ""}
                 ${config.helper ? `<p class="password-helper">${config.helper}</p>` : ""}
+                ${config.stateKey === "shortPassword" ? `<p id="short-genie-success" class="genie-remark hidden" role="status">Eso estuvo fácil, ¿no?</p>` : ""}
                 ${config.stateKey === "finalPassword" && !getPlayerNameWords().length ? `
                     <label class="field" for="final-player-name">
                         <span>Nombre y apellido</span>
@@ -947,6 +956,13 @@ function renderPasswordScreen(config) {
         const visibleResults = getVisiblePasswordResults(results, config);
         const orderedResults = orderPasswordResults(visibleResults, config);
         const allValid = results.every(result => result.ok);
+
+        if (config.stateKey === "shortPassword") {
+            document.querySelector("#short-genie-success").classList.toggle("hidden", !allValid);
+            const genie = document.querySelector(".password-layout--shortPassword .genie-companion img");
+            genie.src = allValid ? GENIE_ASSETS.idle : GENIE_ASSETS.pensando;
+            genie.alt = allValid ? "Akinator sonriendo" : "Akinator pensando";
+        }
 
         renderPasswordRules(document.querySelector("#password-rules"), orderedResults);
 
@@ -1527,14 +1543,15 @@ function renderFakeFinal() {
 }
 
 function renderClosing() {
+    const firstName = state.formData.nombre.trim().split(/\s+/)[0];
     app.innerHTML = `
         <section class="closing-screen">
             <header class="closing-celebration">
                 <div>
                     <span class="section-kicker">RECORRIDO COMPLETADO</span>
-                    <h2>¡FELICITACIONES!</h2>
+                    <h2>${firstName ? `¡Bien hecho, ${escapeHtml(firstName)}!` : "¡Felicitaciones!"}</h2>
                     <p>Completaste todos los desafíos.</p>
-                    <p class="lead">Ahora conocés un poco más sobre cómo las páginas detectan y responden a tus acciones.</p>
+                    <p class="lead genie-remark">“No era magia: eran tus acciones y el código trabajando juntos”.</p>
                 </div>
                 ${renderGenieCompanion({
                     pose: "idle",
@@ -1543,21 +1560,17 @@ function renderClosing() {
             </header>
             <div class="screen-grid closing-summary">
                 <div>
-                    <p class="lead">Cuando tocaste y escribiste, generaste eventos. JavaScript respondió a tus acciones, consultó tus datos y comprobó las condiciones de tus contraseñas.</p>
-                    <ul class="flow-list">
-                        <li>USUARIO</li>
-                        <li>ACCIÓN</li>
-                        <li>EVENTO</li>
-                        <li>JAVASCRIPT</li>
-                        <li>VALIDACIÓN</li>
-                        <li>RESPUESTA</li>
+                    <ul class="closing-memories">
+                        <li>Descubriste qué comparte tu navegador.</li>
+                        <li>Probaste cómo responde una página a tus acciones.</li>
+                        <li>Superaste sus validaciones.</li>
                     </ul>
-                    <p class="lead">Todo esto forma parte de la interactividad web.</p>
                 </div>
             </div>
-            <div class="summary-grid">
-                ${closingConcepts.map(renderConceptCard).join("")}
-            </div>
+            <aside class="reflection-bubble" aria-labelledby="reflection-title">
+                <h3 id="reflection-title">Para pensar…</h3>
+                <p>Además de hacer clic, tocar o escribir, ¿qué otra cosa podría pasar en una página y generar un evento? ¿Cómo podría responder la página?</p>
+            </aside>
             <div class="actions closing-actions">
                 <button type="button" data-next="start">VOLVER AL INICIO</button>
                 <button type="button" class="secondary-button" data-next="finalPassword">PANTALLA ANTERIOR</button>

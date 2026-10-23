@@ -131,7 +131,7 @@ Contiene todo el diseño visual:
 - reglas del Password Game;
 - panel de herramientas de desarrollador;
 - tip de F12;
-- cierre con tarjetas preparadas para miniaturas.
+- cierre personalizado con logros y una pregunta para conversar.
 
 Los estilos incluyen variables de color, superficies translúcidas, componentes compartidos y cortes responsive. Hay ajustes específicos hacia el final del archivo que pueden sobrescribir reglas anteriores; revisar la cascada al modificar un componente. La paleta principal es `#0b1623`, `#12283a`, `#183b50`, `#1ca6f2`, `#fabf3f`, `#27b6b9`, `#f4f7fb` y `#a9bacb`. El highlight azul `#1ca6f2` se usa en bordes, foco y progreso.
 
@@ -682,34 +682,15 @@ Ejemplo:
 <button data-next="nuevaPantalla">CONTINUAR →</button>
 ```
 
-## Cómo agregar imágenes al cierre
+## Mensajes y cierre del recorrido
 
-La pantalla final usa esta lista:
+En el formulario, el genio dice “Veamos si estás en la lista” y pasa de pensativo a sonriente cuando la validación es correcta. Si hay errores, invita a revisar los datos.
 
-```javascript
-const closingConcepts = [
-    ...
-];
-```
+Al completar el primer Password Game, sonríe y muestra “Eso estuvo fácil, ¿no?”. Si se vuelve a incumplir una condición, recupera su pose pensativa.
 
-Cada concepto tiene:
+`renderClosing()` saluda por el primer nombre del formulario, escapado como texto; sin nombre muestra “¡Felicitaciones!”. La frase “No era magia: eran tus acciones y el código trabajando juntos” conecta el cierre con la adivinanza inicial. Tres recuerdos resumen lo aprendido, en lugar de las tarjetas de conceptos.
 
-```javascript
-{
-    title: "Eventos",
-    description: "Click, escritura, teclas y tacto disparan acciones.",
-    image: "assets/screens/eventos.png",
-    activity: "Actividad 2"
-}
-```
-
-Actualmente `renderConceptCard()` muestra el nombre de la actividad en un placeholder; el atributo `data-image` no carga una imagen por sí solo.
-
-Para agregar imágenes reales:
-
-1. guardar la imagen en `assets/screens/`;
-2. usar el mismo nombre indicado en `image`;
-3. modificar `renderConceptCard()` para renderizar un `<img>` con esa ruta en lugar del placeholder.
+El globo “Para pensar…” invita a conversar sobre otros eventos posibles y las respuestas que podría dar la página. No es otro formulario ni una condición para avanzar. Los botones finales siguen siendo VOLVER AL INICIO y PANTALLA ANTERIOR. Los estilos se encuentran en `.genie-remark`, `.closing-memories` y `.reflection-bubble`.
 
 ## Cosas importantes para no romper
 

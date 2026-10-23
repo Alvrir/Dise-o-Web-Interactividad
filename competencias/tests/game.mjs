@@ -21,6 +21,18 @@ function harness(search = '') {
     vm.runInContext(source, ctx);
     return { run: code => vm.runInContext(code, ctx), storage, elements };
 }
+test('cierre personaliza sin interpretar HTML y conserva ambas salidas', () => {
+    const h = harness();
+    h.run(`state.formData.nombre='<img> Apellido'; renderClosing();`);
+    const markup = h.elements.get('#app').innerHTML;
+    assert.match(markup, /¡Bien hecho, &lt;img&gt;!/);
+    assert.match(markup, /Para pensar/);
+    assert.match(markup, /data-next="start"/);
+    assert.match(markup, /data-next="finalPassword"/);
+    h.run(`state.formData.nombre=''; renderClosing();`);
+    assert.match(h.elements.get('#app').innerHTML, /¡Felicitaciones!/);
+});
+
 test('las ocho actividades y las 15 reglas finales se conservan', () => {
     const h = harness();
     assert.equal(h.run('screens.length'),8); // Incluye inicio; formulario contiene actividades 3 y 4.

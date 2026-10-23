@@ -626,6 +626,46 @@ body::before {
     max-height: 360px;
 }
 
+.genie-remark {
+    color: var(--gold);
+    line-height: 1.5;
+}
+
+.closing-memories {
+    margin: 0;
+    padding-left: 24px;
+    line-height: 1.6;
+}
+
+.closing-memories li + li {
+    margin-top: 12px;
+}
+
+.reflection-bubble {
+    grid-column: 1 / -1;
+    padding: 20px 24px;
+    border: 1px solid var(--highlight);
+    border-left: 4px solid var(--gold);
+    border-radius: 8px;
+    background: rgba(28, 166, 242, 0.08);
+    overflow-wrap: anywhere;
+}
+
+.reflection-bubble h3 {
+    margin: 0 0 10px;
+    color: var(--gold);
+    font-size: 1.15rem;
+}
+
+.reflection-bubble p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+.closing-celebration h2 {
+    overflow-wrap: anywhere;
+}
+
 .closing-summary {
     margin-bottom: 36px;
 }
