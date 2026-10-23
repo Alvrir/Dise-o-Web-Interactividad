@@ -622,7 +622,7 @@ style.css
 Partes importantes:
 
 - `.app-shell`: contenedor de ancho y altura completos;
-- `.topbar`: cabecera con progreso, que también es el acceso oculto a las herramientas de desarrollador al mantenerlo presionado cinco segundos;
+- `.topbar`: cabecera con progreso, que también es el acceso oculto a las herramientas de desarrollador al mantenerlo presionado 2,5 segundos;
 - `.screen`: caja principal flexible que ocupa el espacio restante del viewport;
 - `.events-lab`, `.event-grid`, `.event-card` y `.event-console`: laboratorio de la actividad de eventos;
 - `.progress-card`: barra de progreso;

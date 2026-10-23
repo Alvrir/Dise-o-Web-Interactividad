@@ -1609,7 +1609,7 @@ function initDeveloperHoldTrigger() {
             devPanel.classList.remove("hidden");
             setDeveloperMessage("Herramientas abiertas.");
             developerHoldTimeout = null;
-        }, 5000);
+        }, 2500);
     };
 
     progressCard.addEventListener("pointerdown", startHold);
