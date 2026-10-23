@@ -317,6 +317,8 @@ Importante:
 
 Si el JSON está mal escrito, la página no va a poder cargarlo correctamente.
 
+La carga correcta no muestra un aviso con la ruta del archivo en el formulario. Si se usan los datos de respaldo, se mantiene el aviso correspondiente.
+
 ## Cómo funciona la validación del formulario
 
 La pantalla del formulario pide:

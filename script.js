@@ -761,7 +761,7 @@ function renderForm() {
 
 function renderDataNotice() {
     if (state.dataSource === "json") {
-        return `<p class="success-text">✓ Datos cargados desde data/alumnos.json.</p>`;
+        return "";
     }
 
     return `<p class="warning-text">! El navegador bloqueó la lectura del JSON por file://. Se usan datos de demostración en memoria. Para leer el archivo real, ejecutá un servidor local sencillo.</p>`;
