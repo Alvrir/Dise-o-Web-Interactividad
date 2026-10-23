@@ -448,7 +448,10 @@ El nivel final pide:
 11. uno de los textos `Binco`, `Manaos` o `Milkaut`; alcanza con una sola de esas palabras;
 12. el nombre del color mostrado: rojo, azul, amarillo, verde, blanco o negro, elegido aleatoriamente;
 13. alcanzar una longitud fijada al revelarse esta regla: caracteres actuales más un entero aleatorio entre 5 y 18, ambos incluidos;
-14. el nombre de la ciudad: `Rojas`.
+14. el nombre de la ciudad: `Rojas`;
+15. cualquiera de las palabras del nombre y apellido ingresados en el formulario, sin distinguir mayúsculas ni tildes.
+
+Si se entra mediante el acceso directo sin un nombre cargado, el juego final muestra un campo para ingresarlo. Un nombre vacío no cumple la condición.
 
 La longitud objetivo se guarda en el progreso de la partida, también en competencias. No cambia al escribir, borrar o recargar; se vuelve a calcular en una nueva partida. Cuenta todos los caracteres, igual que el contador del campo. Se conserva la regla del año actual en números romanos.
 

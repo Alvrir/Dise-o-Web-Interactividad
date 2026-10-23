@@ -22,6 +22,7 @@ let competitionRuntime = null;
 function finalSnapshot() {
     return {
         password: state.finalPassword,
+        playerName: state.formData.nombre,
         revealed: state.finalPasswordRevealedCount,
         order: state.finalPasswordCompletionOrder,
         startedAt: state.finalPasswordStartedAt,
@@ -33,6 +34,9 @@ function restoreFinalSnapshot(snapshot) {
     resetFinalAttempt();
     if (!snapshot || typeof snapshot.password !== "string") return;
     state.finalPassword = snapshot.password;
+    if (!state.formData.nombre.trim() && typeof snapshot.playerName === "string") {
+        state.formData.nombre = snapshot.playerName;
+    }
     state.finalPasswordRevealedCount = Number(snapshot.revealed) || 0;
     state.finalPasswordCompletionOrder = Array.isArray(snapshot.order) ? snapshot.order : [];
     state.finalPasswordStartedAt = Number(snapshot.startedAt) || null;
@@ -205,8 +209,17 @@ const finalPasswordRules = [
         id: "cityName",
         description: "Debe contener el nombre de nuestra ciudad.",
         validate: password => normalizeText(password).includes("rojas")
+    },
+    {
+        id: "playerName",
+        description: "Debe contener tu nombre o apellido.",
+        validate: password => getPlayerNameWords().some(word => normalizeText(password).includes(word))
     }
 ];
+
+function getPlayerNameWords() {
+    return normalizeText(state.formData.nombre).split(/\s+/).filter(Boolean);
+}
 
 const closingConcepts = [
     {
@@ -891,6 +904,12 @@ function renderPasswordScreen(config) {
                 <p class="lead">${config.intro}</p>
                 ${config.description ? `<p class="password-description">${config.description}</p>` : ""}
                 ${config.helper ? `<p class="password-helper">${config.helper}</p>` : ""}
+                ${config.stateKey === "finalPassword" && !getPlayerNameWords().length ? `
+                    <label class="field" for="final-player-name">
+                        <span>Nombre y apellido</span>
+                        <input id="final-player-name" type="text" autocomplete="name" placeholder="Ingresá tu nombre y apellido">
+                    </label>
+                ` : ""}
                 ${config.stateKey === "finalPassword" ? `
                     <p class="live-timer" aria-live="off">
                         <span>TIEMPO</span>
@@ -949,6 +968,11 @@ function renderPasswordScreen(config) {
     };
 
     input.addEventListener("input", renderRules);
+    document.querySelector("#final-player-name")?.addEventListener("input", event => {
+        state.formData.nombre = event.target.value.trim();
+        saveJourney();
+        renderRules();
+    });
     if (config.stateKey === "finalPassword") {
         input.addEventListener("focus", () => scrollFinalPasswordIntoView(input));
     }
@@ -1716,7 +1740,7 @@ function buildValidFinalPassword() {
     }
 
     balancingDigits.push(String(remainingSum));
-    return `Ab!${passwordContext.currentYear}mayo${passwordContext.currentYearRoman}VManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividadRojas${passwordContext.targetColor.name}`;
+    return `Ab!${passwordContext.currentYear}mayo${passwordContext.currentYearRoman}VManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividadRojas${passwordContext.targetColor.name}${getPlayerNameWords()[0] || ""}`;
 }
 
 function setDeveloperMessage(message) {

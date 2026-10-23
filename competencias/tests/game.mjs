@@ -21,13 +21,24 @@ function harness(search = '') {
     vm.runInContext(source, ctx);
     return { run: code => vm.runInContext(code, ctx), storage, elements };
 }
-test('las ocho actividades y las 14 reglas finales se conservan', () => {
+test('las ocho actividades y las 15 reglas finales se conservan', () => {
     const h = harness();
     assert.equal(h.run('screens.length'),8); // Incluye inicio; formulario contiene actividades 3 y 4.
-    assert.equal(h.run('finalPasswordRules.length'),14);
+    assert.equal(h.run('finalPasswordRules.length'),15);
     assert.equal(h.run('finalPasswordRules.some(r => r.id === "romanNumeral")'),false);
     assert.equal(h.run('finalPasswordRules.some(r => r.id === "currentYearRoman")'),true);
     assert.equal(h.run('shortPasswordRules.length'),3);
+});
+
+test('acepta cualquier palabra del nombre, normaliza tildes y rechaza nombres vacíos', () => {
+    const h = harness();
+    h.run(`state.formData.nombre='  Álvaro   José Irazoqui  ';`);
+    for (const word of ['alvaro', 'JOSE', 'irazoqui']) {
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='playerName').validate('123${word}!')`),true);
+    }
+    assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='playerName').validate('otro')`),false);
+    h.run(`state.formData.nombre='   ';`);
+    assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='playerName').validate('cualquiertexto')`),false);
 });
 
 test('longitud aleatoria se fija al revelarse, persiste y se reinicia por partida', () => {
