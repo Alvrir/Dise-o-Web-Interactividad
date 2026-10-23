@@ -244,7 +244,7 @@ La función que conecta los botones es:
 bindNextButtons()
 ```
 
-Al cambiar de pantalla, `showScreen()` enfoca el contenido principal con `preventScroll`. Esto conserva la accesibilidad del foco sin desplazar automáticamente la página hacia abajo, especialmente en celulares.
+Al cambiar de pantalla, `showScreen()` enfoca el contenido principal con `preventScroll` y devuelve el documento al inicio. Las interacciones dentro de cada actividad conservan su posición.
 
 ## Laboratorio de interactividad
 
@@ -256,7 +256,7 @@ El panel inferior muestra:
 - una explicación en lenguaje simple de lo que ocurrió;
 - el contador `Eventos descubiertos: N/4`.
 
-El contador se guarda solo durante la sesión abierta. Completar los cuatro no bloquea el botón para continuar: la exploración es libre. En escritorio hay cuatro tarjetas por fila cuando entra el ancho disponible, se reducen a dos columnas en anchos intermedios y a una sola columna en celular.
+El contador se guarda durante la sesión abierta. CONTINUAR se habilita al probar las cuatro tarjetas; repetir una interacción no suma otra tarjeta. En el campo de teclado, un evento `input` también completa la tarjeta para admitir teclados virtuales que no emiten `keydown`, mostrando el evento real detectado. La zona sensible puede activarse con Enter o Espacio. En escritorio hay cuatro tarjetas por fila cuando entra el ancho disponible, se reducen a dos columnas en anchos intermedios y a una sola columna en celular.
 
 En equipos con mouse, la segunda tarjeta detecta el evento real `mouseover` al acercar el cursor y `pointerdown` al hacer click. Al tocar en un dispositivo móvil también se registra `pointerdown`. El foco con teclado sigue disponible para acceder al control, sin reemplazar el último evento mostrado.
 
@@ -329,7 +329,7 @@ La función principal es:
 validateStudentForm(formData)
 ```
 
-La pantalla está dividida en dos columnas en PC: el formulario queda a la izquierda y las verificaciones a la derecha. En celular vuelve a una sola columna. El botón `CARGAR` ejecuta la validación.
+La pantalla está dividida en dos columnas en PC: el formulario queda a la izquierda y las verificaciones a la derecha. En celular vuelve a una sola columna. El botón `CARGAR` ejecuta la validación. Los errores aparecen junto al campo correspondiente, con `aria-invalid` y `aria-describedby`, y el primer campo incorrecto recibe foco.
 
 La función agrupa la respuesta en solo dos verificaciones:
 
@@ -553,6 +553,8 @@ En móvil, las mascotas de verificación, Password Game corto, actividad 6 y cie
 Al final de la actividad 8 hay dos controles del mismo tamaño: `VOLVER AL INICIO` regresa a la pantalla de bienvenida y `PANTALLA ANTERIOR` vuelve directamente al Password Game final. En escritorio se muestran lado a lado, alineados al final del recorrido; en móvil se apilan.
 
 ## Fondo personalizado
+
+En móvil, el genio del primer Password Game se muestra sin blur y con opacidad de 0.9. El cierre relaciona los eventos, la consulta de datos y las validaciones con las acciones realizadas durante el recorrido.
 
 La configuración está centralizada al inicio de `script.js`:
 

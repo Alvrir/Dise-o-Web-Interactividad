@@ -2924,6 +2924,8 @@ select:focus-visible {
         width: 260px;
         max-height: 275px;
         margin-inline: auto;
+        opacity: 0.9;
+        filter: none;
     }
 
     .fake-final {

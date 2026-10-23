@@ -344,6 +344,7 @@ async function showScreen(screenId) {
     void app.offsetWidth;
     app.classList.add("is-entering");
     app.focus({ preventScroll: true });
+    if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
 }
 
 function configureBackground() {
@@ -579,7 +580,7 @@ function renderEvents() {
                 <article class="event-card" data-event-card="mouseover">
                     <div class="event-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h10M4 19h6"/><path d="m16 15 4 4m0-4-4 4"/></svg></div>
                     <span class="event-tag">02 · PUNTERO</span>
-                    <h3>Acercá el cursor</h3>
+                    <h3>Explorá la zona</h3>
                     <p>Con mouse se detecta <code>mouseover</code>; al tocar, <code>pointerdown</code>.</p>
                     <div id="hover-demo" class="event-target interactive" tabindex="0" role="button" aria-label="Probar evento de puntero">ZONA SENSIBLE</div>
                 </article>
@@ -597,7 +598,7 @@ function renderEvents() {
                     <div class="event-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h.01M10 9h.01M13 9h.01M16 9h.01M7 13h.01M10 13h.01M13 13h4"/><path d="m16 9 2 2-2 2"/></svg></div>
                     <span class="event-tag">04 · KEYDOWN</span>
                     <h3>Presioná una tecla</h3>
-                    <p>Con teclado físico, el navegador informa cuál fue.</p>
+                    <p>Tocá el campo y usá el teclado de tu celular, o escribí con el teclado físico.</p>
                     <label class="field">
                         <span class="sr-only">Campo para probar keydown</span>
                         <input id="key-demo" type="text" placeholder="Presioná una tecla">
@@ -613,8 +614,9 @@ function renderEvents() {
                 <p id="event-description">Esperando una interacción para mostrar qué ocurrió.</p>
                 </section>
                 <div class="actions">
-                    <button data-next="form">CONTINUAR →</button>
+                    <button id="continue-after-events" data-next="form" ${state.discoveredEvents.length < 4 ? "disabled" : ""} aria-describedby="events-hint">CONTINUAR →</button>
                 </div>
+                <p id="events-hint" class="hint">${state.discoveredEvents.length === 4 ? "¡Probaste las cuatro tarjetas! Ya podés continuar." : "Probá las cuatro tarjetas para continuar."}</p>
             </div>
             ${renderGenieCompanion({
                 pose: "celu",
@@ -631,9 +633,9 @@ function renderEvents() {
         keydown: key => `El navegador detectó que presionaste la tecla ${key}.`
     };
 
-    const updateLastEvent = (eventName, detail = "") => {
+    const updateLastEvent = (eventName, detail = "", discovery = eventName) => {
         state.lastEvent = eventName;
-        const discoveryName = eventName === "pointerdown" ? "mouseover" : eventName;
+        const discoveryName = discovery === "pointerdown" ? "mouseover" : discovery;
 
         if (!state.discoveredEvents.includes(discoveryName)) {
             state.discoveredEvents.push(discoveryName);
@@ -645,13 +647,26 @@ function renderEvents() {
             : eventDescriptions[eventName];
         document.querySelector("#event-discovery-count").textContent = `Eventos descubiertos: ${state.discoveredEvents.length}/4`;
         document.querySelector(`[data-event-card="${discoveryName}"]`)?.classList.add("is-discovered");
+        const complete = state.discoveredEvents.length === 4;
+        document.querySelector("#continue-after-events").disabled = !complete;
+        document.querySelector("#events-hint").textContent = complete
+            ? "¡Probaste las cuatro tarjetas! Ya podés continuar."
+            : `Te faltan ${4 - state.discoveredEvents.length} tarjetas por probar.`;
     };
 
     document.querySelector("#click-demo").addEventListener("click", () => updateLastEvent("click"));
     document.querySelector("#hover-demo").addEventListener("mouseover", () => updateLastEvent("mouseover"));
     document.querySelector("#hover-demo").addEventListener("pointerdown", () => updateLastEvent("pointerdown"));
+    document.querySelector("#hover-demo").addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            updateLastEvent("keydown", event.key === " " ? "Espacio" : event.key, "mouseover");
+        }
+    });
     document.querySelector("#input-demo").addEventListener("input", () => updateLastEvent("input"));
     document.querySelector("#key-demo").addEventListener("keydown", event => updateLastEvent("keydown", event.key));
+    // Algunos teclados virtuales solo emiten input; registrar el evento real.
+    document.querySelector("#key-demo").addEventListener("input", () => updateLastEvent("input", "", "keydown"));
 
     state.discoveredEvents.forEach(eventName => {
         document.querySelector(`[data-event-card="${eventName}"]`)?.classList.add("is-discovered");
@@ -776,6 +791,31 @@ function renderValidationResults(results) {
     `).join("");
 
     continueButton.classList.toggle("hidden", !allValid);
+    const fieldErrors = {
+        nombre: !state.formData.nombre.trim() ? "Ingresá tu nombre y apellido." :
+            (!state.alumnoEncontrado && results[0].ok ? "Ese nombre no figura en la base de alumnos." : ""),
+        dni: /^\d{7,9}$/.test(state.formData.dni) ? "" : "Ingresá un DNI de 7 a 9 números.",
+        edad: /^\d+$/.test(state.formData.edad) && Number(state.formData.edad) >= 12 && Number(state.formData.edad) <= 99
+            ? "" : "Ingresá una edad entre 12 y 99."
+    };
+    Object.entries(fieldErrors).forEach(([id, message]) => {
+        const input = document.getElementById(id);
+        let hint = document.getElementById(`${id}-error`);
+        if (!hint) {
+            hint = document.createElement("span");
+            hint.id = `${id}-error`;
+            hint.className = "warning-text";
+            input.after(hint);
+        }
+        hint.textContent = message;
+        hint.hidden = !message;
+        input.setAttribute("aria-invalid", String(Boolean(message)));
+        input.setAttribute("aria-describedby", hint.id);
+    });
+    if (!allValid) {
+        const firstInvalid = Object.keys(fieldErrors).find(id => fieldErrors[id]);
+        document.getElementById(firstInvalid)?.focus({ preventScroll: true });
+    }
 }
 
 function findAlumnoByName(nombre) {
@@ -1450,7 +1490,7 @@ function renderClosing() {
             </header>
             <div class="screen-grid closing-summary">
                 <div>
-                    <p class="lead">El recorrido conectó acciones reales del usuario con eventos, código JavaScript, validación y respuestas visibles.</p>
+                    <p class="lead">Cuando tocaste y escribiste, generaste eventos. JavaScript respondió a tus acciones, consultó tus datos y comprobó las condiciones de tus contraseñas.</p>
                     <ul class="flow-list">
                         <li>USUARIO</li>
                         <li>ACCIÓN</li>

@@ -8,7 +8,7 @@ function harness(search = '') {
     const storage = new Map();
     const elements = new Map();
     const element = key => {
-        if (!elements.has(key)) elements.set(key, { innerHTML: '', style: {}, classList: { add() {}, remove() {} }, focus() {} });
+        if (!elements.has(key)) elements.set(key, { innerHTML: '', style: {}, classList: { add() {}, remove() {} }, focus() {}, listeners: {}, addEventListener(type, callback) { this.listeners[type] = callback; } });
         return elements.get(key);
     };
     const ctx = vm.createContext({
@@ -26,6 +26,35 @@ test('las ocho actividades y las 15 reglas finales se conservan', () => {
     assert.equal(h.run('screens.length'),8); // Incluye inicio; formulario contiene actividades 3 y 4.
     assert.equal(h.run('finalPasswordRules.length'),15);
     assert.equal(h.run('shortPasswordRules.length'),3);
+});
+
+test('eventos desbloquea solo al completar las cuatro tarjetas, incluido teclado virtual', () => {
+    const h = harness();
+    h.run('renderEvents()');
+    assert.match(h.elements.get('#app').innerHTML, /id="continue-after-events"[^>]*disabled/);
+    h.elements.get('#click-demo').listeners.click();
+    h.elements.get('#click-demo').listeners.click();
+    assert.equal(h.run('state.discoveredEvents.length'), 1);
+    h.elements.get('#hover-demo').listeners.pointerdown();
+    h.elements.get('#key-demo').listeners.input();
+    assert.equal(h.elements.get('#continue-after-events').disabled, true);
+    assert.equal(h.run('state.lastEvent'), 'input');
+    h.elements.get('#input-demo').listeners.input();
+    assert.equal(h.elements.get('#continue-after-events').disabled, false);
+    h.run('renderEvents()');
+    assert.doesNotMatch(h.elements.get('#app').innerHTML, /id="continue-after-events"[^>]*disabled/);
+});
+
+test('la zona sensible permite completar la tarjeta con teclado sin contar foco', () => {
+    const h = harness();
+    h.run('renderEvents()');
+    const zone = h.elements.get('#hover-demo');
+    assert.equal(zone.listeners.focus, undefined);
+    zone.listeners.keydown({key: 'Tab', preventDefault() {}});
+    assert.equal(h.run('state.discoveredEvents.length'), 0);
+    zone.listeners.keydown({key: 'Enter', preventDefault() {}});
+    assert.equal(h.run('state.discoveredEvents[0]'), 'mouseover');
+    assert.equal(h.run('state.lastEvent'), 'keydown');
 });
 test('restaura texto, cronómetro y condiciones de la misma partida', () => {
     const h = harness();
