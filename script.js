@@ -1570,11 +1570,16 @@ function renderClosing() {
             </header>
             <div class="screen-grid closing-summary">
                 <div>
+                    <h3 class="closing-recap-title">¿Qué vimos en este recorrido?</h3>
                     <ul class="closing-memories">
-                        <li>Descubriste qué comparte tu navegador.</li>
-                        <li>Probaste cómo responde una página a tus acciones.</li>
-                        <li>Superaste sus validaciones.</li>
+                        <li><strong>El genio: información del navegador.</strong> Consultamos datos del dispositivo para personalizar las respuestas. Son pistas, no una identificación infalible.</li>
+                        <li><strong>Los experimentos: eventos.</strong> Hacer clic, tocar y escribir dispara eventos que JavaScript puede escuchar para responder.</li>
+                        <li><strong>“Sos alumno”: formularios y consulta de datos.</strong> Recogimos lo que escribiste, revisamos su formato y buscamos tu nombre en una lista local.</li>
+                        <li><strong>Los Password Game: validación en tiempo real.</strong> Cada cambio de la contraseña vuelve a comprobar las reglas y actualiza sus colores y mensajes.</li>
+                        <li><strong>“Esperá…”: respuestas con tiempo.</strong> Un clic inició una espera y después cambió el mensaje: una respuesta también puede ocurrir con demora.</li>
+                        <li><strong>El resultado: estado y persistencia.</strong> La página recordó datos del recorrido, midió el tiempo y guardó el progreso y el resultado para recuperarlos.</li>
                     </ul>
+                    <p class="closing-recap-takeaway">Eso es interactividad: la página recibe una acción, procesa información y devuelve una respuesta visible.</p>
                 </div>
             </div>
             <div class="actions closing-actions">

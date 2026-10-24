@@ -688,7 +688,7 @@ En el formulario, el genio dice “Veamos si estás en la lista” y pasa de pen
 
 Al completar el primer Password Game, sonríe y muestra “Eso estuvo fácil, ¿no?”. Si se vuelve a incumplir una condición, recupera su pose pensativa.
 
-`renderClosing()` saluda por el primer nombre del formulario, escapado como texto; sin nombre muestra “¡Felicitaciones!”. La frase “No era magia: eran tus acciones y el código trabajando juntos” conecta el cierre con la adivinanza inicial. Tres recuerdos resumen lo aprendido, en lugar de las tarjetas de conceptos.
+`renderClosing()` saluda por el primer nombre del formulario, escapado como texto; sin nombre muestra “¡Felicitaciones!”. La frase “No era magia: eran tus acciones y el código trabajando juntos” conecta el cierre con la adivinanza inicial. El recap relaciona seis momentos del recorrido con sus conceptos: información del navegador, eventos, formularios y consulta de datos, validación en tiempo real, respuestas con demora, y estado y persistencia. Termina con la secuencia acción, procesamiento y respuesta visible.
 
 “Para pensar…” pertenece a la actividad de eventos, no al cierre. Los botones finales siguen siendo VOLVER AL INICIO y PANTALLA ANTERIOR. Los estilos se encuentran en `.genie-remark`, `.closing-memories`, `.reflection-bubble` y `.events-reflection`.
 

@@ -641,6 +641,27 @@ body::before {
     margin-top: 12px;
 }
 
+.closing-recap-title {
+    margin: 0 0 18px;
+    color: var(--gold);
+    font-size: 1.2rem;
+    line-height: 1.4;
+}
+
+.closing-memories strong {
+    display: block;
+    color: var(--ink);
+    margin-bottom: 4px;
+}
+
+.closing-recap-takeaway {
+    margin: 24px 0 0;
+    padding-left: 16px;
+    border-left: 3px solid var(--highlight);
+    line-height: 1.6;
+    color: var(--gold);
+}
+
 .reflection-bubble {
     grid-column: 1 / -1;
     padding: 20px 24px;
