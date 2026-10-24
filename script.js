@@ -1561,27 +1561,48 @@ function renderClosing() {
                     <span class="section-kicker">RECORRIDO COMPLETADO</span>
                     <h2>${firstName ? `¡Bien hecho, ${escapeHtml(firstName)}!` : "¡Felicitaciones!"}</h2>
                     <p>Completaste todos los desafíos.</p>
-                    <p class="lead genie-remark">“No era magia: eran tus acciones y el código trabajando juntos”.</p>
+                    <p class="lead genie-remark">“No era magia: el navegador detectaba, el código respondía y vos hacías que todo ocurriera”.</p>
                 </div>
                 ${renderGenieCompanion({
                     pose: "idle",
                     message: "¡Excelente trabajo! Ya dominás las pistas de la experiencia."
                 })}
             </header>
-            <div class="screen-grid closing-summary">
-                <div>
-                    <h3 class="closing-recap-title">¿Qué vimos en este recorrido?</h3>
-                    <ul class="closing-memories">
-                        <li><strong>El genio: información del navegador.</strong> Consultamos datos del dispositivo para personalizar las respuestas. Son pistas, no una identificación infalible.</li>
-                        <li><strong>Los experimentos: eventos.</strong> Hacer clic, tocar y escribir dispara eventos que JavaScript puede escuchar para responder.</li>
-                        <li><strong>“Sos alumno”: formularios y consulta de datos.</strong> Recogimos lo que escribiste, revisamos su formato y buscamos tu nombre en una lista local.</li>
-                        <li><strong>Los Password Game: validación en tiempo real.</strong> Cada cambio de la contraseña vuelve a comprobar las reglas y actualiza sus colores y mensajes.</li>
-                        <li><strong>“Esperá…”: respuestas con tiempo.</strong> Un clic inició una espera y después cambió el mensaje: una respuesta también puede ocurrir con demora.</li>
-                        <li><strong>El resultado: estado y persistencia.</strong> La página recordó datos del recorrido, midió el tiempo y guardó el progreso y el resultado para recuperarlos.</li>
-                    </ul>
-                    <p class="closing-recap-takeaway">Eso es interactividad: la página recibe una acción, procesa información y devuelve una respuesta visible.</p>
+            <section class="recap-journey" aria-labelledby="recap-heading">
+                <h3 id="recap-heading">Lo que había detrás de cada desafío</h3>
+                <p class="recap-intro">No solo miraste una página: hiciste que respondiera. Eso es interactividad.</p>
+                <div class="recap-stops">
+                    ${[
+                        ["01", "El genio del navegador", "Datos y personalización", "Pediste otra pista", "JavaScript consultó información del navegador y cambió el diálogo y la imagen del genio.", "Una página puede adaptar sus respuestas a la información disponible. Esas pistas no prueban quién sos.", "OTRA PISTA → RESPUESTA"],
+                        ["02", "El laboratorio de eventos", "Eventos y JavaScript", "Tocaste, escribiste y presionaste teclas", "El navegador detectó eventos y JavaScript actualizó el panel con lo que estaba ocurriendo.", "El evento es lo que ocurre; la respuesta es lo que programamos. Un mismo clic puede abrir un menú o mostrar un mensaje.", "click · input · keydown"],
+                        ["03", "¿Sos alumno?", "Formularios y datos", "Ingresaste tus datos y pulsaste Cargar", "El formulario recogió la información, comprobó su formato y buscó tu nombre en la lista local.", "Los formularios permiten recibir datos del usuario. Un formato válido no demuestra que la información sea verdadera.", "DATOS → CONSULTA → RESULTADO"],
+                        ["04", "Los dos Password Game", "Validación en tiempo real", "Cambiaste tu contraseña", "Cada cambio disparó una comprobación: las condiciones cambiaron de rojo a verde y se habilitó Continuar.", "JavaScript permite reglas y mensajes personalizados. HTML también ofrece comprobaciones básicas, como campos obligatorios; aquí practicamos las de JavaScript.", "× PENDIENTE → ✓ CUMPLIDA"]
+                    ].map(([number, activity, concept, action, response, lesson, memory]) => `
+                        <article class="recap-stop">
+                            <span class="recap-number" aria-hidden="true">${number}</span>
+                            <div class="recap-stop-content">
+                                <span class="section-kicker">${activity}</span>
+                                <h4>${concept}</h4>
+                                <p class="recap-memory">${memory}</p>
+                                <dl><dt>Vos</dt><dd>${action}.</dd><dt>La página</dt><dd>${response}</dd></dl>
+                                <p class="recap-lesson">${lesson}</p>
+                            </div>
+                        </article>
+                    `).join("")}
                 </div>
-            </div>
+            </section>
+            <section class="recap-connection" aria-labelledby="connection-heading">
+                <h3 id="connection-heading">Así se conecta todo</h3>
+                <ol class="recap-sequence"><li>Tu acción</li><li>Evento</li><li>JavaScript</li><li>Respuesta visible</li></ol>
+                <p>En “Esperá…”, la respuesta llegó con una demora programada. En el resultado final, la página recuperó tu nombre, midió el tiempo y guardó el progreso: también puede recordar lo que ocurre.</p>
+                <div class="recap-roles"><p><strong>HTML</strong>Organiza el contenido.</p><p><strong>CSS</strong>Le da apariencia.</p><p><strong>JavaScript</strong>Agrega comportamiento.</p></div>
+            </section>
+            <section class="recap-trust" aria-labelledby="trust-heading">
+                <h3 id="trust-heading">¿Y alcanza con que se ponga verde?</h3>
+                <p>No. Validar en el navegador ayuda a corregir errores rápido, pero esas comprobaciones se pueden modificar o evitar.</p>
+                <div class="recap-trust-columns"><div><h4>En tu navegador</h4><p>Vimos mensajes, colores y reglas al instante. La consulta de alumnos usa una lista local; no verifica tu identidad en un servidor.</p></div><div><h4>Si enviamos datos a un servidor</h4><p>El servidor debe comprobarlos otra vez antes de aceptarlos. Esa validación es necesaria, pero no garantiza toda la seguridad por sí sola.</p></div></div>
+                <p class="recap-footnote">No todas las interacciones necesitan un servidor: cambiar un texto o comprobar una regla puede resolverse en el navegador.</p>
+            </section>
             <div class="actions closing-actions">
                 <button type="button" data-next="start">VOLVER AL INICIO</button>
                 <button type="button" class="secondary-button" data-next="finalPassword">PANTALLA ANTERIOR</button>
