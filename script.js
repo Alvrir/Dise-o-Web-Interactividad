@@ -1560,49 +1560,19 @@ function renderClosing() {
                 <div>
                     <span class="section-kicker">RECORRIDO COMPLETADO</span>
                     <h2>${firstName ? `¡Bien hecho, ${escapeHtml(firstName)}!` : "¡Felicitaciones!"}</h2>
-                    <p>Completaste todos los desafíos.</p>
-                    <p class="lead genie-remark">“No era magia: el navegador detectaba, el código respondía y vos hacías que todo ocurriera”.</p>
+                    <p>La magia la hiciste vos.</p>
                 </div>
                 ${renderGenieCompanion({
                     pose: "idle",
                     message: "¡Excelente trabajo! Ya dominás las pistas de la experiencia."
                 })}
             </header>
-            <section class="recap-journey" aria-labelledby="recap-heading">
-                <h3 id="recap-heading">Lo que había detrás de cada desafío</h3>
-                <p class="recap-intro">No solo miraste una página: hiciste que respondiera. Eso es interactividad.</p>
-                <div class="recap-stops">
-                    ${[
-                        ["01", "El genio del navegador", "Datos y personalización", "Pediste otra pista", "JavaScript consultó información del navegador y cambió el diálogo y la imagen del genio.", "Una página puede adaptar sus respuestas a la información disponible. Esas pistas no prueban quién sos.", "OTRA PISTA → RESPUESTA"],
-                        ["02", "El laboratorio de eventos", "Eventos y JavaScript", "Tocaste, escribiste y presionaste teclas", "El navegador detectó eventos y JavaScript actualizó el panel con lo que estaba ocurriendo.", "El evento es lo que ocurre; la respuesta es lo que programamos. Un mismo clic puede abrir un menú o mostrar un mensaje.", "click · input · keydown"],
-                        ["03", "¿Sos alumno?", "Formularios y datos", "Ingresaste tus datos y pulsaste Cargar", "El formulario recogió la información, comprobó su formato y buscó tu nombre en la lista local.", "Los formularios permiten recibir datos del usuario. Un formato válido no demuestra que la información sea verdadera.", "DATOS → CONSULTA → RESULTADO"],
-                        ["04", "Los dos Password Game", "Validación en tiempo real", "Cambiaste tu contraseña", "Cada cambio disparó una comprobación: las condiciones cambiaron de rojo a verde y se habilitó Continuar.", "JavaScript permite reglas y mensajes personalizados. HTML también ofrece comprobaciones básicas, como campos obligatorios; aquí practicamos las de JavaScript.", "× PENDIENTE → ✓ CUMPLIDA"]
-                    ].map(([number, activity, concept, action, response, lesson, memory]) => `
-                        <article class="recap-stop">
-                            <span class="recap-number" aria-hidden="true">${number}</span>
-                            <div class="recap-stop-content">
-                                <span class="section-kicker">${activity}</span>
-                                <h4>${concept}</h4>
-                                <p class="recap-memory">${memory}</p>
-                                <dl><dt>Vos</dt><dd>${action}.</dd><dt>La página</dt><dd>${response}</dd></dl>
-                                <p class="recap-lesson">${lesson}</p>
-                            </div>
-                        </article>
-                    `).join("")}
-                </div>
-            </section>
-            <section class="recap-connection" aria-labelledby="connection-heading">
-                <h3 id="connection-heading">Así se conecta todo</h3>
-                <ol class="recap-sequence"><li>Tu acción</li><li>Evento</li><li>JavaScript</li><li>Respuesta visible</li></ol>
-                <p>En “Esperá…”, la respuesta llegó con una demora programada. En el resultado final, la página recuperó tu nombre, midió el tiempo y guardó el progreso: también puede recordar lo que ocurre.</p>
-                <div class="recap-roles"><p><strong>HTML</strong>Organiza el contenido.</p><p><strong>CSS</strong>Le da apariencia.</p><p><strong>JavaScript</strong>Agrega comportamiento.</p></div>
-            </section>
-            <section class="recap-trust" aria-labelledby="trust-heading">
-                <h3 id="trust-heading">¿Y alcanza con que se ponga verde?</h3>
-                <p>No. Validar en el navegador ayuda a corregir errores rápido, pero esas comprobaciones se pueden modificar o evitar.</p>
-                <div class="recap-trust-columns"><div><h4>En tu navegador</h4><p>Vimos mensajes, colores y reglas al instante. La consulta de alumnos usa una lista local; no verifica tu identidad en un servidor.</p></div><div><h4>Si enviamos datos a un servidor</h4><p>El servidor debe comprobarlos otra vez antes de aceptarlos. Esa validación es necesaria, pero no garantiza toda la seguridad por sí sola.</p></div></div>
-                <p class="recap-footnote">No todas las interacciones necesitan un servidor: cambiar un texto o comprobar una regla puede resolverse en el navegador.</p>
-            </section>
+            <div class="recap-switch" role="tablist" aria-label="Lo que experimentaste">
+                <button id="recap-tab-events" role="tab" aria-selected="true" aria-controls="recap-playground" data-recap="events">Hiciste reaccionar</button>
+                <button id="recap-tab-validation" role="tab" aria-selected="false" aria-controls="recap-playground" tabindex="-1" data-recap="validation">Superaste reglas</button>
+                <button id="recap-tab-ranking" role="tab" aria-selected="false" aria-controls="recap-playground" tabindex="-1" data-recap="ranking">Llegaste al ranking</button>
+            </div>
+            <section id="recap-playground" class="recap-playground" role="tabpanel" aria-labelledby="recap-tab-events"></section>
             <div class="actions closing-actions">
                 <button type="button" data-next="start">VOLVER AL INICIO</button>
                 <button type="button" class="secondary-button" data-next="finalPassword">PANTALLA ANTERIOR</button>
@@ -1610,7 +1580,94 @@ function renderClosing() {
         </section>
     `;
 
+    const tabs = [...document.querySelectorAll("[data-recap]")];
+    tabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => {
+            tabs.forEach(item => {
+                item.setAttribute("aria-selected", String(item === tab));
+                item.tabIndex = item === tab ? 0 : -1;
+            });
+            renderClosingExperiment(tab.dataset.recap);
+        });
+        tab.addEventListener("keydown", event => {
+            const next = event.key === "ArrowRight" ? (index + 1) % tabs.length
+                : event.key === "ArrowLeft" ? (index + tabs.length - 1) % tabs.length
+                : event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : null;
+            if (next === null) return;
+            event.preventDefault();
+            tabs[next].focus();
+            tabs[next].click();
+        });
+    });
+    renderClosingExperiment("events");
     bindNextButtons();
+}
+
+function renderClosingExperiment(mode) {
+    const panel = document.querySelector("#recap-playground");
+    panel.setAttribute("aria-labelledby", `recap-tab-${mode}`);
+    if (mode === "events") {
+        panel.innerHTML = `
+            <div class="recap-live-scene">
+                <button class="recap-genie-button" id="recap-react" aria-label="Hacer reaccionar al genio">
+                    <img id="recap-pose" src="${GENIE_ASSETS.pensando}" alt="Akinator pensando">
+                    <span>¿Todavía hay magia?</span>
+                </button>
+                <p id="recap-reaction" class="recap-speech" aria-live="polite">Tocame y vemos.</p>
+            </div>
+            <div class="recap-signal"><span>Tu clic</span><span aria-hidden="true">→</span><code>JavaScript</code><span aria-hidden="true">→</span><span id="recap-effect">¿Qué cambia?</span></div>
+            <p class="recap-caption">El evento es tu clic. La respuesta es el cambio de imagen y mensaje.</p>`;
+        let smiling = false;
+        document.querySelector("#recap-react").addEventListener("click", () => {
+            smiling = !smiling;
+            const pose = document.querySelector("#recap-pose");
+            pose.src = smiling ? GENIE_ASSETS.idle : GENIE_ASSETS.pensando;
+            pose.alt = smiling ? "Akinator sonriendo" : "Akinator pensando";
+            document.querySelector("#recap-reaction").textContent = smiling ? "¡Eso fue un evento!" : "Otra acción, otra respuesta.";
+            document.querySelector("#recap-effect").textContent = "Imagen + mensaje";
+        });
+    } else if (mode === "validation") {
+        panel.innerHTML = `
+            <div class="recap-validation-scene">
+                <span class="recap-scene-label">Como en el Password Game</span>
+                <label for="recap-sample">Una última prueba: 4 caracteres</label>
+                <input id="recap-sample" type="text" autocomplete="off" placeholder="Probá escribir…" aria-describedby="recap-check">
+                <div class="recap-meter" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+                <p id="recap-check" class="recap-check" aria-live="polite">0 / 4 · Pendiente</p>
+            </div>
+            <div class="recap-signal"><span>Escribís</span><span aria-hidden="true">→</span><code>input</code><span aria-hidden="true">→</span><span>Se comprueba la regla</span></div>
+            <p class="recap-caption">Validar es comprobar condiciones. También lo hicimos con tus datos en “Sos alumno”.</p>`;
+        document.querySelector("#recap-sample").addEventListener("input", event => {
+            const length = event.target.value.length;
+            document.querySelectorAll(".recap-meter span").forEach((segment, index) => segment.classList.toggle("is-filled", length > index));
+            const check = document.querySelector("#recap-check");
+            check.classList.toggle("is-valid", length >= 4);
+            check.textContent = `${length} / 4 · ${length >= 4 ? "✓ Cumplida" : "Pendiente"}`;
+        });
+    } else {
+        panel.innerHTML = `
+            <div class="recap-ranking-scene">
+                <span class="recap-scene-label">El viaje de un resultado</span>
+                <div class="recap-delivery" aria-label="Dispositivo, servidor y ranking">
+                    <span class="is-active">Tu dispositivo</span><b aria-hidden="true">→</b><span>Servidor</span><b aria-hidden="true">→</b><span>Ranking compartido</span>
+                </div>
+                <p id="recap-delivery-message" class="recap-speech" aria-live="polite">Terminaste el juego: nombre y tiempo listos.</p>
+                <button id="recap-delivery-next" type="button">Recrear el envío →</button>
+                <small>Recreación del recorrido. No envía otro resultado.</small>
+            </div>
+            <p class="recap-caption">El navegador responde al instante. El servidor comprueba lo que recibe y permite compartir el ranking entre dispositivos.</p>`;
+        let step = 0;
+        document.querySelector("#recap-delivery-next").addEventListener("click", event => {
+            step = (step + 1) % 3;
+            document.querySelectorAll(".recap-delivery span").forEach((node, index) => node.classList.toggle("is-active", index <= step));
+            document.querySelector("#recap-delivery-message").textContent = [
+                "Terminaste el juego: nombre y tiempo listos.",
+                "El servidor comprueba la participación y registra el resultado.",
+                "Los demás dispositivos pueden ver la clasificación."
+            ][step];
+            event.currentTarget.textContent = ["Recrear el envío →", "Actualizar ranking →", "↻ Volver a verlo"][step];
+        });
+    }
 }
 
 function renderConceptCard(concept) {

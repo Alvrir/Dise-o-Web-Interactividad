@@ -8,7 +8,7 @@ function harness(search = '') {
     const storage = new Map();
     const elements = new Map();
     const element = key => {
-        if (!elements.has(key)) elements.set(key, { innerHTML: '', style: {}, classList: { add() {}, remove() {} }, focus() {}, listeners: {}, addEventListener(type, callback) { this.listeners[type] = callback; } });
+        if (!elements.has(key)) elements.set(key, { innerHTML: '', style: {}, classList: { add() {}, remove() {}, toggle() {} }, setAttribute() {}, focus() {}, listeners: {}, addEventListener(type, callback) { this.listeners[type] = callback; } });
         return elements.get(key);
     };
     const ctx = vm.createContext({
@@ -31,6 +31,27 @@ test('cierre personaliza sin interpretar HTML y conserva ambas salidas', () => {
     assert.match(markup, /data-next="finalPassword"/);
     h.run(`state.formData.nombre=''; renderClosing();`);
     assert.match(h.elements.get('#app').innerHTML, /¡Felicitaciones!/);
+});
+
+test('las demostraciones del cierre reaccionan sin modificar la partida', () => {
+    const h = harness();
+    h.run('renderClosingExperiment("events")');
+    h.elements.get('#recap-react').listeners.click();
+    assert.match(h.elements.get('#recap-pose').src, /idle.png/);
+    h.run('renderClosingExperiment("validation")');
+    h.elements.get('#recap-sample').listeners.input({target:{value:'hola'}});
+    assert.match(h.elements.get('#recap-check').textContent, /Cumplida/);
+    h.elements.get('#recap-sample').listeners.input({target:{value:'a'}});
+    assert.match(h.elements.get('#recap-check').textContent, /Pendiente/);
+    h.run('renderClosingExperiment("ranking")');
+    const button = h.elements.get('#recap-delivery-next');
+    button.listeners.click({currentTarget:button});
+    assert.match(h.elements.get('#recap-delivery-message').textContent, /servidor/);
+    button.listeners.click({currentTarget:button});
+    assert.match(h.elements.get('#recap-delivery-message').textContent, /clasificación/);
+    assert.equal(h.run('state.finalPassword'), '');
+    assert.equal(h.run('state.finalPasswordStartedAt'), null);
+    assert.equal(h.storage.size, 0);
 });
 
 test('las ocho actividades y las 15 reglas finales se conservan', () => {
