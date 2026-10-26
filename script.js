@@ -1568,9 +1568,10 @@ function renderClosing() {
                 })}
             </header>
             <div class="recap-switch" role="tablist" aria-label="Lo que experimentaste">
-                <button id="recap-tab-events" role="tab" aria-selected="true" aria-controls="recap-playground" data-recap="events">Hiciste reaccionar</button>
-                <button id="recap-tab-validation" role="tab" aria-selected="false" aria-controls="recap-playground" tabindex="-1" data-recap="validation">Superaste reglas</button>
-                <button id="recap-tab-ranking" role="tab" aria-selected="false" aria-controls="recap-playground" tabindex="-1" data-recap="ranking">Llegaste al ranking</button>
+                <button id="recap-tab-events" role="tab" aria-selected="true" aria-controls="recap-playground" data-recap="events">El genio</button>
+                <button id="recap-tab-form" role="tab" aria-selected="false" aria-controls="recap-playground" tabindex="-1" data-recap="form">¿Sos alumno?</button>
+                <button id="recap-tab-validation" role="tab" aria-selected="false" aria-controls="recap-playground" tabindex="-1" data-recap="validation">Tu contraseña</button>
+                <button id="recap-tab-ranking" role="tab" aria-selected="false" aria-controls="recap-playground" tabindex="-1" data-recap="ranking">La competencia</button>
             </div>
             <section id="recap-playground" class="recap-playground" role="tabpanel" aria-labelledby="recap-tab-events"></section>
             <div class="actions closing-actions">
@@ -1608,46 +1609,66 @@ function renderClosingExperiment(mode) {
     panel.setAttribute("aria-labelledby", `recap-tab-${mode}`);
     if (mode === "events") {
         panel.innerHTML = `
+            <h3 class="recap-moment">Cuando el genio “adivinó” tu navegador…</h3>
             <div class="recap-live-scene">
                 <button class="recap-genie-button" id="recap-react" aria-label="Hacer reaccionar al genio">
                     <img id="recap-pose" src="${GENIE_ASSETS.pensando}" alt="Akinator pensando">
-                    <span>¿Todavía hay magia?</span>
+                    <span>OTRA PISTA</span>
                 </button>
-                <p id="recap-reaction" class="recap-speech" aria-live="polite">Tocame y vemos.</p>
+                <p id="recap-reaction" class="recap-speech" aria-live="polite">¿Cómo lo sabía?</p>
             </div>
             <div class="recap-signal"><span>Tu clic</span><span aria-hidden="true">→</span><code>JavaScript</code><span aria-hidden="true">→</span><span id="recap-effect">¿Qué cambia?</span></div>
-            <p class="recap-caption">El evento es tu clic. La respuesta es el cambio de imagen y mensaje.</p>`;
+            <p class="recap-caption"><strong>Evento + JavaScript:</strong> tu clic pidió una pista; el código leyó datos del navegador y mostró una respuesta.</p>`;
         let smiling = false;
         document.querySelector("#recap-react").addEventListener("click", () => {
             smiling = !smiling;
             const pose = document.querySelector("#recap-pose");
             pose.src = smiling ? GENIE_ASSETS.idle : GENIE_ASSETS.pensando;
             pose.alt = smiling ? "Akinator sonriendo" : "Akinator pensando";
-            document.querySelector("#recap-reaction").textContent = smiling ? "¡Eso fue un evento!" : "Otra acción, otra respuesta.";
-            document.querySelector("#recap-effect").textContent = "Imagen + mensaje";
+            document.querySelector("#recap-reaction").textContent = smiling ? `Tu navegador indica: ${passwordContext.browserName}.` : "Leí una pista del navegador. No era magia ni una prueba de tu identidad.";
+            document.querySelector("#recap-effect").textContent = "Dato → respuesta";
+        });
+    } else if (mode === "form") {
+        panel.innerHTML = `
+            <h3 class="recap-moment">Cuando cargaste tus datos…</h3>
+            <form id="recap-form" class="recap-validation-scene">
+                <label for="recap-name">Nombre y apellido</label>
+                <input id="recap-name" type="text" autocomplete="off" value="${escapeHtml(state.formData.nombre || "Juan Perez")}">
+                <button type="submit">CARGAR</button>
+                <p id="recap-form-result" class="recap-check" aria-live="polite">Consulta pendiente.</p>
+            </form>
+            <div class="recap-signal"><span>Tu nombre</span><span aria-hidden="true">→</span><span>Lista de alumnos</span><span aria-hidden="true">→</span><span>Coincide o no coincide</span></div>
+            <p class="recap-caption"><strong>Formulario + consulta:</strong> recibimos lo que escribiste y buscamos tu nombre en una lista local.</p>`;
+        document.querySelector("#recap-form").addEventListener("submit", event => {
+            event.preventDefault();
+            const name = document.querySelector("#recap-name").value.trim();
+            const found = Boolean(name && findAlumnoByName(name));
+            const result = document.querySelector("#recap-form-result");
+            result.textContent = !name ? "Escribí un nombre para consultar." : found ? "✓ El alumno está en la lista." : "× Ese nombre no está en la lista.";
+            result.classList.toggle("is-valid", found);
         });
     } else if (mode === "validation") {
         panel.innerHTML = `
+            <h3 class="recap-moment">Cuando armaste tu contraseña…</h3>
             <div class="recap-validation-scene">
-                <span class="recap-scene-label">Como en el Password Game</span>
-                <label for="recap-sample">Una última prueba: 4 caracteres</label>
+                <label for="recap-sample">Una regla que ya viste: mínimo 8 caracteres</label>
                 <input id="recap-sample" type="text" autocomplete="off" placeholder="Probá escribir…" aria-describedby="recap-check">
-                <div class="recap-meter" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-                <p id="recap-check" class="recap-check" aria-live="polite">0 / 4 · Pendiente</p>
+                <div class="recap-meter" aria-hidden="true">${"<span></span>".repeat(8)}</div>
+                <p id="recap-check" class="recap-check" aria-live="polite">0 / 8 · Pendiente</p>
             </div>
             <div class="recap-signal"><span>Escribís</span><span aria-hidden="true">→</span><code>input</code><span aria-hidden="true">→</span><span>Se comprueba la regla</span></div>
-            <p class="recap-caption">Validar es comprobar condiciones. También lo hicimos con tus datos en “Sos alumno”.</p>`;
+            <p class="recap-caption"><strong>Validación:</strong> cada letra vuelve a comprobar la regla. Por eso cambiaban los colores mientras escribías.</p>`;
         document.querySelector("#recap-sample").addEventListener("input", event => {
             const length = event.target.value.length;
             document.querySelectorAll(".recap-meter span").forEach((segment, index) => segment.classList.toggle("is-filled", length > index));
             const check = document.querySelector("#recap-check");
-            check.classList.toggle("is-valid", length >= 4);
-            check.textContent = `${length} / 4 · ${length >= 4 ? "✓ Cumplida" : "Pendiente"}`;
+            check.classList.toggle("is-valid", length >= 8);
+            check.textContent = `${length} / 8 · ${length >= 8 ? "✓ Cumplida" : "Pendiente"}`;
         });
     } else {
         panel.innerHTML = `
+            <h3 class="recap-moment">Cuando enviaste tu resultado…</h3>
             <div class="recap-ranking-scene">
-                <span class="recap-scene-label">El viaje de un resultado</span>
                 <div class="recap-delivery" aria-label="Dispositivo, servidor y ranking">
                     <span class="is-active">Tu dispositivo</span><b aria-hidden="true">→</b><span>Servidor</span><b aria-hidden="true">→</b><span>Ranking compartido</span>
                 </div>
@@ -1655,7 +1676,7 @@ function renderClosingExperiment(mode) {
                 <button id="recap-delivery-next" type="button">Recrear el envío →</button>
                 <small>Recreación del recorrido. No envía otro resultado.</small>
             </div>
-            <p class="recap-caption">El navegador responde al instante. El servidor comprueba lo que recibe y permite compartir el ranking entre dispositivos.</p>`;
+            <p class="recap-caption"><strong>Cliente y servidor:</strong> tu dispositivo envió el resultado. El servidor lo registró y permitió compartirlo en el ranking.</p>`;
         let step = 0;
         document.querySelector("#recap-delivery-next").addEventListener("click", event => {
             step = (step + 1) % 3;

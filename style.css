@@ -3361,6 +3361,16 @@ select:focus-visible {
     min-width: 0;
 }
 
+.recap-moment {
+    margin: 0 0 12px;
+    text-align: center;
+    color: var(--gold);
+    font-size: 1.15rem;
+    line-height: 1.5;
+}
+
+.recap-caption strong { color: var(--highlight); }
+
 .recap-live-scene,
 .recap-validation-scene,
 .recap-ranking-scene {

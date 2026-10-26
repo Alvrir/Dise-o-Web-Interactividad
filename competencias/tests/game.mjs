@@ -39,7 +39,7 @@ test('las demostraciones del cierre reaccionan sin modificar la partida', () => 
     h.elements.get('#recap-react').listeners.click();
     assert.match(h.elements.get('#recap-pose').src, /idle.png/);
     h.run('renderClosingExperiment("validation")');
-    h.elements.get('#recap-sample').listeners.input({target:{value:'hola'}});
+    h.elements.get('#recap-sample').listeners.input({target:{value:'Clave123'}});
     assert.match(h.elements.get('#recap-check').textContent, /Cumplida/);
     h.elements.get('#recap-sample').listeners.input({target:{value:'a'}});
     assert.match(h.elements.get('#recap-check').textContent, /Pendiente/);
@@ -51,6 +51,24 @@ test('las demostraciones del cierre reaccionan sin modificar la partida', () => 
     assert.match(h.elements.get('#recap-delivery-message').textContent, /clasificación/);
     assert.equal(h.run('state.finalPassword'), '');
     assert.equal(h.run('state.finalPasswordStartedAt'), null);
+    assert.equal(h.storage.size, 0);
+});
+
+test('el formulario del repaso consulta sin cambiar al jugador', () => {
+    const h = harness();
+    h.run(`state.alumnos = fallbackAlumnos; state.formData.nombre = 'Jugador original'; renderClosingExperiment('form');`);
+    const submit = h.elements.get('#recap-form').listeners.submit;
+    const input = h.run(`document.querySelector('#recap-name')`);
+    input.value = h.run('fallbackAlumnos[0].nombre');
+    submit({preventDefault() {}});
+    assert.match(h.elements.get('#recap-form-result').textContent, /✓ El alumno está/);
+    input.value = 'Nombre inexistente';
+    submit({preventDefault() {}});
+    assert.match(h.elements.get('#recap-form-result').textContent, /no está/);
+    input.value = '   ';
+    submit({preventDefault() {}});
+    assert.match(h.elements.get('#recap-form-result').textContent, /Escribí un nombre/);
+    assert.equal(h.run('state.formData.nombre'), 'Jugador original');
     assert.equal(h.storage.size, 0);
 });
 
