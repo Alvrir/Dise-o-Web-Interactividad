@@ -29,6 +29,10 @@ test('cierre personaliza sin interpretar HTML y conserva ambas salidas', () => {
     assert.doesNotMatch(markup, /Para pensar/);
     assert.match(markup, /data-next="start"/);
     assert.match(markup, /data-next="finalPassword"/);
+    assert.match(markup, /data-recap="lab">Los eventos/);
+    assert.match(markup, /La magia la hiciste vos/);
+    assert.match(markup, /De la experiencia al concepto/);
+    assert.match(markup, /Validar un formato no demuestra/);
     h.run(`state.formData.nombre=''; renderClosing();`);
     assert.match(h.elements.get('#app').innerHTML, /¡Felicitaciones!/);
 });
@@ -52,6 +56,32 @@ test('las demostraciones del cierre reaccionan sin modificar la partida', () => 
     assert.equal(h.run('state.finalPassword'), '');
     assert.equal(h.run('state.finalPasswordStartedAt'), null);
     assert.equal(h.storage.size, 0);
+});
+
+test('el repaso de eventos funciona con mouse, tacto y teclado sin cambiar la partida', () => {
+    const h = harness();
+    h.run(`renderClosingExperiment('lab')`);
+    const detected = () => h.elements.get('#recap-event-name').textContent;
+    h.elements.get('#recap-event-click').listeners.click();
+    assert.equal(detected(), 'click');
+    const zone = h.elements.get('#recap-event-zone');
+    zone.listeners.mouseover();
+    assert.equal(detected(), 'mouseover');
+    zone.listeners.pointerdown();
+    assert.equal(detected(), 'pointerdown');
+    assert.equal(zone.listeners.focus, undefined);
+    zone.listeners.keydown({key:'Enter', preventDefault(){}});
+    assert.equal(detected(), 'keydown');
+    const input = h.elements.get('#recap-event-input');
+    input.listeners.keydown({key:'a'});
+    input.listeners.input({target:{value:'a'},data:'a'});
+    assert.equal(detected(), 'input');
+    assert.match(h.elements.get('#recap-event-key').textContent, /Tecla detectada: a/);
+    input.listeners.input({target:{value:'añ'},data:'ñ'});
+    assert.match(h.elements.get('#recap-event-key').textContent, /Último texto ingresado: ñ/);
+    assert.equal(h.run('state.discoveredEvents.length'),0);
+    assert.equal(h.run('state.finalPasswordStartedAt'),null);
+    assert.equal(h.storage.size,0);
 });
 
 test('el formulario del repaso consulta sin cambiar al jugador', () => {

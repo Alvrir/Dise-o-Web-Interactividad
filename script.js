@@ -1616,11 +1616,23 @@ function renderClosing() {
             </header>
             <div class="recap-switch" role="tablist" aria-label="Lo que experimentaste">
                 <button id="recap-tab-events" role="tab" aria-selected="true" aria-controls="recap-playground" data-recap="events">El genio</button>
+                <button id="recap-tab-lab" role="tab" aria-selected="false" aria-controls="recap-playground" tabindex="-1" data-recap="lab">Los eventos</button>
                 <button id="recap-tab-form" role="tab" aria-selected="false" aria-controls="recap-playground" tabindex="-1" data-recap="form">¿Sos alumno?</button>
                 <button id="recap-tab-validation" role="tab" aria-selected="false" aria-controls="recap-playground" tabindex="-1" data-recap="validation">Tu contraseña</button>
                 <button id="recap-tab-ranking" role="tab" aria-selected="false" aria-controls="recap-playground" tabindex="-1" data-recap="ranking">La competencia</button>
             </div>
             <section id="recap-playground" class="recap-playground" role="tabpanel" aria-labelledby="recap-tab-events"></section>
+            <section class="recap-learning" aria-labelledby="recap-learning-title">
+                <h3 id="recap-learning-title">De la experiencia al concepto</h3>
+                <p>Eso es <strong>interactividad</strong>: participaste y la página respondió. El clic fue el evento; cambiar una imagen, mostrar un mensaje o comprobar una regla fue la respuesta.</p>
+                <div class="recap-signal"><span>Tu acción</span><span aria-hidden="true">→</span><span>Evento</span><span aria-hidden="true">→</span><code>JavaScript</code><span aria-hidden="true">→</span><span>Respuesta visible</span></div>
+                <details class="recap-theory">
+                    <summary>Un poco más: cómo se conectan los conceptos</summary>
+                    <p><strong>HTML, CSS y JavaScript:</strong> HTML organiza los botones y campos; CSS les da su apariencia; JavaScript conecta tus acciones con las respuestas, como las pistas del genio y el detector de eventos.</p>
+                    <p><strong>Formularios y validación:</strong> en “¿Sos alumno?” ingresaste datos y se comprobó su formato y su coincidencia con una lista. En la contraseña, JavaScript revisó reglas mientras escribías. HTML también ofrece comprobaciones básicas con atributos como <code>required</code> y <code>type="email"</code>; las reglas especiales del juego necesitan código.</p>
+                    <p><strong>Cliente y servidor:</strong> las pistas, los eventos y las reglas responden en tu navegador, sin enviar cada interacción. La competencia sí usa un servidor para registrar y compartir resultados. Las comprobaciones del navegador pueden modificarse: los datos enviados deben comprobarse también en el servidor. Validar un formato no demuestra que un dato sea verdadero ni garantiza por sí solo la seguridad.</p>
+                </details>
+            </section>
             <div class="actions closing-actions">
                 <button type="button" data-next="start">VOLVER AL INICIO</button>
                 <button type="button" class="secondary-button" data-next="finalPassword">PANTALLA ANTERIOR</button>
@@ -1674,6 +1686,55 @@ function renderClosingExperiment(mode) {
             pose.alt = smiling ? "Akinator sonriendo" : "Akinator pensando";
             document.querySelector("#recap-reaction").textContent = smiling ? `Tu navegador indica: ${passwordContext.browserName}.` : "Leí una pista del navegador. No era magia ni una prueba de tu identidad.";
             document.querySelector("#recap-effect").textContent = "Dato → respuesta";
+        });
+    } else if (mode === "lab") {
+        panel.innerHTML = `
+            <h3 class="recap-moment">Cuando la página detectó tus acciones…</h3>
+            <div class="recap-events-scene">
+                <div class="recap-event-feedback" role="status" aria-live="polite" aria-atomic="true">
+                    <span>EVENTO DETECTADO</span>
+                    <code id="recap-event-name">Todavía ninguno</code>
+                    <p id="recap-event-response">La respuesta aparecerá acá.</p>
+                </div>
+                <div class="recap-event-controls">
+                    <button id="recap-event-click" type="button">Hacer clic</button>
+                    <button id="recap-event-zone" class="secondary-button" type="button">Zona sensible</button>
+                    <label for="recap-event-input">Un texto de prueba</label>
+                    <input id="recap-event-input" type="text" autocomplete="off" aria-describedby="recap-event-key">
+                    <p id="recap-event-key">Tecla detectada: todavía ninguna.</p>
+                </div>
+            </div>
+            <div class="recap-signal"><span>Actuás</span><span aria-hidden="true">→</span><span>El navegador detecta</span><span aria-hidden="true">→</span><span>JavaScript actualiza el mensaje</span></div>
+            <p class="recap-caption"><strong>Evento ≠ respuesta:</strong> <code>click</code> detecta la activación, <code>mouseover</code> el cursor, <code>pointerdown</code> el contacto, <code>keydown</code> la tecla e <code>input</code> el cambio del texto. Mostrar el mensaje es nuestra respuesta programada.</p>`;
+        const report = (name, message) => {
+            document.querySelector("#recap-event-name").textContent = name;
+            document.querySelector("#recap-event-response").textContent = message;
+        };
+        let clicks = 0;
+        document.querySelector("#recap-event-click").addEventListener("click", () => {
+            clicks += 1;
+            report("click", `El contador cambió: ${clicks}.`);
+        });
+        const zone = document.querySelector("#recap-event-zone");
+        zone.addEventListener("mouseover", () => report("mouseover", "El cursor entró en la zona y este mensaje cambió."));
+        zone.addEventListener("pointerdown", () => report("pointerdown", "Tocaste o presionaste la zona y este mensaje cambió."));
+        zone.addEventListener("keydown", event => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            report("keydown", "Activaste la zona con el teclado y este mensaje cambió.");
+        });
+        const input = document.querySelector("#recap-event-input");
+        let hasKey = false;
+        input.addEventListener("keydown", event => {
+            hasKey = event.key !== "Unidentified" && event.key !== "Process";
+            document.querySelector("#recap-event-key").textContent = `Tecla detectada: ${event.key}.`;
+            report("keydown", "El navegador detectó una tecla, aunque no necesariamente cambió el texto.");
+        });
+        input.addEventListener("input", event => {
+            report("input", `El texto cambió: ahora tiene ${event.target.value.length} caracteres.`);
+            if (!hasKey) document.querySelector("#recap-event-key").textContent = event.data
+                ? `Último texto ingresado: ${event.data}.` : "El texto se modificó sin una tecla identificada.";
+            hasKey = false;
         });
     } else if (mode === "form") {
         panel.innerHTML = `
