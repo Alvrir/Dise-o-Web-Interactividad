@@ -72,10 +72,10 @@ test('el formulario del repaso consulta sin cambiar al jugador', () => {
     assert.equal(h.storage.size, 0);
 });
 
-test('las ocho actividades y las 17 reglas finales se conservan', () => {
+test('las ocho actividades y las 19 reglas finales se conservan', () => {
     const h = harness();
     assert.equal(h.run('screens.length'),8); // Incluye inicio; formulario contiene actividades 3 y 4.
-    assert.equal(h.run('finalPasswordRules.length'),17);
+    assert.equal(h.run('finalPasswordRules.length'),19);
     assert.equal(h.run('finalPasswordRules.some(r => r.id === "romanNumeral")'),false);
     assert.equal(h.run('finalPasswordRules.some(r => r.id === "currentYearRoman")'),true);
     assert.equal(h.run('shortPasswordRules.length'),3);
@@ -107,12 +107,33 @@ test('captcha usa archivos reales, exige el texto exacto y persiste por partida'
 test('permite cinco caracteres iguales seguidos, pero no seis', () => {
     const h = harness();
     for (const value of ['ooooo', '11111', '!!!!!', 'aaaaabaaaaa', 'aaaAAA', '']) {
-        assert.equal(h.run(`finalPasswordRules.at(-1).validate(${JSON.stringify(value)})`), true, value);
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='consecutiveCharacters').validate(${JSON.stringify(value)})`), true, value);
     }
     for (const value of ['oooooo', 'x111111y', '!!!!!!', '      ', '\n'.repeat(6), 'ñ'.repeat(6), String.fromCodePoint(0x1F600).repeat(6)]) {
-        assert.equal(h.run(`finalPasswordRules.at(-1).validate(${JSON.stringify(value)})`), false, value);
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='consecutiveCharacters').validate(${JSON.stringify(value)})`), false, value);
     }
-    assert.equal(h.run(`finalPasswordRules.at(-1).validate(buildValidFinalPassword().padEnd(200, 'ab'))`), true);
+    assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='consecutiveCharacters').validate(buildValidFinalPassword().padEnd(200, 'ab'))`), true);
+});
+
+test('acepta cualquiera de los ocho planetas invertidos sin mostrar las respuestas', () => {
+    const h = harness();
+    for (const word of ['oirucrem', 'sunev', 'arreit', 'etram', 'retipuj', 'onrutas', 'onaru', 'onutpen', 'RETIPÚJ']) {
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='reversedPlanet').validate(${JSON.stringify('123'+word+'!')})`), true, word);
+    }
+    for (const word of ['', 'marte', 'pluton', 'notulp', 'luna']) {
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='reversedPlanet').validate(${JSON.stringify(word)})`), false, word);
+    }
+    assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='reversedPlanet').description`), 'Debe contener el nombre de un planeta al revés.');
+});
+
+test('el orden acordado cierra siempre con extremos iguales y distingue mayúsculas', () => {
+    const h = harness();
+    assert.equal(h.run(`finalPasswordRules.map(r=>r.id).join(',')`), 'lowercase,minLength,uppercase,number,symbol,currentYear,currentYearRoman,multiplicationResult,browserName,month,playerName,sponsor,targetColor,cityName,captcha,reversedPlanet,longPassword,consecutiveCharacters,matchingEnds');
+    for (const [value, ok] of [['AbcA',true], ['1clave1',true], ['!clave!',true], ['Abca',false], ['',false], ['a',false], ['abc',false]]) {
+        assert.equal(h.run(`finalPasswordRules.at(-1).validate(${JSON.stringify(value)})`), ok, value);
+    }
+    h.run(`state.formData.nombre='Juan Perez'; passwordContext.targetLength=200;`);
+    assert.equal(h.run(`validatePassword(buildValidFinalPassword().padEnd(200,'ab')+'A', finalPasswordRules).every(r=>r.ok)`), true);
 });
 
 test('acepta cualquier palabra del nombre, normaliza tildes y rechaza nombres vacíos', () => {
@@ -129,6 +150,7 @@ test('acepta cualquier palabra del nombre, normaliza tildes y rechaza nombres va
 test('longitud aleatoria se fija al revelarse, persiste y se reinicia por partida', () => {
     const h = harness();
     h.run(`const cfg={stateKey:'finalPassword',revealedCountKey:'finalPasswordRevealedCount'};
+        state.formData.nombre='Juan Perez';
         state.finalPassword='a';
         getVisiblePasswordResults(validatePassword(state.finalPassword,finalPasswordRules),cfg);`);
     assert.equal(h.run('passwordContext.targetLength'),null);

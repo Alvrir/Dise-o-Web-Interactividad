@@ -200,6 +200,11 @@ const finalPasswordRules = [
         validate: password => containsMonth(password)
     },
     {
+        id: "playerName",
+        description: "Debe contener tu nombre o apellido.",
+        validate: password => getPlayerNameWords().some(word => normalizeText(password).includes(word))
+    },
+    {
         id: "sponsor",
         description: "Debe contener uno de nuestros sponsors.",
         logos: ["assets/logos/1.png", "assets/logos/2.png", "assets/logos/3.png"],
@@ -212,21 +217,9 @@ const finalPasswordRules = [
         validate: password => normalizeText(password).includes(passwordContext.targetColor.name)
     },
     {
-        id: "longPassword",
-        get description() {
-            return `La contraseña debe tener al menos ${passwordContext.targetLength ?? "más"} caracteres.`;
-        },
-        validate: password => passwordContext.targetLength !== null && password.length >= passwordContext.targetLength
-    },
-    {
         id: "cityName",
         description: "Debe contener el nombre de nuestra ciudad.",
         validate: password => normalizeText(password).includes("rojas")
-    },
-    {
-        id: "playerName",
-        description: "Debe contener tu nombre o apellido.",
-        validate: password => getPlayerNameWords().some(word => normalizeText(password).includes(word))
     },
     {
         id: "captcha",
@@ -235,9 +228,31 @@ const finalPasswordRules = [
         validate: password => password.includes(getCaptchaAnswer())
     },
     {
+        id: "reversedPlanet",
+        description: "Debe contener el nombre de un planeta al revés.",
+        validate: password => ["mercurio", "venus", "tierra", "marte", "jupiter", "saturno", "urano", "neptuno"]
+            .some(planet => normalizeText(password).includes([...planet].reverse().join("")))
+    },
+    {
+        id: "longPassword",
+        get description() {
+            return `La contraseña debe tener al menos ${passwordContext.targetLength ?? "más"} caracteres.`;
+        },
+        validate: password => passwordContext.targetLength !== null && password.length >= passwordContext.targetLength
+    },
+    {
         id: "consecutiveCharacters",
         description: "No puede haber más de 5 caracteres iguales seguidos.",
         validate: password => !/([\s\S])\1{5}/u.test(password)
+    },
+    // Agregar futuras condiciones antes de esta: debe cerrar siempre el juego.
+    {
+        id: "matchingEnds",
+        description: "Debe comenzar y terminar con el mismo carácter.",
+        validate: password => {
+            const characters = [...password];
+            return characters.length >= 2 && characters[0] === characters.at(-1);
+        }
     }
 ];
 
@@ -1879,7 +1894,7 @@ function completeDeveloperPassword() {
     input.value = password;
     input.dispatchEvent(new Event("input", { bubbles: true }));
     if (state.currentScreen === "finalPassword" && passwordContext.targetLength > input.value.length) {
-        input.value = input.value.padEnd(passwordContext.targetLength, "ab");
+        input.value = input.value.padEnd(passwordContext.targetLength, "ab") + [...input.value][0];
         input.dispatchEvent(new Event("input", { bubbles: true }));
     }
     setDeveloperMessage("Contraseña de prueba cargada.");
@@ -1895,7 +1910,7 @@ function buildValidFinalPassword() {
     }
 
     balancingDigits.push(String(remainingSum));
-    return `Ab!${passwordContext.currentYear}mayo${passwordContext.currentYearRoman}VManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividadRojas${passwordContext.targetColor.name}${getPlayerNameWords()[0] || ""}${getCaptchaAnswer()}`;
+    return `Ab!${passwordContext.currentYear}mayo${passwordContext.currentYearRoman}VManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividadRojas${passwordContext.targetColor.name}${getPlayerNameWords()[0] || ""}${getCaptchaAnswer()}etramA`;
 }
 
 function setDeveloperMessage(message) {
