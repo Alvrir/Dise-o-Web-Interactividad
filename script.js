@@ -233,6 +233,11 @@ const finalPasswordRules = [
         description: "Debe contener el texto de esta imagen, respetando las mayúsculas.",
         get captchaFile() { return passwordContext.captchaFile; },
         validate: password => password.includes(getCaptchaAnswer())
+    },
+    {
+        id: "consecutiveCharacters",
+        description: "No puede haber más de 5 caracteres iguales seguidos.",
+        validate: password => !/([\s\S])\1{5}/u.test(password)
     }
 ];
 
@@ -1874,7 +1879,7 @@ function completeDeveloperPassword() {
     input.value = password;
     input.dispatchEvent(new Event("input", { bubbles: true }));
     if (state.currentScreen === "finalPassword" && passwordContext.targetLength > input.value.length) {
-        input.value = input.value.padEnd(passwordContext.targetLength, "a");
+        input.value = input.value.padEnd(passwordContext.targetLength, "ab");
         input.dispatchEvent(new Event("input", { bubbles: true }));
     }
     setDeveloperMessage("Contraseña de prueba cargada.");

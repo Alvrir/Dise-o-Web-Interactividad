@@ -366,7 +366,9 @@ La primera corresponde al juego corto.
 
 La segunda corresponde al juego final.
 
-La última regla del juego final es un captcha educativo. `CAPTCHA_FILES` enumera las seis imágenes reales de `assets/captchas/`; al agregar archivos hay que actualizar esa lista (GitHub Pages no enumera carpetas). La respuesta es el nombre del archivo sin extensión y debe aparecer exactamente, respetando mayúsculas, dentro de la contraseña. Se elige una imagen por partida y se guarda en `passwordContext.captchaFile`, tanto en juego libre como en competencia. Recargar restaura la misma imagen; reiniciar sortea otra (puede repetirse). Los guardados anteriores sin captcha reciben uno válido. El autocompletado de pruebas también incluye la respuesta. No es una protección antibots: los nombres de los archivos son públicos. Es un desafío visual sin alternativa sonora, por lo que puede requerir asistencia para alumnos con discapacidad visual.
+El juego final incluye un captcha educativo. `CAPTCHA_FILES` enumera las seis imágenes reales de `assets/captchas/`; al agregar archivos hay que actualizar esa lista (GitHub Pages no enumera carpetas). La respuesta es el nombre del archivo sin extensión y debe aparecer exactamente, respetando mayúsculas, dentro de la contraseña. Se elige una imagen por partida y se guarda en `passwordContext.captchaFile`, tanto en juego libre como en competencia. Recargar restaura la misma imagen; reiniciar sortea otra (puede repetirse). Los guardados anteriores sin captcha reciben uno válido. El autocompletado de pruebas también incluye la respuesta. No es una protección antibots: los nombres de los archivos son públicos. Es un desafío visual sin alternativa sonora, por lo que puede requerir asistencia para alumnos con discapacidad visual.
+
+Después del captcha aparece `consecutiveCharacters`: no permite más de cinco caracteres iguales consecutivos. `ooooo` cumple; `oooooo` no. También aplica a números, símbolos y espacios, distingue mayúsculas de minúsculas y no limita repeticiones separadas por otro carácter. El relleno del autocompletado de pruebas alterna `ab` para respetarla.
 
 Cada regla tiene esta forma:
 
