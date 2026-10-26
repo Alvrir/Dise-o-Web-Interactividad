@@ -8,7 +8,7 @@ function harness(search = '') {
     const storage = new Map();
     const elements = new Map();
     const element = key => {
-        if (!elements.has(key)) elements.set(key, { innerHTML: '', style: {}, classList: { add() {}, remove() {} }, focus() {} });
+        if (!elements.has(key)) elements.set(key, { innerHTML: '', style: {}, classList: { add() {}, remove() {}, toggle() {} }, setAttribute() {}, focus() {}, listeners: {}, addEventListener(type, callback) { this.listeners[type] = callback; } });
         return elements.get(key);
     };
     const ctx = vm.createContext({
@@ -21,11 +21,202 @@ function harness(search = '') {
     vm.runInContext(source, ctx);
     return { run: code => vm.runInContext(code, ctx), storage, elements };
 }
-test('las ocho actividades y las 15 reglas finales se conservan', () => {
+test('cierre personaliza sin interpretar HTML y conserva ambas salidas', () => {
+    const h = harness();
+    h.run(`state.formData.nombre='<img> Apellido'; renderClosing();`);
+    const markup = h.elements.get('#app').innerHTML;
+    assert.match(markup, /¡Bien hecho, &lt;img&gt;!/);
+    assert.doesNotMatch(markup, /Para pensar/);
+    assert.match(markup, /data-next="start"/);
+    assert.match(markup, /data-next="finalPassword"/);
+    h.run(`state.formData.nombre=''; renderClosing();`);
+    assert.match(h.elements.get('#app').innerHTML, /¡Felicitaciones!/);
+});
+
+test('las demostraciones del cierre reaccionan sin modificar la partida', () => {
+    const h = harness();
+    h.run('renderClosingExperiment("events")');
+    h.elements.get('#recap-react').listeners.click();
+    assert.match(h.elements.get('#recap-pose').src, /idle.png/);
+    h.run('renderClosingExperiment("validation")');
+    h.elements.get('#recap-sample').listeners.input({target:{value:'Clave123'}});
+    assert.match(h.elements.get('#recap-check').textContent, /Cumplida/);
+    h.elements.get('#recap-sample').listeners.input({target:{value:'a'}});
+    assert.match(h.elements.get('#recap-check').textContent, /Pendiente/);
+    h.run('renderClosingExperiment("ranking")');
+    const button = h.elements.get('#recap-delivery-next');
+    button.listeners.click({currentTarget:button});
+    assert.match(h.elements.get('#recap-delivery-message').textContent, /servidor/);
+    button.listeners.click({currentTarget:button});
+    assert.match(h.elements.get('#recap-delivery-message').textContent, /clasificación/);
+    assert.equal(h.run('state.finalPassword'), '');
+    assert.equal(h.run('state.finalPasswordStartedAt'), null);
+    assert.equal(h.storage.size, 0);
+});
+
+test('el formulario del repaso consulta sin cambiar al jugador', () => {
+    const h = harness();
+    h.run(`state.alumnos = fallbackAlumnos; state.formData.nombre = 'Jugador original'; renderClosingExperiment('form');`);
+    const submit = h.elements.get('#recap-form').listeners.submit;
+    const input = h.run(`document.querySelector('#recap-name')`);
+    input.value = h.run('fallbackAlumnos[0].nombre');
+    submit({preventDefault() {}});
+    assert.match(h.elements.get('#recap-form-result').textContent, /✓ El alumno está/);
+    input.value = 'Nombre inexistente';
+    submit({preventDefault() {}});
+    assert.match(h.elements.get('#recap-form-result').textContent, /no está/);
+    input.value = '   ';
+    submit({preventDefault() {}});
+    assert.match(h.elements.get('#recap-form-result').textContent, /Escribí un nombre/);
+    assert.equal(h.run('state.formData.nombre'), 'Jugador original');
+    assert.equal(h.storage.size, 0);
+});
+
+test('las ocho actividades y las 19 reglas finales se conservan', () => {
     const h = harness();
     assert.equal(h.run('screens.length'),8); // Incluye inicio; formulario contiene actividades 3 y 4.
-    assert.equal(h.run('finalPasswordRules.length'),15);
+    assert.equal(h.run('finalPasswordRules.length'),19);
+    assert.equal(h.run('finalPasswordRules.some(r => r.id === "romanNumeral")'),false);
+    assert.equal(h.run('finalPasswordRules.some(r => r.id === "currentYearRoman")'),true);
     assert.equal(h.run('shortPasswordRules.length'),3);
+});
+
+test('captcha usa archivos reales, exige el texto exacto y persiste por partida', async () => {
+    const h = harness();
+    const files = h.run('CAPTCHA_FILES');
+    for (const file of files) {
+        assert.ok((await readFile(new URL(`../../assets/captchas/${file}`, import.meta.url))).length > 0);
+        h.run(`passwordContext.captchaFile=${JSON.stringify(file)}`);
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='captcha').validate('antes'+getCaptchaAnswer()+'despues')`),true);
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='captcha').validate(getCaptchaAnswer().toLowerCase())`),false);
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='captcha').validate('otra respuesta')`),false);
+        assert.match(h.run(`renderPasswordCaptcha(passwordContext.captchaFile)`), /assets\/captchas\//);
+    }
+    h.run(`passwordContext.captchaFile='AWSKH.png'; saveFinalProgress(); resetFinalAttempt(); restoreFinalSnapshot(JSON.parse(localStorage.getItem('interactividad-password-progress:sin-dni')))`);
+    assert.equal(h.run('passwordContext.captchaFile'),'AWSKH.png');
+    h.run(`Math.random=()=>0; resetFinalAttempt()`);
+    assert.equal(h.run('passwordContext.captchaFile'),'4NV3A.png');
+    assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='captcha').validate(buildValidFinalPassword())`),true);
+    assert.equal(h.run(`renderPasswordCaptcha('../no-existe.png')`),'');
+    h.run(`const legacy=finalSnapshot(); delete legacy.context.captchaFile; restoreFinalSnapshot(legacy)`);
+    assert.equal(h.run('CAPTCHA_FILES.includes(passwordContext.captchaFile)'),true);
+    h.run(`const invalid=finalSnapshot(); invalid.context.captchaFile='../no-existe.png'; restoreFinalSnapshot(invalid)`);
+    assert.equal(h.run('CAPTCHA_FILES.includes(passwordContext.captchaFile)'),true);
+});
+
+test('permite cinco caracteres iguales seguidos, pero no seis', () => {
+    const h = harness();
+    for (const value of ['ooooo', '11111', '!!!!!', 'aaaaabaaaaa', 'aaaAAA', '']) {
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='consecutiveCharacters').validate(${JSON.stringify(value)})`), true, value);
+    }
+    for (const value of ['oooooo', 'x111111y', '!!!!!!', '      ', '\n'.repeat(6), 'ñ'.repeat(6), String.fromCodePoint(0x1F600).repeat(6)]) {
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='consecutiveCharacters').validate(${JSON.stringify(value)})`), false, value);
+    }
+    assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='consecutiveCharacters').validate(buildValidFinalPassword().padEnd(200, 'ab'))`), true);
+});
+
+test('acepta cualquiera de los ocho planetas invertidos sin mostrar las respuestas', () => {
+    const h = harness();
+    for (const word of ['oirucrem', 'sunev', 'arreit', 'etram', 'retipuj', 'onrutas', 'onaru', 'onutpen', 'RETIPÚJ']) {
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='reversedPlanet').validate(${JSON.stringify('123'+word+'!')})`), true, word);
+    }
+    for (const word of ['', 'marte', 'pluton', 'notulp', 'luna']) {
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='reversedPlanet').validate(${JSON.stringify(word)})`), false, word);
+    }
+    assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='reversedPlanet').description`), 'Debe contener el nombre de un planeta al revés.');
+});
+
+test('el orden acordado cierra siempre con extremos iguales y distingue mayúsculas', () => {
+    const h = harness();
+    assert.equal(h.run(`finalPasswordRules.map(r=>r.id).join(',')`), 'lowercase,minLength,uppercase,number,symbol,currentYear,currentYearRoman,multiplicationResult,browserName,month,playerName,sponsor,targetColor,cityName,captcha,reversedPlanet,longPassword,consecutiveCharacters,matchingEnds');
+    for (const [value, ok] of [['AbcA',true], ['1clave1',true], ['!clave!',true], ['Abca',false], ['',false], ['a',false], ['abc',false]]) {
+        assert.equal(h.run(`finalPasswordRules.at(-1).validate(${JSON.stringify(value)})`), ok, value);
+    }
+    h.run(`state.formData.nombre='Juan Perez'; passwordContext.targetLength=200;`);
+    assert.equal(h.run(`validatePassword(buildValidFinalPassword().padEnd(200,'ab')+'A', finalPasswordRules).every(r=>r.ok)`), true);
+});
+
+test('acepta cualquier palabra del nombre, normaliza tildes y rechaza nombres vacíos', () => {
+    const h = harness();
+    h.run(`state.formData.nombre='  Álvaro   José Irazoqui  ';`);
+    for (const word of ['alvaro', 'JOSE', 'irazoqui']) {
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='playerName').validate('123${word}!')`),true);
+    }
+    assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='playerName').validate('otro')`),false);
+    h.run(`state.formData.nombre='   ';`);
+    assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='playerName').validate('cualquiertexto')`),false);
+});
+
+test('longitud aleatoria se fija al revelarse, persiste y se reinicia por partida', () => {
+    const h = harness();
+    h.run(`const cfg={stateKey:'finalPassword',revealedCountKey:'finalPasswordRevealedCount'};
+        state.formData.nombre='Juan Perez';
+        state.finalPassword='a';
+        getVisiblePasswordResults(validatePassword(state.finalPassword,finalPasswordRules),cfg);`);
+    assert.equal(h.run('passwordContext.targetLength'),null);
+    for (const [random, extra] of [[0,5],[0.999999,18]]) {
+        h.run(`resetFinalAttempt(); Math.random=()=>${random}; state.finalPassword=buildValidFinalPassword();
+            getVisiblePasswordResults(validatePassword(state.finalPassword,finalPasswordRules),cfg);`);
+        assert.equal(h.run('passwordContext.targetLength-state.finalPassword.length'),extra);
+        const target = h.run('passwordContext.targetLength');
+        h.run(`saveFinalProgress(); restoreFinalSnapshot(JSON.parse(localStorage.getItem('interactividad-password-progress:sin-dni')));`);
+        assert.equal(h.run('passwordContext.targetLength'),target);
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='longPassword').validate('a'.repeat(${target-1}))`),false);
+        assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='longPassword').validate('a'.repeat(${target}))`),true);
+        h.run(`state.finalPassword='a'; getVisiblePasswordResults(validatePassword(state.finalPassword,finalPasswordRules),cfg);`);
+        assert.equal(h.run('passwordContext.targetLength'),target);
+    }
+    h.run('resetFinalAttempt()');
+    assert.equal(h.run('passwordContext.targetLength'),null);
+});
+
+test('eventos desbloquea solo al completar las cuatro tarjetas, incluido teclado virtual', () => {
+    const h = harness();
+    h.run('renderEvents()');
+    assert.match(h.elements.get('#app').innerHTML, /id="continue-after-events"[^>]*disabled/);
+    assert.match(h.elements.get('#app').innerHTML, /<summary>Para pensar/);
+    assert.match(h.elements.get('#app').innerHTML, /<code>scroll<\/code>/);
+    assert.doesNotMatch(h.elements.get('#app').innerHTML, /genie-companion/);
+    h.elements.get('#click-demo').listeners.click();
+    h.elements.get('#click-demo').listeners.click();
+    assert.equal(h.run('state.discoveredEvents.length'), 1);
+    h.elements.get('#hover-demo').listeners.pointerdown();
+    h.elements.get('#key-demo').listeners.input();
+    assert.equal(h.elements.get('#continue-after-events').disabled, true);
+    assert.equal(h.run('state.lastEvent'), 'input');
+    h.elements.get('#input-demo').listeners.input();
+    assert.equal(h.elements.get('#continue-after-events').disabled, false);
+    h.run('renderEvents()');
+    assert.doesNotMatch(h.elements.get('#app').innerHTML, /id="continue-after-events"[^>]*disabled/);
+});
+
+test('keydown conserva la letra ante input y admite teclados virtuales', () => {
+    const h = harness();
+    h.run('renderEvents()');
+    const key = h.elements.get('#key-demo');
+    key.listeners.keydown({key:'a'});
+    key.listeners.input({data:'a'});
+    assert.equal(h.run('state.lastEvent'), 'keydown');
+    assert.match(h.elements.get('#event-description').textContent, /tecla a/);
+    key.listeners.keyup();
+    key.listeners.keydown({key:'Unidentified'});
+    key.listeners.input({data:'ñ'});
+    assert.equal(h.run('state.lastEvent'), 'input');
+    assert.match(h.elements.get('#event-description').textContent, /ingresó: ñ/);
+    key.listeners.input({inputType:'deleteContentBackward'});
+    assert.match(h.elements.get('#event-description').textContent, /borró/);
+});
+
+test('la zona sensible permite completar la tarjeta con teclado sin contar foco', () => {
+    const h = harness();
+    h.run('renderEvents()');
+    const zone = h.elements.get('#hover-demo');
+    assert.equal(zone.listeners.focus, undefined);
+    zone.listeners.keydown({key: 'Tab', preventDefault() {}});
+    assert.equal(h.run('state.discoveredEvents.length'), 0);
+    zone.listeners.keydown({key: 'Enter', preventDefault() {}});
+    assert.equal(h.run('state.discoveredEvents[0]'), 'mouseover');
+    assert.equal(h.run('state.lastEvent'), 'keydown');
 });
 test('restaura texto, cronómetro y condiciones de la misma partida', () => {
     const h = harness();

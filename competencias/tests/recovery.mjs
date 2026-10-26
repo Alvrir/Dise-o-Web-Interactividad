@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import * as ui from '../ui.js';
 
-async function setup({ pending = false } = {}) {
+async function setup({ pending = false, details = false, missingMigration = false } = {}) {
     const elements = new Map();
     const node = selector => {
         if (!elements.has(selector)) elements.set(selector, { innerHTML: '', textContent: '', disabled: false });
@@ -13,7 +13,7 @@ async function setup({ pending = false } = {}) {
     };
     let online = true, submissions = 0, restored, played = 0;
     const stats = { completed: pending ? 0 : 1, best_ms: 10000, last_completed_at: '2020-01-01T00:00:00Z' };
-    let value = JSON.stringify({ gameId: randomUUID(), result: { durationMs: 10000 }, snapshot: null,
+    let value = JSON.stringify({ gameId: randomUUID(), result: { durationMs: 10000, ...(details ? { password: 'Solucion de prueba' } : {}) }, snapshot: null,
         receipt: pending ? null : { result: { completed_at: stats.last_completed_at }, summary: stats } });
     const api = {
         getClient: async () => ({ auth: { getSession: async () => ({ data: { session: {} } }) } }),
@@ -21,6 +21,7 @@ async function setup({ pending = false } = {}) {
         board: async () => [{ participant_id: 'p', ...stats }],
         rpc: async name => {
             if (name === 'pw_join') return { id: 'p', name: 'Nombre original' };
+            if (name === 'pw_submit_details' && missingMigration) throw { code: 'PGRST202' };
             submissions++;
             return { result: { completed_at: stats.last_completed_at }, summary: { ...stats, completed: 1 } };
         }
@@ -68,4 +69,14 @@ test('un fallo de red al reiniciar conserva la victoria y permite reintentar', a
     assert.notEqual(h.saved().gameId, id);
     assert.equal(h.saved().result, null);
     assert.equal(h.played(), 1);
+});
+
+test('si falta la migración, conserva el tiempo confirmado y los detalles pendientes', async () => {
+    const h = await setup({ pending: true, details: true, missingMigration: true });
+    h.runtime.showCompleted();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(h.submissions(), 1);
+    assert.ok(h.saved().receipt);
+    assert.equal(h.saved().detailsPending, true);
+    assert.equal(h.saved().result.password, 'Solucion de prueba');
 });

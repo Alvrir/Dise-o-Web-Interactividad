@@ -38,6 +38,13 @@
 .ranking-panel thead { color: #a6cbea; font-size: .85em; }
 .ranking-panel tbody tr:first-child { color: #fabf3f; background: #fabf3f0a; }
 .ranking-note { color: #b8c9da; font-size: .85rem; }
+.ranking-password { min-width: 220px; max-width: 420px; }
+.ranking-password button { font-size: .85rem; margin-bottom: 10px; }
+.ranking-password-text { display: block; white-space: pre-wrap; overflow-wrap: anywhere; font-family: monospace; font-size: 1rem; line-height: 1.6; filter: blur(5px); user-select: none; }
+.ranking-password.is-revealed .ranking-password-text { filter: none; user-select: text; }
+@media (hover: hover) and (pointer: fine) {
+    .ranking-password:hover .ranking-password-text { filter: none; user-select: text; }
+}
 .admin-shell { max-width: 1100px; color: #fff; }
 .admin-shell .field { display: grid; gap: 8px; margin-bottom: 16px; }
 .admin-shell input, .competition-card input { background: #fff; color: #15202b; }

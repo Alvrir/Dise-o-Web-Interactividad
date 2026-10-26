@@ -13,5 +13,10 @@
         "dni": "11223344",
         "nombre": "Ana Gomez",
         "edad": 19
+    },
+    {
+        "dni": "41928374",
+        "nombre": "Alvaro Irazoqui",
+        "edad": 17
     }
 ]

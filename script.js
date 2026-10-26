@@ -8,6 +8,15 @@ const devScreenSelect = document.querySelector("#dev-screen-select");
 const devMessage = document.querySelector("#dev-message");
 const finalResultStoragePrefix = "interactividad-password-final-result:";
 const BACKGROUND_IMAGE = "assets/background/background.png";
+const CAPTCHA_FILES = ["4NV3A.png", "AWSKH.png", "B4T9S.png", "DWXM5.png", "N8C6H.png", "TK58P.png"];
+
+function getRandomCaptcha() {
+    return CAPTCHA_FILES[Math.floor(Math.random() * CAPTCHA_FILES.length)];
+}
+
+function getCaptchaAnswer() {
+    return passwordContext.captchaFile.replace(/\.[^.]+$/, "");
+}
 const GENIE_ASSETS = {
     idle: "assets/genio/idle.png",
     pensando: "assets/genio/pensando.png",
@@ -22,6 +31,7 @@ let competitionRuntime = null;
 function finalSnapshot() {
     return {
         password: state.finalPassword,
+        playerName: state.formData.nombre,
         revealed: state.finalPasswordRevealedCount,
         order: state.finalPasswordCompletionOrder,
         startedAt: state.finalPasswordStartedAt,
@@ -33,12 +43,18 @@ function restoreFinalSnapshot(snapshot) {
     resetFinalAttempt();
     if (!snapshot || typeof snapshot.password !== "string") return;
     state.finalPassword = snapshot.password;
+    if (!state.formData.nombre.trim() && typeof snapshot.playerName === "string") {
+        state.formData.nombre = snapshot.playerName;
+    }
     state.finalPasswordRevealedCount = Number(snapshot.revealed) || 0;
     state.finalPasswordCompletionOrder = Array.isArray(snapshot.order) ? snapshot.order : [];
     state.finalPasswordStartedAt = Number(snapshot.startedAt) || null;
     if (snapshot.context?.targetColor?.name) {
         Object.assign(passwordContext, snapshot.context);
         finalPasswordRules.find(rule => rule.id === "targetColor").color = passwordContext.targetColor;
+    }
+    if (!CAPTCHA_FILES.includes(passwordContext.captchaFile)) {
+        passwordContext.captchaFile = getRandomCaptcha();
     }
 }
 
@@ -66,6 +82,11 @@ const fallbackAlumnos = [
         dni: "11223344",
         nombre: "Ana Gomez",
         edad: 19
+    },
+    {
+        dni: "41928374",
+        nombre: "Alvaro Irazoqui",
+        edad: 17
     }
 ];
 
@@ -104,7 +125,9 @@ const passwordContext = {
     currentYear: String(new Date().getFullYear()),
     currentYearRoman: toRomanNumeral(new Date().getFullYear()),
     browserName: getBrowserPasswordTerm(),
-    targetColor: getRandomPasswordColor()
+    targetColor: getRandomPasswordColor(),
+    targetLength: null,
+    captchaFile: getRandomCaptcha()
 };
 
 const shortPasswordRules = [
@@ -177,9 +200,9 @@ const finalPasswordRules = [
         validate: password => containsMonth(password)
     },
     {
-        id: "romanNumeral",
-        description: "Debe contener un número romano.",
-        validate: password => /[IVXLCDM]/.test(password)
+        id: "playerName",
+        description: "Debe contener tu nombre o apellido.",
+        validate: password => getPlayerNameWords().some(word => normalizeText(password).includes(word))
     },
     {
         id: "sponsor",
@@ -194,16 +217,48 @@ const finalPasswordRules = [
         validate: password => normalizeText(password).includes(passwordContext.targetColor.name)
     },
     {
-        id: "longPassword",
-        description: "La contraseña debe tener más de 45 caracteres.",
-        validate: password => password.length > 45
-    },
-    {
         id: "cityName",
         description: "Debe contener el nombre de nuestra ciudad.",
         validate: password => normalizeText(password).includes("rojas")
+    },
+    {
+        id: "captcha",
+        description: "Debe contener el texto de esta imagen, respetando las mayúsculas.",
+        get captchaFile() { return passwordContext.captchaFile; },
+        validate: password => password.includes(getCaptchaAnswer())
+    },
+    {
+        id: "reversedPlanet",
+        description: "Debe contener el nombre de un planeta al revés.",
+        validate: password => ["mercurio", "venus", "tierra", "marte", "jupiter", "saturno", "urano", "neptuno"]
+            .some(planet => normalizeText(password).includes([...planet].reverse().join("")))
+    },
+    {
+        id: "longPassword",
+        get description() {
+            return `La contraseña debe tener al menos ${passwordContext.targetLength ?? "más"} caracteres.`;
+        },
+        validate: password => passwordContext.targetLength !== null && password.length >= passwordContext.targetLength
+    },
+    {
+        id: "consecutiveCharacters",
+        description: "No puede haber más de 5 caracteres iguales seguidos.",
+        validate: password => !/([\s\S])\1{5}/u.test(password)
+    },
+    // Agregar futuras condiciones antes de esta: debe cerrar siempre el juego.
+    {
+        id: "matchingEnds",
+        description: "Debe comenzar y terminar con el mismo carácter.",
+        validate: password => {
+            const characters = [...password];
+            return characters.length >= 2 && characters[0] === characters.at(-1);
+        }
     }
 ];
+
+function getPlayerNameWords() {
+    return normalizeText(state.formData.nombre).split(/\s+/).filter(Boolean);
+}
 
 const closingConcepts = [
     {
@@ -255,7 +310,7 @@ async function init() {
         css.href = "competencias/competencias.css";
         document.head.append(css);
         try {
-            const { startCompetition } = await import("./competencias/game.js");
+            const { startCompetition } = await import("./competencias/game.js?v=20261026-ranking");
             startCompetition({
                 attach: runtime => { competitionRuntime = runtime; },
                 restore: restoreFinalSnapshot,
@@ -339,6 +394,7 @@ async function showScreen(screenId) {
     void app.offsetWidth;
     app.classList.add("is-entering");
     app.focus({ preventScroll: true });
+    if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
 }
 
 function configureBackground() {
@@ -574,7 +630,7 @@ function renderEvents() {
                 <article class="event-card" data-event-card="mouseover">
                     <div class="event-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h10M4 19h6"/><path d="m16 15 4 4m0-4-4 4"/></svg></div>
                     <span class="event-tag">02 · PUNTERO</span>
-                    <h3>Acercá el cursor</h3>
+                    <h3>Explorá la zona</h3>
                     <p>Con mouse se detecta <code>mouseover</code>; al tocar, <code>pointerdown</code>.</p>
                     <div id="hover-demo" class="event-target interactive" tabindex="0" role="button" aria-label="Probar evento de puntero">ZONA SENSIBLE</div>
                 </article>
@@ -592,7 +648,7 @@ function renderEvents() {
                     <div class="event-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h.01M10 9h.01M13 9h.01M16 9h.01M7 13h.01M10 13h.01M13 13h4"/><path d="m16 9 2 2-2 2"/></svg></div>
                     <span class="event-tag">04 · KEYDOWN</span>
                     <h3>Presioná una tecla</h3>
-                    <p>Con teclado físico, el navegador informa cuál fue.</p>
+                    <p>Tocá el campo y usá el teclado de tu celular, o escribí con el teclado físico.</p>
                     <label class="field">
                         <span class="sr-only">Campo para probar keydown</span>
                         <input id="key-demo" type="text" placeholder="Presioná una tecla">
@@ -608,13 +664,24 @@ function renderEvents() {
                 <p id="event-description">Esperando una interacción para mostrar qué ocurrió.</p>
                 </section>
                 <div class="actions">
-                    <button data-next="form">CONTINUAR →</button>
+                    <button id="continue-after-events" data-next="form" ${state.discoveredEvents.length < 4 ? "disabled" : ""} aria-describedby="events-hint">CONTINUAR →</button>
                 </div>
+                <p id="events-hint" class="hint">${state.discoveredEvents.length === 4 ? "¡Probaste las cuatro tarjetas! Ya podés continuar." : "Probá las cuatro tarjetas para continuar."}</p>
             </div>
-            ${renderGenieCompanion({
-                pose: "celu",
-                message: "¡Cada movimiento cuenta! Probá interactuar con los elementos."
-            })}
+            <aside class="reflection-bubble events-reflection">
+                <details>
+                    <summary>Para pensar…</summary>
+                    <p>Además de hacer clic, tocar o escribir, ¿qué otra cosa podría pasar en una página? ¿Cómo podría responder?</p>
+                    <ul>
+                        <li><code>dblclick</code>: hacer doble clic.</li>
+                        <li><code>submit</code>: enviar un formulario.</li>
+                        <li><code>paste</code>: pegar texto.</li>
+                        <li><code>scroll</code>: desplazar el contenido.</li>
+                        <li><code>resize</code>: cambiar el tamaño de la ventana.</li>
+                        <li><code>play</code>: iniciar un audio o video.</li>
+                    </ul>
+                </details>
+            </aside>
         </section>
     `;
 
@@ -626,9 +693,9 @@ function renderEvents() {
         keydown: key => `El navegador detectó que presionaste la tecla ${key}.`
     };
 
-    const updateLastEvent = (eventName, detail = "") => {
+    const updateLastEvent = (eventName, detail = "", discovery = eventName) => {
         state.lastEvent = eventName;
-        const discoveryName = eventName === "pointerdown" ? "mouseover" : eventName;
+        const discoveryName = discovery === "pointerdown" ? "mouseover" : discovery;
 
         if (!state.discoveredEvents.includes(discoveryName)) {
             state.discoveredEvents.push(discoveryName);
@@ -640,13 +707,45 @@ function renderEvents() {
             : eventDescriptions[eventName];
         document.querySelector("#event-discovery-count").textContent = `Eventos descubiertos: ${state.discoveredEvents.length}/4`;
         document.querySelector(`[data-event-card="${discoveryName}"]`)?.classList.add("is-discovered");
+        const complete = state.discoveredEvents.length === 4;
+        document.querySelector("#continue-after-events").disabled = !complete;
+        document.querySelector("#events-hint").textContent = complete
+            ? "¡Probaste las cuatro tarjetas! Ya podés continuar."
+            : `Te faltan ${4 - state.discoveredEvents.length} tarjetas por probar.`;
     };
 
     document.querySelector("#click-demo").addEventListener("click", () => updateLastEvent("click"));
     document.querySelector("#hover-demo").addEventListener("mouseover", () => updateLastEvent("mouseover"));
     document.querySelector("#hover-demo").addEventListener("pointerdown", () => updateLastEvent("pointerdown"));
+    document.querySelector("#hover-demo").addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            updateLastEvent("keydown", event.key === " " ? "Espacio" : event.key, "mouseover");
+        }
+    });
     document.querySelector("#input-demo").addEventListener("input", () => updateLastEvent("input"));
-    document.querySelector("#key-demo").addEventListener("keydown", event => updateLastEvent("keydown", event.key));
+    const keyDemo = document.querySelector("#key-demo");
+    let identifiedKey = false;
+    keyDemo.addEventListener("keydown", event => {
+        identifiedKey = Boolean(event.key) && !event.isComposing
+            && !["Unidentified", "Process", "Dead"].includes(event.key);
+        if (identifiedKey) updateLastEvent("keydown", event.key === " " ? "Espacio" : event.key);
+    });
+    keyDemo.addEventListener("keyup", () => { identifiedKey = false; });
+    keyDemo.addEventListener("blur", () => { identifiedKey = false; });
+    // El input posterior no debe tapar una tecla identificada por keydown.
+    keyDemo.addEventListener("input", (event = {}) => {
+        if (identifiedKey) {
+            identifiedKey = false;
+            return;
+        }
+        updateLastEvent("input", "", "keydown");
+        document.querySelector("#event-description").textContent = event.data
+            ? `El teclado ingresó: ${event.data}. Este navegador lo informa mediante input.`
+            : event.inputType?.startsWith("delete")
+                ? "El teclado borró texto mediante input."
+                : `El campo cambió mediante input. Texto actual: ${keyDemo.value || "(vacío)"}.`;
+    });
 
     state.discoveredEvents.forEach(eventName => {
         document.querySelector(`[data-event-card="${eventName}"]`)?.classList.add("is-discovered");
@@ -685,6 +784,7 @@ function renderForm() {
             </div>
             <section class="result-panel" aria-live="polite">
                 <h2>VERIFICACIÓN</h2>
+                <p id="student-genie-message" class="genie-remark">Veamos si estás en la lista.</p>
                 <ul id="validation-results" class="validation-list">
                     <li class="validation-item"><span class="status waiting">?</span><span>Esperando la carga de los datos.</span></li>
                     <li class="validation-item"><span class="status waiting">?</span><span>Consulta a la base de datos pendiente.</span></li>
@@ -722,7 +822,7 @@ function renderForm() {
 
 function renderDataNotice() {
     if (state.dataSource === "json") {
-        return `<p class="success-text">✓ Datos cargados desde data/alumnos.json.</p>`;
+        return "";
     }
 
     return `<p class="warning-text">! El navegador bloqueó la lectura del JSON por file://. Se usan datos de demostración en memoria. Para leer el archivo real, ejecutá un servidor local sencillo.</p>`;
@@ -740,10 +840,9 @@ function validateStudentForm(formData) {
         && edadOnlyNumbers
         && edad >= 12
         && edad <= 99;
-    const alumno = validFormat ? findAlumnoByDni(formData.dni) : null;
+    const alumno = validFormat ? findAlumnoByName(formData.nombre) : null;
     const studentMatches = Boolean(alumno)
-        && normalizeText(alumno.nombre) === normalizeText(formData.nombre)
-        && Number(alumno.edad) === edad;
+        && normalizeText(alumno.nombre) === normalizeText(formData.nombre);
 
     state.alumnoEncontrado = studentMatches ? alumno : null;
     addResult(results, validFormat, "Los datos tienen un formato válido.", "Revisá los datos ingresados.");
@@ -764,6 +863,13 @@ function renderValidationResults(results) {
     const continueButton = document.querySelector("#continue-after-form");
     const allValid = results.every(result => result.ok);
 
+    const studentGenie = document.querySelector(".student-layout .genie-companion img");
+    studentGenie.src = allValid ? GENIE_ASSETS.idle : GENIE_ASSETS.pensando;
+    studentGenie.alt = allValid ? "Akinator sonriendo" : "Akinator pensando";
+    document.querySelector("#student-genie-message").textContent = allValid
+        ? "¡Acá estás! Podemos seguir."
+        : "Todavía no puedo confirmarlo. Revisemos tus datos.";
+
     list.innerHTML = results.map(result => `
         <li class="validation-item">
             <span class="status ${result.ok ? "ok" : "bad"}">${result.ok ? "✓" : "×"}</span>
@@ -772,10 +878,35 @@ function renderValidationResults(results) {
     `).join("");
 
     continueButton.classList.toggle("hidden", !allValid);
+    const fieldErrors = {
+        nombre: !state.formData.nombre.trim() ? "Ingresá tu nombre y apellido." :
+            (!state.alumnoEncontrado && results[0].ok ? "Ese nombre no figura en la base de alumnos." : ""),
+        dni: /^\d{7,9}$/.test(state.formData.dni) ? "" : "Ingresá un DNI de 7 a 9 números.",
+        edad: /^\d+$/.test(state.formData.edad) && Number(state.formData.edad) >= 12 && Number(state.formData.edad) <= 99
+            ? "" : "Ingresá una edad entre 12 y 99."
+    };
+    Object.entries(fieldErrors).forEach(([id, message]) => {
+        const input = document.getElementById(id);
+        let hint = document.getElementById(`${id}-error`);
+        if (!hint) {
+            hint = document.createElement("span");
+            hint.id = `${id}-error`;
+            hint.className = "warning-text";
+            input.after(hint);
+        }
+        hint.textContent = message;
+        hint.hidden = !message;
+        input.setAttribute("aria-invalid", String(Boolean(message)));
+        input.setAttribute("aria-describedby", hint.id);
+    });
+    if (!allValid) {
+        const firstInvalid = Object.keys(fieldErrors).find(id => fieldErrors[id]);
+        document.getElementById(firstInvalid)?.focus({ preventScroll: true });
+    }
 }
 
-function findAlumnoByDni(dni) {
-    return state.alumnos.find(alumno => String(alumno.dni) === String(dni)) || null;
+function findAlumnoByName(nombre) {
+    return state.alumnos.find(alumno => normalizeText(alumno.nombre) === normalizeText(nombre)) || null;
 }
 
 function renderShortPassword() {
@@ -807,8 +938,9 @@ function renderFinalPassword() {
     }
 
     renderPasswordScreen({
-        intro: "Ahora sí. Cumplí todas las condiciones.",
-        helper: "Empezá a escribir: el tiempo inicia con tu primera letra y se irán revelando las condiciones.",
+        intro: "Ahora sí, creá tu verdadera contraseña",
+        description: "Deberás crear una contraseña que cumpla todas las condiciones que irán apareciendo.",
+        helper: "Empezá a escribir: el tiempo comienza con tu primera letra.",
         stateKey: "finalPassword",
         inputId: "final-password-input",
         rules: finalPasswordRules,
@@ -827,7 +959,15 @@ function renderPasswordScreen(config) {
         <section class="password-layout password-layout--${config.stateKey}">
             <div class="password-primary">
                 <p class="lead">${config.intro}</p>
+                ${config.description ? `<p class="password-description">${config.description}</p>` : ""}
                 ${config.helper ? `<p class="password-helper">${config.helper}</p>` : ""}
+                ${config.stateKey === "shortPassword" ? `<p id="short-genie-success" class="genie-remark hidden" role="status">Eso estuvo fácil, ¿no?</p>` : ""}
+                ${config.stateKey === "finalPassword" && !getPlayerNameWords().length ? `
+                    <label class="field" for="final-player-name">
+                        <span>Nombre y apellido</span>
+                        <input id="final-player-name" type="text" autocomplete="name" placeholder="Ingresá tu nombre y apellido">
+                    </label>
+                ` : ""}
                 ${config.stateKey === "finalPassword" ? `
                     <p class="live-timer" aria-live="off">
                         <span>TIEMPO</span>
@@ -866,6 +1006,13 @@ function renderPasswordScreen(config) {
         const orderedResults = orderPasswordResults(visibleResults, config);
         const allValid = results.every(result => result.ok);
 
+        if (config.stateKey === "shortPassword") {
+            document.querySelector("#short-genie-success").classList.toggle("hidden", !allValid);
+            const genie = document.querySelector(".password-layout--shortPassword .genie-companion img");
+            genie.src = allValid ? GENIE_ASSETS.idle : GENIE_ASSETS.pensando;
+            genie.alt = allValid ? "Akinator sonriendo" : "Akinator pensando";
+        }
+
         renderPasswordRules(document.querySelector("#password-rules"), orderedResults);
 
         continueButton.classList.toggle("hidden", !allValid);
@@ -886,6 +1033,11 @@ function renderPasswordScreen(config) {
     };
 
     input.addEventListener("input", renderRules);
+    document.querySelector("#final-player-name")?.addEventListener("input", event => {
+        state.formData.nombre = event.target.value.trim();
+        saveJourney();
+        renderRules();
+    });
     if (config.stateKey === "finalPassword") {
         input.addEventListener("focus", () => scrollFinalPasswordIntoView(input));
     }
@@ -1061,6 +1213,8 @@ function getResultPassword(result) {
 }
 
 function resetFinalAttempt() {
+    passwordContext.targetLength = null;
+    passwordContext.captchaFile = getRandomCaptcha();
     state.finalPassword = "";
     state.finalPasswordRevealedCount = 0;
     state.finalPasswordCompletionOrder = [];
@@ -1233,6 +1387,7 @@ function validatePassword(password, rules) {
         description: rule.description,
         logos: rule.logos || [],
         color: rule.color || null,
+        captchaFile: rule.captchaFile || null,
         order,
         ok: rule.validate(password)
     }));
@@ -1258,6 +1413,15 @@ function getVisiblePasswordResults(results, config) {
     }
 
     state[config.revealedCountKey] = revealedCount;
+
+    const lengthIndex = results.findIndex(result => result.id === "longPassword");
+    if (config.stateKey === "finalPassword" && lengthIndex >= 0 && lengthIndex < revealedCount
+        && passwordContext.targetLength === null) {
+        passwordContext.targetLength = state.finalPassword.length + 5 + Math.floor(Math.random() * 14);
+        const rule = finalPasswordRules.find(rule => rule.id === "longPassword");
+        results[lengthIndex].description = rule.description;
+        results[lengthIndex].ok = rule.validate(state.finalPassword);
+    }
 
     return results.slice(0, revealedCount);
 }
@@ -1319,6 +1483,7 @@ function renderPasswordRules(list, results) {
                 <span>${result.description}</span>
                 ${renderSponsorLogos(result.logos)}
                 ${renderPasswordColor(result.color)}
+                ${renderPasswordCaptcha(result.captchaFile)}
             </div>
         `;
         list.append(item);
@@ -1350,6 +1515,11 @@ function renderPasswordRules(list, results) {
         item.style.transition = "";
         item.style.transform = "";
     });
+}
+
+function renderPasswordCaptcha(file) {
+    if (!CAPTCHA_FILES.includes(file)) return "";
+    return `<img class="password-captcha" src="assets/captchas/${file}" alt="Captcha: transcribí los caracteres de la imagen" decoding="async">`;
 }
 
 function renderSponsorLogos(logos) {
@@ -1430,37 +1600,27 @@ function renderFakeFinal() {
 }
 
 function renderClosing() {
+    const firstName = state.formData.nombre.trim().split(/\s+/)[0];
     app.innerHTML = `
         <section class="closing-screen">
             <header class="closing-celebration">
                 <div>
                     <span class="section-kicker">RECORRIDO COMPLETADO</span>
-                    <h2>¡FELICITACIONES!</h2>
-                    <p>Completaste todos los desafíos.</p>
-                    <p class="lead">Ahora conocés un poco más sobre cómo las páginas detectan y responden a tus acciones.</p>
+                    <h2>${firstName ? `¡Bien hecho, ${escapeHtml(firstName)}!` : "¡Felicitaciones!"}</h2>
+                    <p>La magia la hiciste vos.</p>
                 </div>
                 ${renderGenieCompanion({
                     pose: "idle",
                     message: "¡Excelente trabajo! Ya dominás las pistas de la experiencia."
                 })}
             </header>
-            <div class="screen-grid closing-summary">
-                <div>
-                    <p class="lead">El recorrido conectó acciones reales del usuario con eventos, código JavaScript, validación y respuestas visibles.</p>
-                    <ul class="flow-list">
-                        <li>USUARIO</li>
-                        <li>ACCIÓN</li>
-                        <li>EVENTO</li>
-                        <li>JAVASCRIPT</li>
-                        <li>VALIDACIÓN</li>
-                        <li>RESPUESTA</li>
-                    </ul>
-                    <p class="lead">Todo esto forma parte de la interactividad web.</p>
-                </div>
+            <div class="recap-switch" role="tablist" aria-label="Lo que experimentaste">
+                <button id="recap-tab-events" role="tab" aria-selected="true" aria-controls="recap-playground" data-recap="events">El genio</button>
+                <button id="recap-tab-form" role="tab" aria-selected="false" aria-controls="recap-playground" tabindex="-1" data-recap="form">¿Sos alumno?</button>
+                <button id="recap-tab-validation" role="tab" aria-selected="false" aria-controls="recap-playground" tabindex="-1" data-recap="validation">Tu contraseña</button>
+                <button id="recap-tab-ranking" role="tab" aria-selected="false" aria-controls="recap-playground" tabindex="-1" data-recap="ranking">La competencia</button>
             </div>
-            <div class="summary-grid">
-                ${closingConcepts.map(renderConceptCard).join("")}
-            </div>
+            <section id="recap-playground" class="recap-playground" role="tabpanel" aria-labelledby="recap-tab-events"></section>
             <div class="actions closing-actions">
                 <button type="button" data-next="start">VOLVER AL INICIO</button>
                 <button type="button" class="secondary-button" data-next="finalPassword">PANTALLA ANTERIOR</button>
@@ -1468,7 +1628,114 @@ function renderClosing() {
         </section>
     `;
 
+    const tabs = [...document.querySelectorAll("[data-recap]")];
+    tabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => {
+            tabs.forEach(item => {
+                item.setAttribute("aria-selected", String(item === tab));
+                item.tabIndex = item === tab ? 0 : -1;
+            });
+            renderClosingExperiment(tab.dataset.recap);
+        });
+        tab.addEventListener("keydown", event => {
+            const next = event.key === "ArrowRight" ? (index + 1) % tabs.length
+                : event.key === "ArrowLeft" ? (index + tabs.length - 1) % tabs.length
+                : event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : null;
+            if (next === null) return;
+            event.preventDefault();
+            tabs[next].focus();
+            tabs[next].click();
+        });
+    });
+    renderClosingExperiment("events");
     bindNextButtons();
+}
+
+function renderClosingExperiment(mode) {
+    const panel = document.querySelector("#recap-playground");
+    panel.setAttribute("aria-labelledby", `recap-tab-${mode}`);
+    if (mode === "events") {
+        panel.innerHTML = `
+            <h3 class="recap-moment">Cuando el genio “adivinó” tu navegador…</h3>
+            <div class="recap-live-scene">
+                <button class="recap-genie-button" id="recap-react" aria-label="Hacer reaccionar al genio">
+                    <img id="recap-pose" src="${GENIE_ASSETS.pensando}" alt="Akinator pensando">
+                    <span>OTRA PISTA</span>
+                </button>
+                <p id="recap-reaction" class="recap-speech" aria-live="polite">¿Cómo lo sabía?</p>
+            </div>
+            <div class="recap-signal"><span>Tu clic</span><span aria-hidden="true">→</span><code>JavaScript</code><span aria-hidden="true">→</span><span id="recap-effect">¿Qué cambia?</span></div>
+            <p class="recap-caption"><strong>Evento + JavaScript:</strong> tu clic pidió una pista; el código leyó datos del navegador y mostró una respuesta.</p>`;
+        let smiling = false;
+        document.querySelector("#recap-react").addEventListener("click", () => {
+            smiling = !smiling;
+            const pose = document.querySelector("#recap-pose");
+            pose.src = smiling ? GENIE_ASSETS.idle : GENIE_ASSETS.pensando;
+            pose.alt = smiling ? "Akinator sonriendo" : "Akinator pensando";
+            document.querySelector("#recap-reaction").textContent = smiling ? `Tu navegador indica: ${passwordContext.browserName}.` : "Leí una pista del navegador. No era magia ni una prueba de tu identidad.";
+            document.querySelector("#recap-effect").textContent = "Dato → respuesta";
+        });
+    } else if (mode === "form") {
+        panel.innerHTML = `
+            <h3 class="recap-moment">Cuando cargaste tus datos…</h3>
+            <form id="recap-form" class="recap-validation-scene">
+                <label for="recap-name">Nombre y apellido</label>
+                <input id="recap-name" type="text" autocomplete="off" value="${escapeHtml(state.formData.nombre || "Juan Perez")}">
+                <button type="submit">CARGAR</button>
+                <p id="recap-form-result" class="recap-check" aria-live="polite">Consulta pendiente.</p>
+            </form>
+            <div class="recap-signal"><span>Tu nombre</span><span aria-hidden="true">→</span><span>Lista de alumnos</span><span aria-hidden="true">→</span><span>Coincide o no coincide</span></div>
+            <p class="recap-caption"><strong>Formulario + consulta:</strong> recibimos lo que escribiste y buscamos tu nombre en una lista local.</p>`;
+        document.querySelector("#recap-form").addEventListener("submit", event => {
+            event.preventDefault();
+            const name = document.querySelector("#recap-name").value.trim();
+            const found = Boolean(name && findAlumnoByName(name));
+            const result = document.querySelector("#recap-form-result");
+            result.textContent = !name ? "Escribí un nombre para consultar." : found ? "✓ El alumno está en la lista." : "× Ese nombre no está en la lista.";
+            result.classList.toggle("is-valid", found);
+        });
+    } else if (mode === "validation") {
+        panel.innerHTML = `
+            <h3 class="recap-moment">Cuando armaste tu contraseña…</h3>
+            <div class="recap-validation-scene">
+                <label for="recap-sample">Una regla que ya viste: mínimo 8 caracteres</label>
+                <input id="recap-sample" type="text" autocomplete="off" placeholder="Probá escribir…" aria-describedby="recap-check">
+                <div class="recap-meter" aria-hidden="true">${"<span></span>".repeat(8)}</div>
+                <p id="recap-check" class="recap-check" aria-live="polite">0 / 8 · Pendiente</p>
+            </div>
+            <div class="recap-signal"><span>Escribís</span><span aria-hidden="true">→</span><code>input</code><span aria-hidden="true">→</span><span>Se comprueba la regla</span></div>
+            <p class="recap-caption"><strong>Validación:</strong> cada letra vuelve a comprobar la regla. Por eso cambiaban los colores mientras escribías.</p>`;
+        document.querySelector("#recap-sample").addEventListener("input", event => {
+            const length = event.target.value.length;
+            document.querySelectorAll(".recap-meter span").forEach((segment, index) => segment.classList.toggle("is-filled", length > index));
+            const check = document.querySelector("#recap-check");
+            check.classList.toggle("is-valid", length >= 8);
+            check.textContent = `${length} / 8 · ${length >= 8 ? "✓ Cumplida" : "Pendiente"}`;
+        });
+    } else {
+        panel.innerHTML = `
+            <h3 class="recap-moment">Cuando enviaste tu resultado…</h3>
+            <div class="recap-ranking-scene">
+                <div class="recap-delivery" aria-label="Dispositivo, servidor y ranking">
+                    <span class="is-active">Tu dispositivo</span><b aria-hidden="true">→</b><span>Servidor</span><b aria-hidden="true">→</b><span>Ranking compartido</span>
+                </div>
+                <p id="recap-delivery-message" class="recap-speech" aria-live="polite">Terminaste el juego: nombre y tiempo listos.</p>
+                <button id="recap-delivery-next" type="button">Recrear el envío →</button>
+                <small>Recreación del recorrido. No envía otro resultado.</small>
+            </div>
+            <p class="recap-caption"><strong>Cliente y servidor:</strong> tu dispositivo envió el resultado. El servidor lo registró y permitió compartirlo en el ranking.</p>`;
+        let step = 0;
+        document.querySelector("#recap-delivery-next").addEventListener("click", event => {
+            step = (step + 1) % 3;
+            document.querySelectorAll(".recap-delivery span").forEach((node, index) => node.classList.toggle("is-active", index <= step));
+            document.querySelector("#recap-delivery-message").textContent = [
+                "Terminaste el juego: nombre y tiempo listos.",
+                "El servidor comprueba la participación y registra el resultado.",
+                "Los demás dispositivos pueden ver la clasificación."
+            ][step];
+            event.currentTarget.textContent = ["Recrear el envío →", "Actualizar ranking →", "↻ Volver a verlo"][step];
+        });
+    }
 }
 
 function renderConceptCard(concept) {
@@ -1546,7 +1813,7 @@ function initDeveloperHoldTrigger() {
             devPanel.classList.remove("hidden");
             setDeveloperMessage("Herramientas abiertas.");
             developerHoldTimeout = null;
-        }, 5000);
+        }, 2500);
     };
 
     progressCard.addEventListener("pointerdown", startHold);
@@ -1626,6 +1893,10 @@ function completeDeveloperPassword() {
 
     input.value = password;
     input.dispatchEvent(new Event("input", { bubbles: true }));
+    if (state.currentScreen === "finalPassword" && passwordContext.targetLength > input.value.length) {
+        input.value = input.value.padEnd(passwordContext.targetLength, "ab") + [...input.value][0];
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+    }
     setDeveloperMessage("Contraseña de prueba cargada.");
 }
 
@@ -1639,7 +1910,7 @@ function buildValidFinalPassword() {
     }
 
     balancingDigits.push(String(remainingSum));
-    return `Ab!${passwordContext.currentYear}mayo${passwordContext.currentYearRoman}VManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividadRojas`;
+    return `Ab!${passwordContext.currentYear}mayo${passwordContext.currentYearRoman}VManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividadRojas${passwordContext.targetColor.name}${getPlayerNameWords()[0] || ""}${getCaptchaAnswer()}etramA`;
 }
 
 function setDeveloperMessage(message) {

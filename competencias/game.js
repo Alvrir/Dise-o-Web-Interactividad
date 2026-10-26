@@ -1,7 +1,7 @@
 import { getClient, rpc, competition, board } from './supabase.js';
 import { escapeHtml as html, duration, links, message } from './ui.js';
 
-// El texto sólo se guarda en este dispositivo. Nunca forma parte de una solicitud.
+// Sólo la solución final se publica con su resultado; la partida en curso sigue siendo local.
 export function startCompetition(hooks) {
     const id = new URL(location.href).searchParams.get('competencia');
     const app = document.querySelector('#app');
@@ -34,11 +34,11 @@ export function startCompetition(hooks) {
             <p class="eyebrow">${html(event.name)}</p><h2>¡DESAFÍO COMPLETADO!</h2>
             <img class="competition-genie" src="assets/genio/idle.png" alt="Genio sonriendo">
             <h3>${html(participant.name)}</h3><p class="competition-time">${duration(saved.result.durationMs)}</p>
-            <p role="status">${receipt ? 'Resultado registrado.' : 'Resultado pendiente de confirmación.'}</p>
+            <p role="status">${receipt ? (saved.detailsPending ? 'Tiempo registrado. Contraseña pendiente de sincronización.' : 'Resultado registrado.') : 'Resultado pendiente de confirmación.'}</p>
             ${stats ? `<p>Mejor marca: <strong>${duration(stats.best_ms)}</strong></p><p>Intentos completados: ${stats.completed}/${event.max_attempts} · Restantes: ${remaining}</p><p id="personal-position"></p>` : ''}
             <p class="competition-error" role="alert">${html(errorText)}</p>
             <div class="actions"><button id="continue-exhibition">CONTINUAR →</button><a class="competition-link" href="${html(ranking)}">Ver ranking</a>
-            ${!receipt ? '<button id="submit-result">Reintentar envío</button>' : remaining > 0 && event.status === 'active' ? '<button id="next-attempt" disabled>Esperando cooldown…</button>' : ''}</div>
+            ${!receipt || saved.detailsPending ? '<button id="submit-result">Reintentar envío</button>' : remaining > 0 && event.status === 'active' ? '<button id="next-attempt" disabled>Esperando cooldown…</button>' : ''}</div>
             ${remaining === 0 ? '<p>Ya no quedan intentos competitivos.</p>' : ''}
             ${event.status === 'closed' ? '<p>La competencia finalizó.</p>' : ''}
             <p><a href="index.html">Volver al modo libre</a></p>
@@ -72,10 +72,23 @@ export function startCompetition(hooks) {
         }).catch(() => {});
     }
     async function send() {
-        if (busy || saved.receipt) return;
+        if (busy || (saved.receipt && !saved.detailsPending)) return;
         busy = true; renderResult();
         try {
-            const receipt = await rpc('pw_submit', { p_competition: id, p_game: saved.gameId, p_duration: saved.result.durationMs });
+            const args = { p_competition: id, p_game: saved.gameId, p_duration: saved.result.durationMs };
+            const hasPassword = typeof saved.result.password === 'string';
+            if (hasPassword) args.p_password = saved.result.password;
+            let receipt;
+            try {
+                receipt = await rpc(hasPassword ? 'pw_submit_details' : 'pw_submit', args);
+                saved.detailsPending = false;
+            } catch (error) {
+                if (!hasPassword || error.code !== 'PGRST202') throw error;
+                // Durante el despliegue, el SQL anterior sigue registrando tiempos sin perder intentos.
+                const { p_password, ...legacyArgs } = args;
+                receipt = await rpc('pw_submit', legacyArgs);
+                saved.detailsPending = true;
+            }
             saved.receipt = receipt;
             summary = receipt.summary;
             persist();
@@ -113,19 +126,19 @@ export function startCompetition(hooks) {
         showCompleted() {
             if (!saved?.result) return false;
             renderResult();
-            if (!saved.receipt) void send();
+            if (!saved.receipt || saved.detailsPending) void send();
             return true;
         },
         complete(result) {
             if (!saved.result) {
-                saved.result = { durationMs: Math.max(1, Math.round(result.durationMs)) };
+                saved.result = { durationMs: Math.max(1, Math.round(result.durationMs)), password: result.password };
                 saved.snapshot = null;
                 try { persist(); } catch { /* Conservamos el resultado en memoria para enviarlo. */ }
             }
             renderResult(); void send();
         }
     };
-    window.addEventListener('online', () => { if (saved?.result && !saved.receipt) void send(); });
+    window.addEventListener('online', () => { if (saved?.result && (!saved.receipt || saved.detailsPending)) void send(); });
     hooks.attach(runtime);
     return runtime;
 }

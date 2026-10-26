@@ -39,7 +39,7 @@ Para jugar como participante mientras probás el panel, usá otro navegador o pe
 ## Reglas de funcionamiento
 
 - El cronómetro arranca con el primer contenido en la caja de contraseña. Continúa si la pestaña se cierra o queda en segundo plano. Se conserva el inicio, texto, reglas reveladas y condiciones en almacenamiento local.
-- El texto del juego **nunca se envía a Supabase**. Sólo se guarda localmente para recuperar el progreso. El modo libre conserva también su resultado e imagen originales.
+- La partida en curso se conserva localmente. Al ganar en competencia, se guarda en Supabase la contraseña final del juego para mostrarla en el ranking. Usar sólo contraseñas inventadas para el desafío. El modo libre conserva su resultado e imagen originales.
 - Abandonar no consume intentos. Una victoria confirmada consume uno. Cada partida tiene UUID; los reintentos devuelven el registro existente.
 - La base de datos limita victorias y rechaza escrituras directas. El bloqueo de la competencia serializa altas, resultados y cierre; un índice único impide dos competencias activas.
 - Hay 20 segundos de cooldown; en competencia se cuentan desde la confirmación temporal del servidor. No se inicia otro intento mientras haya un envío pendiente.
@@ -89,3 +89,11 @@ Después de configurar Supabase, verificar manualmente desde dos dispositivos:
 9. Probar desde la URL publicada y un celular. Las pruebas locales no sustituyen esta validación.
 
 No se declara completada la integración con Supabase hasta ejecutar estas pruebas con el proyecto configurado.
+
+## Caracteres y contraseña en el ranking
+
+El ranking muestra la cantidad de caracteres y la contraseña **de la mejor marca** de cada participante. El texto completo aparece difuminado; se revela al pasar el mouse por encima o con el botón “Mostrar contraseña” (también funciona con teclado y en celulares). El botón permite volver a ocultarla. No se recorta el texto.
+
+Para habilitar el guardado, ejecutar una vez `competencias/sql/002_result_details.sql` en SQL Editor de Supabase, después del esquema inicial. En instalaciones existentes **no volver a ejecutar 001**. Los resultados viejos muestran “No disponible”: no es posible recuperar contraseñas que nunca se enviaron. Hasta aplicar 002, se siguen registrando los tiempos con el procedimiento anterior; los detalles quedan pendientes en el dispositivo y se pueden reintentar desde la victoria.
+
+El difuminado es únicamente visual: estas soluciones del juego son públicas en el ranking y no deben ser contraseñas reales de cuentas. El contador mantiene el mismo criterio del juego (`String.length`, unidades UTF-16). Un resultado más lento no reemplaza el texto de la mejor marca; si mejora, se actualizan juntos el tiempo, contador y contraseña.
