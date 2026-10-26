@@ -368,7 +368,7 @@ La segunda corresponde al juego final.
 
 El juego final incluye un captcha educativo. `CAPTCHA_FILES` enumera las seis imágenes reales de `assets/captchas/`; al agregar archivos hay que actualizar esa lista (GitHub Pages no enumera carpetas). La respuesta es el nombre del archivo sin extensión y debe aparecer exactamente, respetando mayúsculas, dentro de la contraseña. Se elige una imagen por partida y se guarda en `passwordContext.captchaFile`, tanto en juego libre como en competencia. Recargar restaura la misma imagen; reiniciar sortea otra (puede repetirse). Los guardados anteriores sin captcha reciben uno válido. El autocompletado de pruebas también incluye la respuesta. No es una protección antibots: los nombres de los archivos son públicos. Es un desafío visual sin alternativa sonora, por lo que puede requerir asistencia para alumnos con discapacidad visual.
 
-El orden del nivel final es: minúscula → ocho caracteres → mayúscula → número → símbolo → año actual → año romano → multiplicación → navegador → mes → nombre o apellido → sponsor → color → ciudad → captcha → planeta al revés → longitud variable → límite de repeticiones → extremos iguales.
+La lista completa y el orden de aparición están en [Reglas actuales del nivel final](#reglas-actuales-del-nivel-final). Al modificar `finalPasswordRules`, actualizar también ese listado.
 
 `reversedPlanet` acepta el nombre en español de cualquiera de los ocho planetas del Sistema Solar escrito al revés, sin distinguir mayúsculas ni tildes. Basta uno; la consigna no muestra nombres ni respuestas. No incluye planetas enanos.
 
@@ -386,7 +386,7 @@ Cada regla tiene esta forma:
 }
 ```
 
-Para agregar una regla nueva, agregar otro objeto a la lista.
+Para agregar una regla nueva al nivel final, insertar otro objeto antes de `matchingEnds`, que debe mantenerse al final.
 
 Ejemplo:
 
@@ -443,7 +443,9 @@ La tarjeta se guarda en el navegador del jugador usando su DNI como clave local.
 
 La tarjeta tiene una `×` para cerrarla, un botón `MOSTRAR RESULTADO` para abrirla otra vez y `GUARDAR IMAGEN`, que descarga una imagen PNG con la contraseña, el tiempo y la cantidad de letras para compartirla o capturarla. La imagen exportada usa el tema oscuro del laboratorio e incorpora la imagen sonriendo de Akinator, cargada antes de dibujarse en el Canvas. En la pantalla posterior al resultado aparece `REINICIAR PARTIDA` debajo de `CONTINUAR`; se habilita 20 segundos después de terminar para permitir otra partida.
 
-El nivel final pide:
+### Reglas actuales del nivel final
+
+Las 19 reglas aparecen en este orden. Todas deben cumplirse simultáneamente para completar la partida:
 
 1. una minúscula;
 2. mínimo 8 caracteres;
@@ -455,11 +457,15 @@ El nivel final pide:
 8. el resultado de `10 × 42`;
 9. el nombre del navegador detectado;
 10. un mes del año;
-11. uno de los textos `Binco`, `Manaos` o `Milkaut`; alcanza con una sola de esas palabras;
-12. el nombre del color mostrado: rojo, azul, amarillo, verde, blanco o negro, elegido aleatoriamente;
-13. alcanzar una longitud fijada al revelarse esta regla: caracteres actuales más un entero aleatorio entre 5 y 18, ambos incluidos;
+11. cualquiera de las palabras del nombre y apellido ingresados en el formulario, sin distinguir mayúsculas ni tildes;
+12. uno de los textos `Binco`, `Manaos` o `Milkaut`; alcanza con una sola de esas palabras;
+13. el nombre del color mostrado: rojo, azul, amarillo, verde, blanco o negro, elegido aleatoriamente;
 14. el nombre de la ciudad: `Rojas`;
-15. cualquiera de las palabras del nombre y apellido ingresados en el formulario, sin distinguir mayúsculas ni tildes.
+15. el texto del captcha mostrado, respetando las mayúsculas; la respuesta corresponde al nombre del archivo sin extensión;
+16. el nombre de cualquiera de los ocho planetas del Sistema Solar al revés, sin distinguir mayúsculas ni tildes; la consigna no revela los nombres ni las respuestas;
+17. alcanzar una longitud fijada al revelarse esta regla: caracteres actuales más un entero aleatorio entre 5 y 18, ambos incluidos;
+18. no repetir el mismo carácter más de cinco veces seguidas: `ooooo` está permitido y `oooooo` no;
+19. comenzar y terminar con exactamente el mismo carácter, distinguiendo mayúsculas de minúsculas. **Esta condición debe permanecer siempre al final**, incluso al agregar reglas nuevas.
 
 Si se entra mediante el acceso directo sin un nombre cargado, el juego final muestra un campo para ingresarlo. Un nombre vacío no cumple la condición.
 
