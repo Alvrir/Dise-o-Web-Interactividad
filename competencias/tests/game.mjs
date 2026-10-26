@@ -72,13 +72,36 @@ test('el formulario del repaso consulta sin cambiar al jugador', () => {
     assert.equal(h.storage.size, 0);
 });
 
-test('las ocho actividades y las 15 reglas finales se conservan', () => {
+test('las ocho actividades y las 16 reglas finales se conservan', () => {
     const h = harness();
     assert.equal(h.run('screens.length'),8); // Incluye inicio; formulario contiene actividades 3 y 4.
-    assert.equal(h.run('finalPasswordRules.length'),15);
+    assert.equal(h.run('finalPasswordRules.length'),16);
     assert.equal(h.run('finalPasswordRules.some(r => r.id === "romanNumeral")'),false);
     assert.equal(h.run('finalPasswordRules.some(r => r.id === "currentYearRoman")'),true);
     assert.equal(h.run('shortPasswordRules.length'),3);
+});
+
+test('captcha usa archivos reales, exige el texto exacto y persiste por partida', async () => {
+    const h = harness();
+    const files = h.run('CAPTCHA_FILES');
+    for (const file of files) {
+        assert.ok((await readFile(new URL(`../../assets/captchas/${file}`, import.meta.url))).length > 0);
+        h.run(`passwordContext.captchaFile=${JSON.stringify(file)}`);
+        assert.equal(h.run(`finalPasswordRules.at(-1).validate('antes'+getCaptchaAnswer()+'despues')`),true);
+        assert.equal(h.run(`finalPasswordRules.at(-1).validate(getCaptchaAnswer().toLowerCase())`),false);
+        assert.equal(h.run(`finalPasswordRules.at(-1).validate('otra respuesta')`),false);
+        assert.match(h.run(`renderPasswordCaptcha(passwordContext.captchaFile)`), /assets\/captchas\//);
+    }
+    h.run(`passwordContext.captchaFile='AWSKH.png'; saveFinalProgress(); resetFinalAttempt(); restoreFinalSnapshot(JSON.parse(localStorage.getItem('interactividad-password-progress:sin-dni')))`);
+    assert.equal(h.run('passwordContext.captchaFile'),'AWSKH.png');
+    h.run(`Math.random=()=>0; resetFinalAttempt()`);
+    assert.equal(h.run('passwordContext.captchaFile'),'4NV3A.png');
+    assert.equal(h.run(`finalPasswordRules.at(-1).validate(buildValidFinalPassword())`),true);
+    assert.equal(h.run(`renderPasswordCaptcha('../no-existe.png')`),'');
+    h.run(`const legacy=finalSnapshot(); delete legacy.context.captchaFile; restoreFinalSnapshot(legacy)`);
+    assert.equal(h.run('CAPTCHA_FILES.includes(passwordContext.captchaFile)'),true);
+    h.run(`const invalid=finalSnapshot(); invalid.context.captchaFile='../no-existe.png'; restoreFinalSnapshot(invalid)`);
+    assert.equal(h.run('CAPTCHA_FILES.includes(passwordContext.captchaFile)'),true);
 });
 
 test('acepta cualquier palabra del nombre, normaliza tildes y rechaza nombres vacíos', () => {

@@ -135,7 +135,7 @@ Contiene todo el diseño visual:
 
 Los estilos incluyen variables de color, superficies translúcidas, componentes compartidos y cortes responsive. Hay ajustes específicos hacia el final del archivo que pueden sobrescribir reglas anteriores; revisar la cascada al modificar un componente. La paleta principal es `#0b1623`, `#12283a`, `#183b50`, `#1ca6f2`, `#fabf3f`, `#27b6b9`, `#f4f7fb` y `#a9bacb`. El highlight azul `#1ca6f2` se usa en bordes, foco y progreso.
 
-Los paneles principales usan un tratamiento de vidrio: fondo oscuro semitransparente, `backdrop-filter` con blur y bordes azules suaves.
+Los paneles conservan el tratamiento de vidrio mediante fondos oscuros semitransparentes y bordes azules, sin `backdrop-filter`. El único desenfoque global está en `body::before`: `--background-blur` define 8px en escritorio y 5px en móvil. Así los paneles, reglas y campos no vuelven a filtrar el fondo ni el contenido animado que tienen debajo. Se conserva el filtro local del genio del primer juego en escritorio (no afecta al fondo); en móvil sigue sin blur. Esto reduce las capas de filtrado, aunque la mejora de FPS depende del dispositivo y requiere medirla en hardware real.
 
 La tipografía se carga localmente desde `assets/font/`: `Cinzel` se usa en texto e interfaz, y `Cinzel Decorative` en los títulos destacados. Esto evita depender de la carga de fuentes externas. El navegador usa las fuentes de reserva declaradas en CSS si fuera necesario.
 
@@ -365,6 +365,8 @@ const finalPasswordRules = [
 La primera corresponde al juego corto.
 
 La segunda corresponde al juego final.
+
+La última regla del juego final es un captcha educativo. `CAPTCHA_FILES` enumera las seis imágenes reales de `assets/captchas/`; al agregar archivos hay que actualizar esa lista (GitHub Pages no enumera carpetas). La respuesta es el nombre del archivo sin extensión y debe aparecer exactamente, respetando mayúsculas, dentro de la contraseña. Se elige una imagen por partida y se guarda en `passwordContext.captchaFile`, tanto en juego libre como en competencia. Recargar restaura la misma imagen; reiniciar sortea otra (puede repetirse). Los guardados anteriores sin captcha reciben uno válido. El autocompletado de pruebas también incluye la respuesta. No es una protección antibots: los nombres de los archivos son públicos. Es un desafío visual sin alternativa sonora, por lo que puede requerir asistencia para alumnos con discapacidad visual.
 
 Cada regla tiene esta forma:
 

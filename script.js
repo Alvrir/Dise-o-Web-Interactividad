@@ -8,6 +8,15 @@ const devScreenSelect = document.querySelector("#dev-screen-select");
 const devMessage = document.querySelector("#dev-message");
 const finalResultStoragePrefix = "interactividad-password-final-result:";
 const BACKGROUND_IMAGE = "assets/background/background.png";
+const CAPTCHA_FILES = ["4NV3A.png", "AWSKH.png", "B4T9S.png", "DWXM5.png", "N8C6H.png", "TK58P.png"];
+
+function getRandomCaptcha() {
+    return CAPTCHA_FILES[Math.floor(Math.random() * CAPTCHA_FILES.length)];
+}
+
+function getCaptchaAnswer() {
+    return passwordContext.captchaFile.replace(/\.[^.]+$/, "");
+}
 const GENIE_ASSETS = {
     idle: "assets/genio/idle.png",
     pensando: "assets/genio/pensando.png",
@@ -43,6 +52,9 @@ function restoreFinalSnapshot(snapshot) {
     if (snapshot.context?.targetColor?.name) {
         Object.assign(passwordContext, snapshot.context);
         finalPasswordRules.find(rule => rule.id === "targetColor").color = passwordContext.targetColor;
+    }
+    if (!CAPTCHA_FILES.includes(passwordContext.captchaFile)) {
+        passwordContext.captchaFile = getRandomCaptcha();
     }
 }
 
@@ -114,7 +126,8 @@ const passwordContext = {
     currentYearRoman: toRomanNumeral(new Date().getFullYear()),
     browserName: getBrowserPasswordTerm(),
     targetColor: getRandomPasswordColor(),
-    targetLength: null
+    targetLength: null,
+    captchaFile: getRandomCaptcha()
 };
 
 const shortPasswordRules = [
@@ -214,6 +227,12 @@ const finalPasswordRules = [
         id: "playerName",
         description: "Debe contener tu nombre o apellido.",
         validate: password => getPlayerNameWords().some(word => normalizeText(password).includes(word))
+    },
+    {
+        id: "captcha",
+        description: "Debe contener el texto de esta imagen, respetando las mayúsculas.",
+        get captchaFile() { return passwordContext.captchaFile; },
+        validate: password => password.includes(getCaptchaAnswer())
     }
 ];
 
@@ -1175,6 +1194,7 @@ function getResultPassword(result) {
 
 function resetFinalAttempt() {
     passwordContext.targetLength = null;
+    passwordContext.captchaFile = getRandomCaptcha();
     state.finalPassword = "";
     state.finalPasswordRevealedCount = 0;
     state.finalPasswordCompletionOrder = [];
@@ -1347,6 +1367,7 @@ function validatePassword(password, rules) {
         description: rule.description,
         logos: rule.logos || [],
         color: rule.color || null,
+        captchaFile: rule.captchaFile || null,
         order,
         ok: rule.validate(password)
     }));
@@ -1442,6 +1463,7 @@ function renderPasswordRules(list, results) {
                 <span>${result.description}</span>
                 ${renderSponsorLogos(result.logos)}
                 ${renderPasswordColor(result.color)}
+                ${renderPasswordCaptcha(result.captchaFile)}
             </div>
         `;
         list.append(item);
@@ -1473,6 +1495,11 @@ function renderPasswordRules(list, results) {
         item.style.transition = "";
         item.style.transform = "";
     });
+}
+
+function renderPasswordCaptcha(file) {
+    if (!CAPTCHA_FILES.includes(file)) return "";
+    return `<img class="password-captcha" src="assets/captchas/${file}" alt="Captcha: transcribí los caracteres de la imagen" decoding="async">`;
 }
 
 function renderSponsorLogos(logos) {
@@ -1863,7 +1890,7 @@ function buildValidFinalPassword() {
     }
 
     balancingDigits.push(String(remainingSum));
-    return `Ab!${passwordContext.currentYear}mayo${passwordContext.currentYearRoman}VManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividadRojas${passwordContext.targetColor.name}${getPlayerNameWords()[0] || ""}`;
+    return `Ab!${passwordContext.currentYear}mayo${passwordContext.currentYearRoman}VManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividadRojas${passwordContext.targetColor.name}${getPlayerNameWords()[0] || ""}${getCaptchaAnswer()}`;
 }
 
 function setDeveloperMessage(message) {
