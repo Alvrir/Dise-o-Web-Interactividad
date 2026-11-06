@@ -3372,6 +3372,35 @@ select:focus-visible {
 
 .recap-caption strong { color: var(--highlight); }
 
+.recap-events-scene {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+    max-width: 900px;
+    margin: 24px auto;
+    align-items: center;
+}
+.recap-event-feedback { border-left: 3px solid var(--highlight); padding: 16px; min-width: 0; }
+.recap-event-feedback > span { display: block; font-size: 0.8rem; color: var(--muted); }
+.recap-event-feedback code { display: block; color: var(--gold); font-size: 1.25rem; margin: 12px 0; overflow-wrap: anywhere; }
+.recap-event-feedback p { margin: 0; min-height: 4.5em; line-height: 1.5; }
+.recap-event-controls { display: grid; gap: 12px; min-width: 0; }
+.recap-event-controls input { width: 100%; min-width: 0; font-family: Verdana, sans-serif; }
+.recap-event-controls p { margin: 0; font-size: 0.85rem; overflow-wrap: anywhere; color: var(--muted); }
+.recap-learning { border-top: 1px solid var(--line); margin-top: 32px; padding-top: 24px; }
+.recap-learning h3 { color: var(--gold); font-size: 1.2rem; margin: 0 0 12px; }
+.recap-learning p { max-width: 80ch; line-height: 1.6; color: var(--muted); }
+.recap-learning strong { color: var(--ink); }
+.recap-theory summary { cursor: pointer; color: var(--highlight); line-height: 1.5; padding: 12px 0; }
+.recap-theory summary:focus-visible { outline: 2px solid var(--highlight); outline-offset: 4px; }
+
+@media (max-width: 820px) {
+    .recap-switch { flex-wrap: wrap; }
+    .recap-switch button { flex-basis: 30%; }
+    .recap-events-scene { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    .recap-event-feedback p { min-height: 3em; }
+}
+
 .recap-live-scene,
 .recap-validation-scene,
 .recap-ranking-scene {
