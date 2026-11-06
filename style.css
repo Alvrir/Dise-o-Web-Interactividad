@@ -437,22 +437,6 @@ body::before {
     gap: 24px;
 }
 
-.events-activity > .genie-companion {
-    width: min(720px, 100%);
-    grid-template-columns: minmax(150px, 220px) minmax(0, 1fr);
-    justify-items: start;
-    margin: 0 auto;
-}
-
-.events-activity > .genie-companion img {
-    width: min(100%, 190px);
-    max-height: 180px;
-}
-
-.events-activity > .genie-companion .genie-companion-message {
-    width: 100%;
-}
-
 .student-layout .result-panel .genie-companion {
     grid-template-columns: 104px minmax(0, 1fr);
     justify-items: start;
@@ -632,37 +616,6 @@ body::before {
     line-height: 1.5;
 }
 
-.closing-memories {
-    margin: 0;
-    padding-left: 24px;
-    line-height: 1.6;
-}
-
-.closing-memories li + li {
-    margin-top: 12px;
-}
-
-.closing-recap-title {
-    margin: 0 0 18px;
-    color: var(--gold);
-    font-size: 1.2rem;
-    line-height: 1.4;
-}
-
-.closing-memories strong {
-    display: block;
-    color: var(--ink);
-    margin-bottom: 4px;
-}
-
-.closing-recap-takeaway {
-    margin: 24px 0 0;
-    padding-left: 16px;
-    border-left: 3px solid var(--highlight);
-    line-height: 1.6;
-    color: var(--gold);
-}
-
 .reflection-bubble {
     grid-column: 1 / -1;
     padding: 20px 24px;
@@ -728,25 +681,10 @@ body::before {
     overflow-wrap: anywhere;
 }
 
-.closing-summary {
-    margin-bottom: 36px;
-}
-
 @media (min-width: 1500px) {
     .events-activity {
         grid-template-columns: minmax(0, 1fr) 270px;
         align-items: center;
-    }
-
-    .events-activity > .genie-companion {
-        width: 100%;
-        grid-template-columns: 1fr;
-        justify-items: center;
-    }
-
-    .events-activity > .genie-companion img {
-        width: min(100%, 245px);
-        max-height: 270px;
     }
 }
 
@@ -804,7 +742,6 @@ body::before {
         padding: 12px 13px;
     }
 
-    .events-activity > .genie-companion,
     .student-layout .result-panel .genie-companion,
     .completed-game-screen > .genie-companion {
         width: 100%;
@@ -812,7 +749,6 @@ body::before {
         justify-items: start;
     }
 
-    .events-activity > .genie-companion img,
     .student-layout .result-panel .genie-companion img,
     .completed-game-screen > .genie-companion img {
         width: 112px;
@@ -899,7 +835,6 @@ body::before {
 .info-card,
 .event-target,
 .rule-item,
-.summary-card,
 .result-panel,
 .callout,
 .tip-box {
@@ -910,13 +845,11 @@ body::before {
 
 .info-card,
 .event-target,
-.summary-card,
 .callout {
     padding: 16px;
 }
 
-.info-card strong,
-.summary-card strong {
+.info-card strong {
     display: block;
     margin-bottom: 8px;
     color: var(--accent-dark);
@@ -990,8 +923,7 @@ body::before {
 }
 
 .validation-list,
-.rule-list,
-.flow-list {
+.rule-list {
     display: grid;
     gap: 10px;
     margin: 0;
@@ -1334,46 +1266,6 @@ body::before {
     font-weight: 900;
 }
 
-.flow-list {
-    max-width: 420px;
-    margin-top: 24px;
-}
-
-.flow-list li {
-    padding: 12px 14px;
-    border-left: 5px solid var(--accent);
-    border-radius: 8px;
-    background: var(--surface-soft);
-    font-weight: 800;
-}
-
-.screen-thumb {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    display: grid;
-    place-items: center;
-    margin-bottom: 12px;
-    border: 1px dashed var(--line);
-    border-radius: 8px;
-    color: var(--muted);
-    background: #f6f9fc;
-    font-weight: 800;
-}
-
-.summary-card img {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 12px;
-}
-
-.summary-card p {
-    margin: 0;
-    color: var(--muted);
-    line-height: 1.45;
-}
-
 .callout {
     margin-top: 18px;
     color: var(--muted);
@@ -1506,8 +1398,6 @@ body {
     font-family: Inter, Arial, Helvetica, sans-serif;
     color: var(--ink);
     background:
-        repeating-linear-gradient(90deg, rgba(83, 151, 208, 0.045) 0 1px, transparent 1px 80px),
-        repeating-linear-gradient(0deg, rgba(39, 182, 185, 0.035) 0 1px, transparent 1px 80px),
         linear-gradient(145deg, #08131f 0%, #0b1b2a 52%, #10283a 100%);
 }
 
@@ -1632,7 +1522,6 @@ select:focus-visible {
 .dev-message,
 .hint,
 .lead,
-.summary-card p,
 .callout {
     color: var(--muted);
 }
@@ -1698,7 +1587,6 @@ select:focus-visible {
 .info-card,
 .event-target,
 .rule-item,
-.summary-card,
 .result-panel,
 .callout,
 .tip-box {
@@ -1709,7 +1597,6 @@ select:focus-visible {
 }
 
 .info-card,
-.summary-card,
 .callout,
 .result-panel,
 .tip-box {
@@ -1717,7 +1604,6 @@ select:focus-visible {
 }
 
 .info-card strong,
-.summary-card strong,
 .result-panel h2 {
     color: var(--aqua);
     letter-spacing: 0.08em;
@@ -2021,23 +1907,6 @@ kbd {
     color: var(--gold);
     font-family: Outfit, Inter, sans-serif;
     text-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
-}
-
-.flow-list li {
-    border-left-color: var(--gold);
-    color: var(--ink);
-    background: rgba(24, 59, 80, 0.62);
-}
-
-.screen-thumb {
-    border-color: rgba(83, 151, 208, 0.34);
-    color: var(--aqua);
-    background: rgba(7, 19, 29, 0.46);
-}
-
-.summary-card:hover {
-    border-color: rgba(39, 182, 185, 0.58);
-    transform: translateY(-2px);
 }
 
 .completed-game-screen {
@@ -2368,7 +2237,6 @@ body::before {
 }
 
 .genie-companion img,
-.events-activity > .genie-companion img,
 .student-layout .result-panel .genie-companion img,
 .completed-game-screen > .genie-companion img,
 .password-layout > .genie-companion img,
@@ -2382,10 +2250,6 @@ body::before {
 .events-activity {
     display: block;
     width: min(1280px, 100%);
-}
-
-.events-activity > .genie-companion {
-    display: none;
 }
 
 .student-layout .result-panel .genie-companion {
@@ -2451,10 +2315,6 @@ body::before {
         grid-template-columns: minmax(0, 1fr) 180px;
         gap: 28px;
         align-items: center;
-    }
-
-    .events-activity > .genie-companion {
-        display: grid;
     }
 }
 
@@ -2538,7 +2398,6 @@ body::before {
 .callout,
 .tip-box,
 .info-card,
-.summary-card,
 .genie-dialog,
 .result-modal-card {
     background: rgba(7, 23, 36, 0.38);
@@ -2549,7 +2408,6 @@ body::before {
 .result-panel,
 .callout,
 .info-card,
-.summary-card,
 .genie-dialog {
     border-color: rgba(28, 166, 242, 0.42);
 }
@@ -2770,53 +2628,8 @@ select:focus-visible {
     width: 100%;
 }
 
-.closing-summary {
-    grid-template-columns: minmax(0, 1fr);
-    width: min(100%, 820px);
-}
-
 .closing-celebration {
     margin-bottom: clamp(18px, 2.5vw, 30px);
-}
-
-@media (min-width: 821px) {
-    .closing-screen {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(220px, 30%);
-        column-gap: 32px;
-        align-items: start;
-    }
-
-    .closing-celebration {
-        display: contents;
-    }
-
-    .closing-celebration > div {
-        grid-column: 1;
-        grid-row: 1;
-        min-width: 0;
-    }
-
-    .closing-celebration > .genie-companion {
-        grid-column: 2;
-        grid-row: 1 / span 2;
-        align-self: start;
-    }
-
-    .closing-screen > .closing-summary {
-        grid-column: 1;
-        grid-row: 2;
-        margin-top: 20px;
-    }
-
-    .closing-summary > div > .lead:first-child {
-        margin-top: 0;
-    }
-
-    .closing-screen > .summary-grid,
-    .closing-screen > .closing-actions {
-        grid-column: 1 / -1;
-    }
 }
 
 /* Stored final results remain a compact, centered group instead of stretched columns. */

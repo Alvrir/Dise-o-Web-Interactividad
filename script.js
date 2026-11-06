@@ -260,45 +260,6 @@ function getPlayerNameWords() {
     return normalizeText(state.formData.nombre).split(/\s+/).filter(Boolean);
 }
 
-const closingConcepts = [
-    {
-        title: "Interactividad",
-        description: "La página cambia cuando la persona participa.",
-        image: "assets/screens/interactividad.png",
-        activity: "Inicio"
-    },
-    {
-        title: "Eventos",
-        description: "Click, escritura, teclas y tacto disparan acciones.",
-        image: "assets/screens/eventos.png",
-        activity: "Actividad 2"
-    },
-    {
-        title: "JavaScript",
-        description: "El código escucha eventos, procesa datos y actualiza la interfaz.",
-        image: "assets/screens/javascript.png",
-        activity: "Actividad 2"
-    },
-    {
-        title: "Formularios",
-        description: "Los datos ingresados por el usuario se convierten en información útil.",
-        image: "assets/screens/formularios.png",
-        activity: "Actividad 3"
-    },
-    {
-        title: "Validación",
-        description: "Antes de avanzar se comprueba formato, existencia y coincidencia.",
-        image: "assets/screens/validacion.png",
-        activity: "Actividad 4"
-    },
-    {
-        title: "Password Game",
-        description: "Las reglas separadas de la interfaz permiten modificar el juego fácilmente.",
-        image: "assets/screens/password-game.png",
-        activity: "Actividad 5 y 7"
-    }
-];
-
 init();
 
 async function init() {
@@ -310,7 +271,7 @@ async function init() {
         css.href = "competencias/competencias.css";
         document.head.append(css);
         try {
-            const { startCompetition } = await import("./competencias/game.js?v=20261026-ranking");
+            const { startCompetition } = await import("./competencias/game.js?v=20261106-limpieza-1");
             startCompetition({
                 attach: runtime => { competitionRuntime = runtime; },
                 restore: restoreFinalSnapshot,
@@ -1797,16 +1758,6 @@ function renderClosingExperiment(mode) {
             event.currentTarget.textContent = ["Recrear el envío →", "Actualizar ranking →", "↻ Volver a verlo"][step];
         });
     }
-}
-
-function renderConceptCard(concept) {
-    return `
-        <article class="summary-card">
-            <div class="screen-thumb" data-image="${concept.image}">${concept.activity}</div>
-            <strong>${concept.title}</strong>
-            <p>${concept.description}</p>
-        </article>
-    `;
 }
 
 function bindNextButtons() {

@@ -59,7 +59,7 @@ La revisión debe incluir, según corresponda:
 - datos de prueba;
 - instrucciones de ejecución y publicación.
 
-`index.html` agrega un parámetro `?v=` a `style.css` y `script.js` para evitar que GitHub Pages o el navegador mantengan archivos antiguos en caché. Cuando se publiquen cambios de CSS o JavaScript, incrementar ese valor en ambas referencias.
+`index.html` agrega un parámetro `?v=` a `style.css` y `script.js` para evitar que GitHub Pages o el navegador mantengan archivos antiguos en caché. El mismo criterio se aplica al modo competencia: `competencias/game.js` (importado desde `index.html`), `admin.js` y `competencias.css` en `admin.html`, y `ranking.js` y `competencias.css` en `ranking.html`. Cuando se publiquen cambios de CSS o JavaScript, incrementar ese valor en todas las referencias afectadas.
 
 ## Cómo abrir el proyecto
 
@@ -89,11 +89,16 @@ Página Diseño Web/
 |-- style.css
 |-- script.js
 |
+|-- .github/
+|   |-- workflows/
+|       |-- deploy-pages.yml
+|
 |-- data/
 |   |-- alumnos.json
 |
 |-- assets/
 |   |-- background/
+|   |-- captchas/
 |   |-- font/
 |   |-- genio/
 |   |-- logos/
@@ -102,9 +107,27 @@ Página Diseño Web/
 |
 |-- competencias/
 |   |-- README.md
+|   |-- admin.html
+|   |-- admin.js
+|   |-- competencias.css
+|   |-- config.js
+|   |-- game.js
+|   |-- ranking.html
+|   |-- ranking.js
+|   |-- supabase.js
+|   |-- ui.js
+|   |-- sql/
+|   |   |-- 001_initial_schema.sql
+|   |   |-- 002_result_details.sql
+|   |-- tests/
+|       |-- database.mjs
+|       |-- game.mjs
+|       |-- recovery.mjs
 |
 |-- README.md
 ```
+
+Otros directorios presentes en la carpeta local (proyectos aparte) no forman parte del repositorio mientras no se agreguen con git. El workflow `deploy-pages.yml` publica todo el repositorio en GitHub Pages en cada push a `main`, así que cualquier archivo incluido es público.
 
 ## Qué hace cada archivo
 
@@ -568,7 +591,7 @@ const GENIE_ASSETS = {
 };
 ```
 
-Fuera de la actividad original de adivinación, `renderGenieCompanion()` genera el componente reutilizable. Su mensaje contextual está oculto por CSS. El personaje se muestra en eventos en pantallas muy anchas, verificación de alumno, Password Game corto, falso final y cierre; se oculta en el Password Game final y en el resultado guardado. Las animaciones respetan `prefers-reduced-motion`.
+Fuera de la actividad original de adivinación, `renderGenieCompanion()` genera el componente reutilizable. Su mensaje contextual está oculto por CSS. El personaje se muestra en la verificación de alumno, el Password Game corto, el falso final y el cierre; se oculta en la actividad de eventos, el Password Game final y el resultado guardado. Las animaciones respetan `prefers-reduced-motion`.
 
 En la verificación de alumno, el personaje aparece centrado debajo de la lista de verificaciones y con una presencia algo mayor dentro de su recuadro. En el primer Password Game queda centrado, ocupa toda la altura disponible, se alinea con el borde inferior del recuadro principal y se difumina por debajo de los dos paneles ampliados del campo y las reglas. El Password Game final no muestra personaje, para dejar todo el espacio al temporizador, el campo y las condiciones. En celular vuelve al flujo normal para no interferir con el contenido. En la actividad 6, el genio sonriente ocupa la columna lateral amplia, aprovechando el espacio vacío con una entrada suave y un movimiento vertical discreto. La actividad 8 muestra un genio más grande junto al cierre, sin el recuadro técnico para miniaturas.
 
@@ -708,7 +731,7 @@ Al completar el primer Password Game, sonríe y muestra “Eso estuvo fácil, ¿
 
 Después de las demostraciones, “De la experiencia al concepto” resume acción → evento → JavaScript → respuesta. Su desplegable amplía los conceptos del documento académico: funciones de HTML, CSS y JavaScript; formularios; validación nativa frente a reglas JavaScript; cliente y servidor. Distingue validar un formato de comprobar la veracidad de los datos y aclara que validar no garantiza por sí solo la seguridad. En móvil las pestañas se distribuyen en varias filas y el detector de eventos aparece antes de los controles. No se agregan filtros de fondo ni dependencias.
 
-“Para pensar…” pertenece a la actividad de eventos, no al cierre. Los botones finales siguen siendo VOLVER AL INICIO y PANTALLA ANTERIOR. Los estilos se encuentran en `.genie-remark`, `.closing-memories`, `.reflection-bubble` y `.events-reflection`.
+“Para pensar…” pertenece a la actividad de eventos, no al cierre. Los botones finales siguen siendo VOLVER AL INICIO y PANTALLA ANTERIOR. Los estilos se encuentran en `.genie-remark`, `.reflection-bubble` y `.events-reflection`.
 
 ## Cosas importantes para no romper
 
