@@ -358,7 +358,7 @@ validateStudentForm(formData)
 
 La pantalla está dividida en dos columnas en PC: el formulario queda a la izquierda y las verificaciones a la derecha. En celular vuelve a una sola columna. El botón `CARGAR` ejecuta la validación. Los errores aparecen junto al campo correspondiente, con `aria-invalid` y `aria-describedby`, y el primer campo incorrecto recibe foco.
 
-Antes de mostrar la pantalla principal, `renderStart()` pide nombre y apellido. Ese dato queda en `state.formData.nombre` en memoria y se reutiliza en el Password Game final y en el cierre. En modo competencia también se conserva en el recorrido local (`journeyKey`) para que una recarga no obligue a repetirlo; no se consulta `data/alumnos.json` para habilitar el ingreso ni se envía ese nombre al servidor hasta que la competencia prepara la participación.
+Antes de mostrar la pantalla principal, `renderStart()` pide nombre y apellido. Ese dato queda en `state.formData.nombre` y `state.initialName` en memoria y se reutiliza en el Password Game final, en “¿Sos alumno?” y en el cierre. La segunda verificación del formulario ya no consulta `data/alumnos.json`: compara el nombre escrito con el nombre inicial. DNI y edad siguen comprobándose solo por formato. En modo competencia el nombre también se conserva en el recorrido local (`journeyKey`) para que una recarga no obligue a repetirlo y se envía al servidor recién al preparar la participación.
 
 La función agrupa la respuesta en solo dos verificaciones:
 

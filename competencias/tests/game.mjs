@@ -102,15 +102,15 @@ test('el repaso de eventos funciona con mouse, tacto y teclado sin cambiar la pa
 
 test('el formulario del repaso consulta sin cambiar al jugador', () => {
     const h = harness();
-    h.run(`state.alumnos = fallbackAlumnos; state.formData.nombre = 'Jugador original'; renderClosingExperiment('form');`);
+    h.run(`state.alumnos = fallbackAlumnos; state.initialName = 'Jugador original'; state.formData.nombre = 'Jugador original'; renderClosingExperiment('form');`);
     const submit = h.elements.get('#recap-form').listeners.submit;
     const input = h.run(`document.querySelector('#recap-name')`);
-    input.value = h.run('fallbackAlumnos[0].nombre');
+    input.value = h.run('state.initialName');
     submit({preventDefault() {}});
-    assert.match(h.elements.get('#recap-form-result').textContent, /✓ El alumno está/);
+    assert.match(h.elements.get('#recap-form-result').textContent, /✓ El nombre coincide/);
     input.value = 'Nombre inexistente';
     submit({preventDefault() {}});
-    assert.match(h.elements.get('#recap-form-result').textContent, /no está/);
+    assert.match(h.elements.get('#recap-form-result').textContent, /no coincide/);
     input.value = '   ';
     submit({preventDefault() {}});
     assert.match(h.elements.get('#recap-form-result').textContent, /Escribí un nombre/);

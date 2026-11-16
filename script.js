@@ -106,6 +106,8 @@ const state = {
         dni: "",
         edad: ""
     },
+    initialName: "",
+    submittedName: "",
     alumnoEncontrado: null,
     lastEvent: "todavía ninguno",
     discoveredEvents: [],
@@ -294,6 +296,7 @@ async function init() {
             const journey = JSON.parse(localStorage.getItem(journeyKey()));
             if (journey?.formData) {
                 state.formData = journey.formData;
+                state.initialName = journey.initialName || journey.formData.nombre || "";
                 state.activePlayerDni = journey.activePlayerDni || "";
                 showScreen(screens.some(screen => screen.id === journey.screen) ? journey.screen : "start");
                 return;
@@ -312,7 +315,7 @@ function journeyKey() {
 function saveJourney(screen = state.currentScreen) {
     if (!competitionMode) return;
     try {
-        localStorage.setItem(journeyKey(), JSON.stringify({ screen, formData: state.formData, activePlayerDni: state.activePlayerDni }));
+        localStorage.setItem(journeyKey(), JSON.stringify({ screen, formData: state.formData, initialName: state.initialName, activePlayerDni: state.activePlayerDni }));
     } catch { /* No bloquear las actividades si se llena el almacenamiento. */ }
 }
 
@@ -419,6 +422,7 @@ function renderStart() {
                 }
             }
             state.formData.nombre = name;
+            state.initialName = name;
             saveJourney("start");
             renderStart();
         });
@@ -767,13 +771,13 @@ function renderForm() {
     app.innerHTML = `
         <section class="student-layout">
             <div class="student-form-column">
-                <p class="lead">Completá tus datos para continuar. El formulario se valida en el navegador y consulta una base local en JSON.</p>
+                <p class="lead">Completá los datos que faltan. El nombre se compara con el que ingresaste al comenzar.</p>
                 ${renderDataNotice()}
                 <form id="student-form" novalidate>
                     <div class="form-grid">
                         <div class="field">
                             <label for="nombre">Nombre y apellido</label>
-                            <input id="nombre" name="nombre" type="text" autocomplete="name" value="${escapeHtml(state.formData.nombre)}" placeholder="Juan Perez">
+                            <input id="nombre" name="nombre" type="text" autocomplete="name" value="${escapeHtml(state.formData.nombre)}" placeholder="Tu nombre inicial">
                         </div>
                         <div class="field">
                             <label for="dni">DNI</label>
@@ -796,7 +800,7 @@ function renderForm() {
                 <p id="student-genie-message" class="genie-remark">Veamos si estás en la lista.</p>
                 <ul id="validation-results" class="validation-list">
                     <li class="validation-item"><span class="status waiting">?</span><span>Esperando la carga de los datos.</span></li>
-                    <li class="validation-item"><span class="status waiting">?</span><span>Consulta a la base de datos pendiente.</span></li>
+                    <li class="validation-item"><span class="status waiting">?</span><span>Comparación con tu nombre inicial pendiente.</span></li>
                 </ul>
                 ${renderGenieCompanion({
                     pose: "pensando",
@@ -810,13 +814,15 @@ function renderForm() {
         event.preventDefault();
         const form = new FormData(event.currentTarget);
 
+        const submittedName = String(form.get("nombre") || "").trim();
         state.formData = {
-            nombre: String(form.get("nombre") || "").trim(),
+            nombre: state.initialName || submittedName,
             dni: String(form.get("dni") || "").trim(),
             edad: String(form.get("edad") || "").trim()
         };
+        state.submittedName = submittedName;
 
-        const results = validateStudentForm(state.formData);
+        const results = validateStudentForm(state.formData, submittedName);
         renderValidationResults(results);
 
         if (results.every(result => result.ok) && state.activePlayerDni !== state.formData.dni) {
@@ -837,25 +843,25 @@ function renderDataNotice() {
     return `<p class="warning-text">! El navegador bloqueó la lectura del JSON por file://. Se usan datos de demostración en memoria. Para leer el archivo real, ejecutá un servidor local sencillo.</p>`;
 }
 
-function validateStudentForm(formData) {
+function validateStudentForm(formData, submittedName = formData.nombre) {
     const results = [];
     const dniOnlyNumbers = /^\d+$/.test(formData.dni);
     const edadOnlyNumbers = /^\d+$/.test(formData.edad);
     const edad = Number(formData.edad);
-    const validFormat = formData.nombre.length > 0
+    const validFormat = submittedName.length > 0
         && dniOnlyNumbers
         && formData.dni.length >= 7
         && formData.dni.length <= 9
         && edadOnlyNumbers
         && edad >= 12
         && edad <= 99;
-    const alumno = validFormat ? findAlumnoByName(formData.nombre) : null;
-    const studentMatches = Boolean(alumno)
-        && normalizeText(alumno.nombre) === normalizeText(formData.nombre);
+    const studentMatches = validFormat
+        && Boolean(state.initialName)
+        && normalizeText(submittedName) === normalizeText(state.initialName);
 
-    state.alumnoEncontrado = studentMatches ? alumno : null;
+    state.alumnoEncontrado = studentMatches ? { nombre: state.initialName } : null;
     addResult(results, validFormat, "Los datos tienen un formato válido.", "Revisá los datos ingresados.");
-    addResult(results, studentMatches, "El alumno está en la base de datos.", "El alumno no está en la base de datos.");
+    addResult(results, studentMatches, "El nombre coincide con el ingresado al comenzar.", "El nombre no coincide con el ingresado al comenzar.");
 
     return results;
 }
@@ -889,7 +895,7 @@ function renderValidationResults(results) {
     continueButton.classList.toggle("hidden", !allValid);
     const fieldErrors = {
         nombre: !state.formData.nombre.trim() ? "Ingresá tu nombre y apellido." :
-            (!state.alumnoEncontrado && results[0].ok ? "Ese nombre no figura en la base de alumnos." : ""),
+            (!state.alumnoEncontrado && results[0].ok ? "El nombre no coincide con el que ingresaste al comenzar." : ""),
         dni: /^\d{7,9}$/.test(state.formData.dni) ? "" : "Ingresá un DNI de 7 a 9 números.",
         edad: /^\d+$/.test(state.formData.edad) && Number(state.formData.edad) >= 12 && Number(state.formData.edad) <= 99
             ? "" : "Ingresá una edad entre 12 y 99."
@@ -1754,9 +1760,9 @@ function renderClosingExperiment(mode) {
         document.querySelector("#recap-form").addEventListener("submit", event => {
             event.preventDefault();
             const name = document.querySelector("#recap-name").value.trim();
-            const found = Boolean(name && findAlumnoByName(name));
+            const found = Boolean(name && state.initialName && normalizeText(name) === normalizeText(state.initialName));
             const result = document.querySelector("#recap-form-result");
-            result.textContent = !name ? "Escribí un nombre para consultar." : found ? "✓ El alumno está en la lista." : "× Ese nombre no está en la lista.";
+            result.textContent = !name ? "Escribí un nombre para comparar." : found ? "✓ El nombre coincide con el inicial." : "× El nombre no coincide con el inicial.";
             result.classList.toggle("is-valid", found);
         });
     } else if (mode === "validation") {
