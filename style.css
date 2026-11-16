@@ -3185,6 +3185,9 @@ select:focus-visible {
 
 .recap-caption strong { color: var(--highlight); }
 
+.entry-name-form { width: min(100%, 460px); margin: 28px auto 0; display: grid; gap: 18px; }
+.entry-name-form button:disabled { opacity: 0.45; cursor: not-allowed; }
+
 .recap-events-scene {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

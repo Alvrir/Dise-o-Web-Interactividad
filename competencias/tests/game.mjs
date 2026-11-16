@@ -58,6 +58,22 @@ test('las demostraciones del cierre reaccionan sin modificar la partida', () => 
     assert.equal(h.storage.size, 0);
 });
 
+test('el nombre se pide antes de la pantalla inicial y queda disponible para el juego final', () => {
+    const h = harness();
+    h.run('renderStart()');
+    assert.match(h.elements.get('#app').innerHTML, /Ingresá tu nombre y apellido/);
+    const input = h.run(`document.querySelector('#entry-name')`);
+    const submit = h.elements.get('#entry-name-submit');
+    const form = h.run(`document.querySelector('#entry-name-form')`);
+    assert.equal(submit.disabled, undefined);
+    input.value = 'Alvaro Irazoqui';
+    input.listeners.input();
+    form.listeners.submit({preventDefault(){}});
+    assert.equal(h.run('state.formData.nombre'), 'Alvaro Irazoqui');
+    assert.match(h.elements.get('#app').innerHTML, /Una página que reacciona a vos/);
+    assert.equal(h.run('getPlayerNameWords().join(",")'), 'alvaro,irazoqui');
+});
+
 test('el repaso de eventos funciona con mouse, tacto y teclado sin cambiar la partida', () => {
     const h = harness();
     h.run(`renderClosingExperiment('lab')`);
@@ -107,7 +123,8 @@ test('las ocho actividades y las 19 reglas finales se conservan', () => {
     assert.equal(h.run('screens.length'),8); // Incluye inicio; formulario contiene actividades 3 y 4.
     assert.equal(h.run('finalPasswordRules.length'),19);
     assert.equal(h.run('finalPasswordRules.some(r => r.id === "romanNumeral")'),false);
-    assert.equal(h.run('finalPasswordRules.some(r => r.id === "currentYearRoman")'),true);
+    assert.equal(h.run('finalPasswordRules.some(r => r.id === "targetNumber")'),true);
+    assert.equal(h.run('Number.isInteger(passwordContext.targetNumber) && passwordContext.targetNumber >= 1 && passwordContext.targetNumber <= 10'),true);
     assert.equal(h.run('shortPasswordRules.length'),3);
 });
 
@@ -158,7 +175,7 @@ test('acepta cualquiera de los ocho planetas invertidos sin mostrar las respuest
 
 test('el orden acordado cierra siempre con extremos iguales y distingue mayúsculas', () => {
     const h = harness();
-    assert.equal(h.run(`finalPasswordRules.map(r=>r.id).join(',')`), 'lowercase,minLength,uppercase,number,symbol,currentYear,currentYearRoman,multiplicationResult,browserName,month,playerName,sponsor,targetColor,cityName,captcha,reversedPlanet,longPassword,consecutiveCharacters,matchingEnds');
+    assert.equal(h.run(`finalPasswordRules.map(r=>r.id).join(',')`), 'lowercase,minLength,uppercase,number,symbol,currentYear,targetNumber,multiplicationResult,browserName,month,playerName,sponsor,targetColor,cityName,captcha,reversedPlanet,longPassword,consecutiveCharacters,matchingEnds');
     for (const [value, ok] of [['AbcA',true], ['1clave1',true], ['!clave!',true], ['Abca',false], ['',false], ['a',false], ['abc',false]]) {
         assert.equal(h.run(`finalPasswordRules.at(-1).validate(${JSON.stringify(value)})`), ok, value);
     }
