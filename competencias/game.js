@@ -7,7 +7,7 @@ export function startCompetition(hooks) {
     const app = document.querySelector('#app');
     const ranking = links(id).ranking;
     let client, event, participant, saved, key, summary;
-    let busy = false, prepared = false, timer;
+    let busy = false, registered = false, timer;
     const renderNotice = text => {
         app.innerHTML = `<section class="competition-card"><h2>Password Game</h2><p role="status">${html(text)}</p><button id="competition-reload">Volver a intentar</button><p><a href="${html(ranking)}">Ver ranking</a> · <a href="index.html">Modo libre</a></p></section>`;
         document.querySelector('#competition-reload').onclick = () => hooks.play();
@@ -97,27 +97,33 @@ export function startCompetition(hooks) {
         } catch (error) { busy = false; renderResult(message(error)); }
     }
     const runtime = {
+        async register(name) {
+            if (registered) return;
+            client = await getClient();
+            event = await competition(id);
+            const { data, error } = await client.auth.getSession();
+            if (error) throw error;
+            if (!data.session) {
+                const { error: authError } = await client.auth.signInAnonymously();
+                if (authError) throw authError;
+            }
+            participant = await rpc('pw_join', { p_competition: id, p_name: name });
+            key = `pw-competition:${id}:${participant.id}`;
+            restore();
+            persist();
+            await syncSummary();
+            registered = true;
+        },
         async prepare(name) {
-            if (prepared) return true;
-            app.innerHTML = '<p role="status">Preparando el desafío…</p>';
             try {
-                client = await getClient();
+                await runtime.register(name);
                 event = await competition(id);
-                const { data, error } = await client.auth.getSession();
-                if (error) throw error;
-                if (!data.session) {
-                    const { error: authError } = await client.auth.signInAnonymously();
-                    if (authError) throw authError;
-                }
-                participant = await rpc('pw_join', { p_competition: id, p_name: name });
-                key = `pw-competition:${id}:${participant.id}`;
-                restore(); persist(); await syncSummary();
+                await syncSummary();
                 if (!saved.result && event.status !== 'active') throw new Error('Esta exposición ya no acepta resultados.');
                 if (!saved.result && summary.completed >= event.max_attempts) throw new Error('Ya completaste todos tus intentos.');
                 const remaining = Date.parse(summary.last_completed_at || '') + 20000 - Date.now();
                 if (!saved.result && remaining > 0) throw new Error(`Esperá ${Math.ceil(remaining / 1000)} segundos antes de volver a jugar.`);
                 hooks.restore(saved.snapshot);
-                prepared = true;
                 return true;
             } catch (error) { renderNotice(message(error)); return false; }
         },

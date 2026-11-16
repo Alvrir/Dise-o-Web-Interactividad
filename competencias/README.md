@@ -1,6 +1,6 @@
 # Competencias de Password Game
 
-El enlace con `?competencia=ID` abre el inicio de la exposición y conserva todas las actividades en orden. El juego final de la actividad 7 registra el resultado con el mismo nombre del formulario original. No hay una segunda inscripción ni una bienvenida competitiva: el ranking se revela en la victoria. El DNI y la edad del formulario original no se envían a Supabase. Sin ese parámetro, todo funciona en modo libre.
+El enlace con `?competencia=ID` abre el inicio de la exposición y conserva todas las actividades en orden. Al confirmar nombre y apellido antes de la primera pantalla, la persona se inscribe y aparece inmediatamente en el ranking, todavía sin tiempo. El juego final de la actividad 7 registra el resultado con ese mismo nombre. No hay una segunda inscripción ni una bienvenida competitiva: el ranking se revela en la victoria. El DNI y la edad del formulario original no se envían a Supabase. Sin ese parámetro, todo funciona en modo libre.
 
 ## Configuración necesaria (una sola vez)
 
@@ -31,7 +31,7 @@ Publicá los archivos con el mecanismo de GitHub Pages que ya utiliza el reposit
 2. Creá una competencia (dos victorias por defecto) y activala. Sólo puede haber una activa; primero finalizá la anterior.
 3. Abrí **Enlaces y QR**. El QR se genera en el navegador y respeta el subdirectorio real de GitHub Pages.
 4. Abrí el enlace del ranking en el proyector. Compartí el enlace del juego o su QR.
-5. Los participantes recorren las actividades y completan el formulario original. Su nombre se reutiliza al llegar al juego final; pueden repetirse nombres porque la identidad interna los distingue. Tras ganar, pueden consultar el ranking, repetir sólo el juego final o continuar al cierre de la exposición.
+5. Los participantes escriben nombre y apellido antes de empezar. Al confirmarlo, aparecen en la tabla del ranking sin tiempo; pueden repetirse nombres porque la identidad interna los distingue. Tras ganar, pueden consultar el ranking, repetir sólo el juego final o continuar al cierre de la exposición.
 6. Al terminar, finalizá la competencia. Los resultados quedan en el historial. Para una exposición nueva, creá otra; no hace falta borrar pruebas.
 
 Para jugar como participante mientras probás el panel, usá otro navegador o perfil: el administrador y el participante utilizan la sesión de Auth del navegador. Cerrar o cambiar esa sesión puede hacer que no se recupere una identidad anónima anterior.
@@ -44,9 +44,9 @@ Para jugar como participante mientras probás el panel, usá otro navegador o pe
 - La base de datos limita victorias y rechaza escrituras directas. El bloqueo de la competencia serializa altas, resultados y cierre; un índice único impide dos competencias activas.
 - Hay 20 segundos de cooldown; en competencia se cuentan desde la confirmación temporal del servidor. No se inicia otro intento mientras haya un envío pendiente.
 - Si el resultado todavía no llegó cuando se cierra la competencia, no se acepta. Si ya estaba guardado, un reintento puede recuperarlo incluso después del cierre.
-- El QR identifica una competencia concreta y abre el inicio de la exposición: uno viejo no inscribe en una exposición nueva. El recorrido y formulario se conservan localmente para recuperar la pantalla tras una recarga. La inscripción en Supabase se realiza al entrar al juego final; el contador no incluye visitantes que todavía no llegaron a esa actividad.
+- El QR identifica una competencia concreta y abre el inicio de la exposición: uno viejo no inscribe en una exposición nueva. El recorrido y formulario se conservan localmente para recuperar la pantalla tras una recarga. La inscripción en Supabase se realiza al confirmar nombre y apellido, antes de la primera actividad.
 - Ranking: mejor tiempo, momento de registro de esa marca y UUID público del participante. Se almacenan milisegundos y se muestran centésimas; dos tiempos visualmente iguales pueden diferir en milisegundos.
-- El contador representa participantes registrados, no personas conectadas. Los datos visibles del ranking y el historial son públicos.
+- El contador representa participantes registrados, incluso quienes todavía no jugaron, no personas conectadas. Los datos visibles del ranking y el historial son públicos.
 - El ranking usa dos suscripciones por pantalla (resultados y estado). También consulta cada 15 segundos como respaldo y después de reconectar.
 - El panel de desarrollo no se inicializa en modo competencia. Un navegador manipulado todavía puede falsificar tiempos o victorias: este sistema es educativo. Los tiempos deben estar entre 1 ms y siete días; eso no certifica que sean legítimos.
 - Límites: de 1 a 20 victorias configuradas; nombre de participante hasta 40 caracteres y competencia hasta 100. Se utiliza el límite elegido al crear el evento; no hay edición ni borrado masivo.

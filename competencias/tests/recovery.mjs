@@ -11,7 +11,7 @@ async function setup({ pending = false, details = false, missingMigration = fals
         if (!elements.has(selector)) elements.set(selector, { innerHTML: '', textContent: '', disabled: false });
         return elements.get(selector);
     };
-    let online = true, submissions = 0, restored, played = 0;
+    let online = true, submissions = 0, registrations = 0, restored, played = 0;
     const stats = { completed: pending ? 0 : 1, best_ms: 10000, last_completed_at: '2020-01-01T00:00:00Z' };
     let value = JSON.stringify({ gameId: randomUUID(), result: { durationMs: 10000, ...(details ? { password: 'Solucion de prueba' } : {}) }, snapshot: null,
         receipt: pending ? null : { result: { completed_at: stats.last_completed_at }, summary: stats } });
@@ -20,7 +20,10 @@ async function setup({ pending = false, details = false, missingMigration = fals
         competition: async () => { if (!online) throw Error('Sin conexión'); return { name: 'Prueba', status: 'active', max_attempts: 2 }; },
         board: async () => [{ participant_id: 'p', ...stats }],
         rpc: async name => {
-            if (name === 'pw_join') return { id: 'p', name: 'Nombre original' };
+            if (name === 'pw_join') {
+                registrations++;
+                return { id: 'p', name: 'Nombre original' };
+            }
             if (name === 'pw_submit_details' && missingMigration) throw { code: 'PGRST202' };
             submissions++;
             return { result: { completed_at: stats.last_completed_at }, summary: { ...stats, completed: 1 } };
@@ -46,8 +49,16 @@ async function setup({ pending = false, details = false, missingMigration = fals
     });
     await runtime.prepare('Nombre original');
     return { runtime, node, offline: () => { online = false; }, online: () => { online = true; },
-        saved: () => JSON.parse(value), submissions: () => submissions, played: () => played };
+        saved: () => JSON.parse(value), submissions: () => submissions, registrations: () => registrations, played: () => played };
 }
+test('la inscripción ocurre antes del Password Game y se reutiliza al llegar a él', async () => {
+    const h = await setup({ pending: true });
+    assert.equal(h.registrations(), 1);
+    await h.runtime.register('Nombre original');
+    assert.equal(h.registrations(), 1);
+    await h.runtime.prepare('Nombre original');
+    assert.equal(h.registrations(), 1);
+});
 test('recargar una victoria pendiente reintenta el mismo UUID', async () => {
     const h = await setup({ pending: true });
     const id = h.saved().gameId;

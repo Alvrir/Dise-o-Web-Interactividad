@@ -24,7 +24,7 @@ https://github.com/Alvrir/Dise-o-Web-Interactividad
 
 El enlace generado por el panel (`index.html?competencia=ID`) abre **la primera pantalla**, con el botón COMENZAR y las actividades originales en orden. No muestra una inscripción separada ni anuncia la competencia antes de la victoria. El acceso directo al juego final se conserva sólo en el modo libre.
 
-- Se reutiliza el nombre del formulario original para identificar el resultado y el ranking. No se pide otro apodo.
+- Se usa el nombre y apellido pedido antes de la primera pantalla para identificar el resultado y el ranking. Al confirmarlo, la persona aparece de inmediato en la tabla, todavía sin tiempo. No se pide otro apodo.
 - Al llegar al juego final se prepara la participación automáticamente. El cronómetro empieza al escribir, no durante las actividades previas ni mientras conecta.
 - Sólo una victoria confirmada consume un intento (dos por defecto). Los reintentos de envío no duplican resultados y el servidor controla el límite.
 - Al ganar se revela el ranking, la mejor marca y los intentos restantes. CONTINUAR lleva al cierre de la exposición; volver a intentar repite sólo el juego final después del cooldown de 20 segundos.
@@ -358,6 +358,8 @@ validateStudentForm(formData)
 
 La pantalla está dividida en dos columnas en PC: el formulario queda a la izquierda y las verificaciones a la derecha. En celular vuelve a una sola columna. El botón `CARGAR` ejecuta la validación. Los errores aparecen junto al campo correspondiente, con `aria-invalid` y `aria-describedby`, y el primer campo incorrecto recibe foco.
 
+Antes de mostrar la pantalla principal, `renderStart()` pide nombre y apellido. Ese dato queda en `state.formData.nombre` en memoria y se reutiliza en el Password Game final y en el cierre. En modo competencia también se conserva en el recorrido local (`journeyKey`) para que una recarga no obligue a repetirlo; no se consulta `data/alumnos.json` para habilitar el ingreso ni se envía ese nombre al servidor hasta que la competencia prepara la participación.
+
 La función agrupa la respuesta en solo dos verificaciones:
 
 1. controla que nombre, DNI y edad tengan un formato válido;
@@ -476,7 +478,7 @@ Las 19 reglas aparecen en este orden. Todas deben cumplirse simultáneamente par
 4. un número;
 5. un símbolo;
 6. el número del año actual;
-7. el año actual escrito en números romanos;
+7. un número aleatorio del 1 al 10 que muestra la condición, respetando el valor exacto; la regla ya no usa números romanos;
 8. el resultado de `10 × 42`;
 9. el nombre del navegador detectado;
 10. un mes del año;
@@ -492,7 +494,7 @@ Las 19 reglas aparecen en este orden. Todas deben cumplirse simultáneamente par
 
 Si se entra mediante el acceso directo sin un nombre cargado, el juego final muestra un campo para ingresarlo. Un nombre vacío no cumple la condición.
 
-La longitud objetivo se guarda en el progreso de la partida, también en competencias. No cambia al escribir, borrar o recargar; se vuelve a calcular en una nueva partida. Cuenta todos los caracteres, igual que el contador del campo. Se conserva la regla del año actual en números romanos.
+El número objetivo se elige aleatoriamente entre 1 y 10 al comenzar una partida y se conserva al recargar o restaurar el progreso. Se vuelve a sortear al reiniciar. La longitud objetivo también se guarda en el progreso, no cambia al escribir, borrar o recargar y se recalcula en una nueva partida. Cuenta todos los caracteres, igual que el contador del campo.
 
 La regla de sponsors muestra los tres logos de `assets/logos/` en recuadros de 72 px de alto. Cada imagen cubre su recuadro completo y cada regla usa `.is-valid` o `.is-invalid` para recibir un fondo verde o rojo suave.
 
