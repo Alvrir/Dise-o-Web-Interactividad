@@ -478,7 +478,7 @@ Las 19 reglas aparecen en este orden. Todas deben cumplirse simultáneamente par
 4. un número;
 5. un símbolo;
 6. el número del año actual;
-7. un número aleatorio del 1 al 10 que muestra la condición, respetando el valor exacto; la regla ya no usa números romanos;
+7. el número aleatorio del 1 al 10 convertido a números romanos y escrito en mayúsculas; por ejemplo, si muestra 5, la contraseña debe contener `V`;
 8. el resultado de `10 × 42`;
 9. el nombre del navegador detectado;
 10. un mes del año;

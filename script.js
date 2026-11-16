@@ -63,6 +63,7 @@ function restoreFinalSnapshot(snapshot) {
     if (!Number.isInteger(passwordContext.targetNumber) || passwordContext.targetNumber < 1 || passwordContext.targetNumber > 10) {
         passwordContext.targetNumber = getRandomTargetNumber();
     }
+    passwordContext.targetRoman = toRomanNumeral(passwordContext.targetNumber);
 }
 
 function saveFinalProgress() {
@@ -133,11 +134,13 @@ const screens = [
 const passwordContext = {
     currentYear: String(new Date().getFullYear()),
     targetNumber: getRandomTargetNumber(),
+    targetRoman: "",
     browserName: getBrowserPasswordTerm(),
     targetColor: getRandomPasswordColor(),
     targetLength: null,
     captchaFile: getRandomCaptcha()
 };
+passwordContext.targetRoman = toRomanNumeral(passwordContext.targetNumber);
 
 const shortPasswordRules = [
     {
@@ -190,8 +193,10 @@ const finalPasswordRules = [
     },
     {
         id: "targetNumber",
-        description: "Debe contener este número del 1 al 10:",
-        validate: password => password.includes(String(passwordContext.targetNumber))
+        get description() {
+            return `Debe contener el número ${passwordContext.targetNumber} en números romanos.`;
+        },
+        validate: password => password.includes(passwordContext.targetRoman)
     },
     {
         id: "multiplicationResult",
@@ -1224,6 +1229,7 @@ function getResultPassword(result) {
 function resetFinalAttempt() {
     passwordContext.targetLength = null;
     passwordContext.targetNumber = getRandomTargetNumber();
+    passwordContext.targetRoman = toRomanNumeral(passwordContext.targetNumber);
     passwordContext.captchaFile = getRandomCaptcha();
     state.finalPassword = "";
     state.finalPasswordRevealedCount = 0;
@@ -1971,7 +1977,7 @@ function buildValidFinalPassword() {
     }
 
     balancingDigits.push(String(remainingSum));
-    return `Ab!${passwordContext.currentYear}${passwordContext.targetNumber}mayoVManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividadRojas${passwordContext.targetColor.name}${getPlayerNameWords()[0] || ""}${getCaptchaAnswer()}etramA`;
+    return `Ab!${passwordContext.currentYear}${passwordContext.targetRoman}mayoVManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividadRojas${passwordContext.targetColor.name}${getPlayerNameWords()[0] || ""}${getCaptchaAnswer()}etramA`;
 }
 
 function setDeveloperMessage(message) {

@@ -125,6 +125,7 @@ test('las ocho actividades y las 19 reglas finales se conservan', () => {
     assert.equal(h.run('finalPasswordRules.some(r => r.id === "romanNumeral")'),false);
     assert.equal(h.run('finalPasswordRules.some(r => r.id === "targetNumber")'),true);
     assert.equal(h.run('Number.isInteger(passwordContext.targetNumber) && passwordContext.targetNumber >= 1 && passwordContext.targetNumber <= 10'),true);
+    assert.equal(h.run('passwordContext.targetRoman === toRomanNumeral(passwordContext.targetNumber)'),true);
     assert.equal(h.run('shortPasswordRules.length'),3);
 });
 
@@ -160,6 +161,16 @@ test('permite cinco caracteres iguales seguidos, pero no seis', () => {
         assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='consecutiveCharacters').validate(${JSON.stringify(value)})`), false, value);
     }
     assert.equal(h.run(`finalPasswordRules.find(r=>r.id==='consecutiveCharacters').validate(buildValidFinalPassword().padEnd(200, 'ab'))`), true);
+});
+
+test('muestra el número arábigo y exige su equivalente romano en mayúsculas', () => {
+    const h = harness();
+    h.run(`passwordContext.targetNumber=5; passwordContext.targetRoman=toRomanNumeral(5);`);
+    const rule = 'finalPasswordRules.find(r=>r.id===\'targetNumber\')';
+    assert.equal(h.run(`${rule}.description`), 'Debe contener el número 5 en números romanos.');
+    assert.equal(h.run(`${rule}.validate('claveV')`), true);
+    assert.equal(h.run(`${rule}.validate('clavev')`), false);
+    assert.equal(h.run(`${rule}.validate('clave5')`), false);
 });
 
 test('acepta cualquiera de los ocho planetas invertidos sin mostrar las respuestas', () => {
