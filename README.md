@@ -59,7 +59,7 @@ La revisión debe incluir, según corresponda:
 - datos de prueba;
 - instrucciones de ejecución y publicación.
 
-`index.html` agrega un parámetro `?v=` a `style.css` y `script.js` para evitar que GitHub Pages o el navegador mantengan archivos antiguos en caché. Cuando se publiquen cambios de CSS o JavaScript, incrementar ese valor en ambas referencias.
+`index.html` agrega un parámetro `?v=` a `style.css` y `script.js` para evitar que GitHub Pages o el navegador mantengan archivos antiguos en caché. El mismo criterio se aplica al modo competencia: `competencias/game.js` (importado desde `index.html`), `admin.js` y `competencias.css` en `admin.html`, y `ranking.js` y `competencias.css` en `ranking.html`. Cuando se publiquen cambios de CSS o JavaScript, incrementar ese valor en todas las referencias afectadas.
 
 ## Cómo abrir el proyecto
 
@@ -89,11 +89,16 @@ Página Diseño Web/
 |-- style.css
 |-- script.js
 |
+|-- .github/
+|   |-- workflows/
+|       |-- deploy-pages.yml
+|
 |-- data/
 |   |-- alumnos.json
 |
 |-- assets/
 |   |-- background/
+|   |-- captchas/
 |   |-- font/
 |   |-- genio/
 |   |-- logos/
@@ -102,9 +107,27 @@ Página Diseño Web/
 |
 |-- competencias/
 |   |-- README.md
+|   |-- admin.html
+|   |-- admin.js
+|   |-- competencias.css
+|   |-- config.js
+|   |-- game.js
+|   |-- ranking.html
+|   |-- ranking.js
+|   |-- supabase.js
+|   |-- ui.js
+|   |-- sql/
+|   |   |-- 001_initial_schema.sql
+|   |   |-- 002_result_details.sql
+|   |-- tests/
+|       |-- database.mjs
+|       |-- game.mjs
+|       |-- recovery.mjs
 |
 |-- README.md
 ```
+
+Otros directorios presentes en la carpeta local (proyectos aparte) no forman parte del repositorio mientras no se agreguen con git. El workflow `deploy-pages.yml` publica todo el repositorio en GitHub Pages en cada push a `main`, así que cualquier archivo incluido es público.
 
 ## Qué hace cada archivo
 
@@ -335,6 +358,8 @@ validateStudentForm(formData)
 
 La pantalla está dividida en dos columnas en PC: el formulario queda a la izquierda y las verificaciones a la derecha. En celular vuelve a una sola columna. El botón `CARGAR` ejecuta la validación. Los errores aparecen junto al campo correspondiente, con `aria-invalid` y `aria-describedby`, y el primer campo incorrecto recibe foco.
 
+Antes de mostrar la pantalla principal, `renderStart()` pide nombre y apellido. Ese dato queda en `state.formData.nombre` en memoria y se reutiliza en el Password Game final y en el cierre. En modo competencia también se conserva en el recorrido local (`journeyKey`) para que una recarga no obligue a repetirlo; no se consulta `data/alumnos.json` para habilitar el ingreso ni se envía ese nombre al servidor hasta que la competencia prepara la participación.
+
 La función agrupa la respuesta en solo dos verificaciones:
 
 1. controla que nombre, DNI y edad tengan un formato válido;
@@ -453,7 +478,7 @@ Las 19 reglas aparecen en este orden. Todas deben cumplirse simultáneamente par
 4. un número;
 5. un símbolo;
 6. el número del año actual;
-7. el año actual escrito en números romanos;
+7. un número aleatorio del 1 al 10 que muestra la condición, respetando el valor exacto; la regla ya no usa números romanos;
 8. el resultado de `10 × 42`;
 9. el nombre del navegador detectado;
 10. un mes del año;
@@ -469,7 +494,7 @@ Las 19 reglas aparecen en este orden. Todas deben cumplirse simultáneamente par
 
 Si se entra mediante el acceso directo sin un nombre cargado, el juego final muestra un campo para ingresarlo. Un nombre vacío no cumple la condición.
 
-La longitud objetivo se guarda en el progreso de la partida, también en competencias. No cambia al escribir, borrar o recargar; se vuelve a calcular en una nueva partida. Cuenta todos los caracteres, igual que el contador del campo. Se conserva la regla del año actual en números romanos.
+El número objetivo se elige aleatoriamente entre 1 y 10 al comenzar una partida y se conserva al recargar o restaurar el progreso. Se vuelve a sortear al reiniciar. La longitud objetivo también se guarda en el progreso, no cambia al escribir, borrar o recargar y se recalcula en una nueva partida. Cuenta todos los caracteres, igual que el contador del campo.
 
 La regla de sponsors muestra los tres logos de `assets/logos/` en recuadros de 72 px de alto. Cada imagen cubre su recuadro completo y cada regla usa `.is-valid` o `.is-invalid` para recibir un fondo verde o rojo suave.
 
@@ -568,7 +593,7 @@ const GENIE_ASSETS = {
 };
 ```
 
-Fuera de la actividad original de adivinación, `renderGenieCompanion()` genera el componente reutilizable. Su mensaje contextual está oculto por CSS. El personaje se muestra en eventos en pantallas muy anchas, verificación de alumno, Password Game corto, falso final y cierre; se oculta en el Password Game final y en el resultado guardado. Las animaciones respetan `prefers-reduced-motion`.
+Fuera de la actividad original de adivinación, `renderGenieCompanion()` genera el componente reutilizable. Su mensaje contextual está oculto por CSS. El personaje se muestra en la verificación de alumno, el Password Game corto, el falso final y el cierre; se oculta en la actividad de eventos, el Password Game final y el resultado guardado. Las animaciones respetan `prefers-reduced-motion`.
 
 En la verificación de alumno, el personaje aparece centrado debajo de la lista de verificaciones y con una presencia algo mayor dentro de su recuadro. En el primer Password Game queda centrado, ocupa toda la altura disponible, se alinea con el borde inferior del recuadro principal y se difumina por debajo de los dos paneles ampliados del campo y las reglas. El Password Game final no muestra personaje, para dejar todo el espacio al temporizador, el campo y las condiciones. En celular vuelve al flujo normal para no interferir con el contenido. En la actividad 6, el genio sonriente ocupa la columna lateral amplia, aprovechando el espacio vacío con una entrada suave y un movimiento vertical discreto. La actividad 8 muestra un genio más grande junto al cierre, sin el recuadro técnico para miniaturas.
 
@@ -708,7 +733,7 @@ Al completar el primer Password Game, sonríe y muestra “Eso estuvo fácil, ¿
 
 Después de las demostraciones, “De la experiencia al concepto” resume acción → evento → JavaScript → respuesta. Su desplegable amplía los conceptos del documento académico: funciones de HTML, CSS y JavaScript; formularios; validación nativa frente a reglas JavaScript; cliente y servidor. Distingue validar un formato de comprobar la veracidad de los datos y aclara que validar no garantiza por sí solo la seguridad. En móvil las pestañas se distribuyen en varias filas y el detector de eventos aparece antes de los controles. No se agregan filtros de fondo ni dependencias.
 
-“Para pensar…” pertenece a la actividad de eventos, no al cierre. Los botones finales siguen siendo VOLVER AL INICIO y PANTALLA ANTERIOR. Los estilos se encuentran en `.genie-remark`, `.closing-memories`, `.reflection-bubble` y `.events-reflection`.
+“Para pensar…” pertenece a la actividad de eventos, no al cierre. Los botones finales siguen siendo VOLVER AL INICIO y PANTALLA ANTERIOR. Los estilos se encuentran en `.genie-remark`, `.reflection-bubble` y `.events-reflection`.
 
 ## Cosas importantes para no romper
 

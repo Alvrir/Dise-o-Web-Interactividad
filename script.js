@@ -14,6 +14,10 @@ function getRandomCaptcha() {
     return CAPTCHA_FILES[Math.floor(Math.random() * CAPTCHA_FILES.length)];
 }
 
+function getRandomTargetNumber() {
+    return 1 + Math.floor(Math.random() * 10);
+}
+
 function getCaptchaAnswer() {
     return passwordContext.captchaFile.replace(/\.[^.]+$/, "");
 }
@@ -55,6 +59,9 @@ function restoreFinalSnapshot(snapshot) {
     }
     if (!CAPTCHA_FILES.includes(passwordContext.captchaFile)) {
         passwordContext.captchaFile = getRandomCaptcha();
+    }
+    if (!Number.isInteger(passwordContext.targetNumber) || passwordContext.targetNumber < 1 || passwordContext.targetNumber > 10) {
+        passwordContext.targetNumber = getRandomTargetNumber();
     }
 }
 
@@ -123,7 +130,7 @@ const screens = [
 
 const passwordContext = {
     currentYear: String(new Date().getFullYear()),
-    currentYearRoman: toRomanNumeral(new Date().getFullYear()),
+    targetNumber: getRandomTargetNumber(),
     browserName: getBrowserPasswordTerm(),
     targetColor: getRandomPasswordColor(),
     targetLength: null,
@@ -180,9 +187,9 @@ const finalPasswordRules = [
         validate: password => password.includes(passwordContext.currentYear)
     },
     {
-        id: "currentYearRoman",
-        description: "Debe contener el año actual en números romanos.",
-        validate: password => normalizeText(password).includes(normalizeText(passwordContext.currentYearRoman))
+        id: "targetNumber",
+        description: "Debe contener este número del 1 al 10:",
+        validate: password => password.includes(String(passwordContext.targetNumber))
     },
     {
         id: "multiplicationResult",
@@ -260,45 +267,6 @@ function getPlayerNameWords() {
     return normalizeText(state.formData.nombre).split(/\s+/).filter(Boolean);
 }
 
-const closingConcepts = [
-    {
-        title: "Interactividad",
-        description: "La página cambia cuando la persona participa.",
-        image: "assets/screens/interactividad.png",
-        activity: "Inicio"
-    },
-    {
-        title: "Eventos",
-        description: "Click, escritura, teclas y tacto disparan acciones.",
-        image: "assets/screens/eventos.png",
-        activity: "Actividad 2"
-    },
-    {
-        title: "JavaScript",
-        description: "El código escucha eventos, procesa datos y actualiza la interfaz.",
-        image: "assets/screens/javascript.png",
-        activity: "Actividad 2"
-    },
-    {
-        title: "Formularios",
-        description: "Los datos ingresados por el usuario se convierten en información útil.",
-        image: "assets/screens/formularios.png",
-        activity: "Actividad 3"
-    },
-    {
-        title: "Validación",
-        description: "Antes de avanzar se comprueba formato, existencia y coincidencia.",
-        image: "assets/screens/validacion.png",
-        activity: "Actividad 4"
-    },
-    {
-        title: "Password Game",
-        description: "Las reglas separadas de la interfaz permiten modificar el juego fácilmente.",
-        image: "assets/screens/password-game.png",
-        activity: "Actividad 5 y 7"
-    }
-];
-
 init();
 
 async function init() {
@@ -310,7 +278,7 @@ async function init() {
         css.href = "competencias/competencias.css";
         document.head.append(css);
         try {
-            const { startCompetition } = await import("./competencias/game.js?v=20261026-ranking");
+            const { startCompetition } = await import("./competencias/game.js?v=20261106-limpieza-1");
             startCompetition({
                 attach: runtime => { competitionRuntime = runtime; },
                 restore: restoreFinalSnapshot,
@@ -366,6 +334,10 @@ async function loadAlumnos() {
 }
 
 async function showScreen(screenId) {
+    if (screenId === "finalPassword" && !state.formData.nombre.trim()) {
+        showScreen("start");
+        return;
+    }
     if (competitionMode && screenId === "finalPassword") {
         if (!state.formData.nombre || !state.activePlayerDni) {
             showScreen("form");
@@ -415,6 +387,30 @@ function updateProgress(screen) {
 }
 
 function renderStart() {
+    if (!state.formData.nombre.trim()) {
+        app.innerHTML = `
+            <section class="start-screen name-entry-screen">
+                <span class="section-kicker">ANTES DE COMENZAR</span>
+                <h2>Ingresá tu nombre y apellido</h2>
+                <p class="lead">Lo vamos a usar durante el recorrido y en el Password Game final.</p>
+                <form id="entry-name-form" class="entry-name-form">
+                    <label class="field" for="entry-name"><span>Nombre y apellido</span><input id="entry-name" type="text" autocomplete="name" placeholder="Ej.: Alvaro Irazoqui" required></label>
+                    <button id="entry-name-submit" type="submit" disabled>ENTRAR A LA EXPERIENCIA →</button>
+                </form>
+            </section>`;
+        const input = document.querySelector("#entry-name");
+        const submit = document.querySelector("#entry-name-submit");
+        input.addEventListener("input", () => { submit.disabled = !input.value.trim(); });
+        document.querySelector("#entry-name-form").addEventListener("submit", event => {
+            event.preventDefault();
+            const name = input.value.trim();
+            if (!name) return;
+            state.formData.nombre = name;
+            saveJourney("start");
+            renderStart();
+        });
+        return;
+    }
     app.innerHTML = `
         <section class="start-screen">
             <h2 class="hero-title">INTERACTIVIDAD <span>Y VALIDACIÓN</span></h2>
@@ -962,12 +958,6 @@ function renderPasswordScreen(config) {
                 ${config.description ? `<p class="password-description">${config.description}</p>` : ""}
                 ${config.helper ? `<p class="password-helper">${config.helper}</p>` : ""}
                 ${config.stateKey === "shortPassword" ? `<p id="short-genie-success" class="genie-remark hidden" role="status">Eso estuvo fácil, ¿no?</p>` : ""}
-                ${config.stateKey === "finalPassword" && !getPlayerNameWords().length ? `
-                    <label class="field" for="final-player-name">
-                        <span>Nombre y apellido</span>
-                        <input id="final-player-name" type="text" autocomplete="name" placeholder="Ingresá tu nombre y apellido">
-                    </label>
-                ` : ""}
                 ${config.stateKey === "finalPassword" ? `
                     <p class="live-timer" aria-live="off">
                         <span>TIEMPO</span>
@@ -1214,6 +1204,7 @@ function getResultPassword(result) {
 
 function resetFinalAttempt() {
     passwordContext.targetLength = null;
+    passwordContext.targetNumber = getRandomTargetNumber();
     passwordContext.captchaFile = getRandomCaptcha();
     state.finalPassword = "";
     state.finalPasswordRevealedCount = 0;
@@ -1799,16 +1790,6 @@ function renderClosingExperiment(mode) {
     }
 }
 
-function renderConceptCard(concept) {
-    return `
-        <article class="summary-card">
-            <div class="screen-thumb" data-image="${concept.image}">${concept.activity}</div>
-            <strong>${concept.title}</strong>
-            <p>${concept.description}</p>
-        </article>
-    `;
-}
-
 function bindNextButtons() {
     document.querySelectorAll("[data-next]").forEach(button => {
         button.addEventListener("click", () => showScreen(button.dataset.next));
@@ -1971,7 +1952,7 @@ function buildValidFinalPassword() {
     }
 
     balancingDigits.push(String(remainingSum));
-    return `Ab!${passwordContext.currentYear}mayo${passwordContext.currentYearRoman}VManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividadRojas${passwordContext.targetColor.name}${getPlayerNameWords()[0] || ""}${getCaptchaAnswer()}etramA`;
+    return `Ab!${passwordContext.currentYear}${passwordContext.targetNumber}mayoVManaos420${balancingDigits.join("x")}${passwordContext.browserName}interactividadRojas${passwordContext.targetColor.name}${getPlayerNameWords()[0] || ""}${getCaptchaAnswer()}etramA`;
 }
 
 function setDeveloperMessage(message) {
